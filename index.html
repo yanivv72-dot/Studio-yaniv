@@ -3,186 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Yaniv AI Ultra Studio</title>
+    <title>Yaniv AI Studio Ultra</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        body { background-color: #000; color: #fff; font-family: sans-serif; margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        /* נגן קבוע */
-        .player-section { height: 38vh; background: #000; position: relative; flex-shrink: 0; border-bottom: 1px solid #1A1A1A; z-index: 10; }
-        /* ממשק נגלל */
-        .controls-section { flex-grow: 1; overflow-y: auto; padding: 15px; padding-bottom: 120px; -webkit-overflow-scrolling: touch; }
-        .accent-purple { background-color: #7C3AED; }
-        .progress-text { font-size: 5rem; font-weight: 900; color: #7C3AED; }
-        .tool-card { background: #0A0A0B; border: 1px solid #1A1A1A; border-radius: 20px; padding: 15px; }
-        .active-btn:active { transform: scale(0.95); transition: 0.1s; }
+        :root { --bg: #0A0A0B; --card: #1A1A1D; --accent: #7C3AED; }
+        body { background-color: var(--bg); color: white; font-family: system-ui, sans-serif; margin: 0; overflow: hidden; }
+        
+        /* נגן קבוע למעלה - 40% גובה */
+        .player-fixed { 
+            height: 40vh; width: 100%; background: #000; 
+            position: fixed; top: 0; left: 0; z-index: 50;
+            border-bottom: 1px solid #2D2D30; 
+        }
+        
+        /* אזור פקדים נגלל מתחת לנגן */
+        .scrollable-content { 
+            margin-top: 40vh; height: 60vh; 
+            overflow-y: auto; padding: 20px; padding-bottom: 150px; 
+        }
+
+        .progress-circle-text { font-size: 4rem; font-weight: 900; color: var(--accent); text-shadow: 0 0 30px rgba(124,58,237,0.6); }
+        .tool-btn { background: var(--card); border: 1px solid #2D2D30; border-radius: 18px; transition: all 0.2s; }
+        .tool-btn:active { transform: scale(0.95); background: #2D2D30; }
+        .purple-gradient { background: linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%); }
+        
+        /* התאמה לטאבלט ומחשב */
+        @media (min-width: 1024px) {
+            .player-fixed { width: 50%; height: 100vh; left: auto; right: 0; border-l: 1px solid #2D2D30; }
+            .scrollable-content { margin-top: 0; width: 50%; height: 100vh; margin-right: 50%; }
+        }
     </style>
 </head>
 <body>
 
-    <!-- אזור 1: נגן קבוע -->
-    <div class="player-section flex items-center justify-center overflow-hidden">
-        <div id="placeholder" class="opacity-30 flex flex-col items-center">
-            <i data-lucide="clapperboard" class="w-12 h-12 mb-2 text-[#7C3AED]"></i>
-            <span class="text-[10px] tracking-widest font-bold">4K CLOUD ENGINE</span>
+    <!-- אזור 1: נגן וידאו/תמונה 4K -->
+    <div class="player-fixed flex flex-col items-center justify-center relative">
+        <div id="placeholder" class="flex flex-col items-center opacity-20">
+            <i data-lucide="aperture" class="w-16 h-16 mb-2"></i>
+            <span class="text-xs tracking-[0.4em]">4K RENDERING ENGINE</span>
         </div>
         
-        <img id="outputImg" class="hidden w-full h-full object-contain">
-        <video id="outputVid" class="hidden w-full h-full object-contain" controls playsinline loop></video>
+        <img id="mainImage" class="hidden w-full h-full object-contain">
+        <video id="mainVideo" class="hidden w-full h-full object-contain" controls playsinline loop></video>
 
-        <!-- מנדול: רק אחוזים גדולים -->
-        <div id="loader" class="hidden absolute inset-0 bg-black flex flex-col items-center justify-center z-50">
-            <div id="percentLabel" class="progress-text">0%</div>
+        <!-- מנדול אחוזים מרכזי - תיקון בעיית הנתקע -->
+        <div id="loader" class="hidden absolute inset-0 bg-black/90 flex flex-col items-center justify-center z-[60]">
+            <div id="percentText" class="progress-circle-text tracking-tighter">0%</div>
+            <div class="mt-4 text-xs text-zinc-500 font-bold uppercase tracking-widest">Cloud Rendering</div>
+        </div>
+
+        <!-- פקדים צפים בנגן -->
+        <div class="absolute bottom-4 left-4 flex gap-2">
+            <button class="bg-black/50 p-2 rounded-full border border-white/10" onclick="undo()"><i data-lucide="undo-2" class="w-4 h-4"></i></button>
+            <button class="bg-black/50 p-2 rounded-full border border-white/10" onclick="redo()"><i data-lucide="redo-2" class="w-4 h-4"></i></button>
         </div>
     </div>
 
-    <!-- אזור 2: ממשק נגלל (כל הכפתורים כאן) -->
-    <div class="controls-section space-y-4">
+    <!-- אזור פקדים נגלל -->
+    <div class="scrollable-content space-y-6" dir="rtl">
         
-        <!-- פס תחבורה -->
-        <div class="flex justify-center gap-10 py-2 border-b border-[#1A1A1A]">
-            <i data-lucide="rewind" class="w-6 h-6 text-zinc-500" onclick="seek(-2)"></i>
-            <i data-lucide="play" class="w-8 h-8 text-[#7C3AED] fill-current" onclick="togglePlay()"></i>
-            <i data-lucide="fast-forward" class="w-6 h-6 text-zinc-500" onclick="seek(2)"></i>
+        <!-- אזור 2: פס תחבורה -->
+        <div class="flex justify-around items-center py-4 border-b border-zinc-800">
+            <button class="active:scale-90" onclick="seek(-2)"><i data-lucide="rewind" class="w-6 h-6"></i></button>
+            <button class="active:scale-90" onclick="togglePlay()"><i data-lucide="play" id="playIcon" class="w-10 h-10 fill-current text-[#7C3AED]"></i></button>
+            <button class="active:scale-90" onclick="seek(2)"><i data-lucide="fast-forward" class="w-6 h-6"></i></button>
         </div>
 
-        <!-- אזור יצירה -->
-        <div class="tool-card shadow-2xl">
-            <div class="flex justify-between items-center mb-3">
-                <span class="text-xs font-bold text-purple-400">CREATE AI CONTENT</span>
-                <button onclick="randomPrompt()" class="text-[10px] bg-zinc-900 px-3 py-1 rounded-full border border-zinc-800">הפתע אותי 🎲</button>
+        <!-- אזור 3: יצירה -->
+        <div class="tool-btn p-5 shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4 text-purple-500"></i> יצירה ועריכה</h3>
+                <button onclick="randomPrompt()" class="text-[10px] bg-zinc-800 px-3 py-1 rounded-full border border-zinc-700">הפתע אותי 🎲</button>
             </div>
-            <textarea id="prompt" placeholder="תאר מה ליצור (באנגלית)..." 
-                class="w-full bg-black rounded-xl p-4 text-sm h-24 outline-none focus:border-[#7C3AED] text-right border border-zinc-900"></textarea>
+            <textarea id="promptInp" placeholder="תאר את הוידאו או התמונה שלך (באנגלית)..." 
+                class="w-full bg-black border border-zinc-800 rounded-2xl p-4 text-sm h-28 mb-4 outline-none focus:border-[#7C3AED] text-right"></textarea>
+            
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="generateAI('image')" class="purple-gradient py-4 rounded-2xl font-bold active:scale-95 transition-transform flex items-center justify-center gap-2 shadow-lg shadow-purple-900/40">
+                    <i data-lucide="wand-2" class="w-5 h-5"></i> צור תמונה
+                </button>
+                <button onclick="generateAI('video')" class="bg-zinc-800 py-4 rounded-2xl font-bold active:scale-95 border border-zinc-700 flex items-center justify-center gap-2">
+                    <i data-lucide="video" class="w-5 h-5"></i> צור וידאו
+                </button>
+            </div>
             
             <div class="flex gap-2 mt-3">
-                <button onclick="generateAI()" class="flex-[2] accent-purple py-4 rounded-xl font-bold active-btn shadow-lg shadow-purple-900/30">צור יצירה</button>
-                <button onclick="alert('Extend +10s')" class="flex-1 bg-zinc-900 text-[10px] rounded-xl border border-zinc-800">הארכה +10ש'</button>
+                <button onclick="alert('Extend +10s')" class="flex-1 bg-zinc-900 py-2 rounded-xl text-[10px] border border-zinc-800">הארכה +10ש'</button>
+                <button onclick="alert('Persistence Engine Enabled')" class="flex-1 bg-zinc-900 py-2 rounded-xl text-[10px] border border-zinc-800">מנוע עקיבה דמות</button>
             </div>
         </div>
 
-        <!-- כפתורי העלאה בשורה (תמונות, סרטון, מצלמה) -->
+        <!-- אזור 4: העלאה נפרדת (תמונות | סרטון | מצלמה) -->
         <div class="grid grid-cols-3 gap-2">
-            <label class="bg-zinc-900 p-4 rounded-2xl border border-zinc-800 flex flex-col items-center gap-2 active-btn cursor-pointer">
-                <i data-lucide="image" class="text-blue-500 w-5 h-5"></i>
-                <span class="text-[9px] font-bold">תמונות</span>
-                <input type="file" class="hidden" accept="image/*" onchange="loadFile(event, 'img')">
+            <label class="tool-btn p-4 flex flex-col items-center gap-2 cursor-pointer">
+                <i data-lucide="image" class="text-blue-400"></i>
+                <span class="text-[10px] font-bold">תמונות</span>
+                <input type="file" class="hidden" accept="image/*" onchange="handleUpload(event, 'img')">
             </label>
-            <label class="bg-zinc-900 p-4 rounded-2xl border border-zinc-800 flex flex-col items-center gap-2 active-btn cursor-pointer">
-                <i data-lucide="video" class="text-red-500 w-5 h-5"></i>
-                <span class="text-[9px] font-bold">סרטון</span>
-                <input type="file" class="hidden" accept="video/*" onchange="loadFile(event, 'vid')">
+            <label class="tool-btn p-4 flex flex-col items-center gap-2 cursor-pointer">
+                <i data-lucide="clapperboard" class="text-red-400"></i>
+                <span class="text-[10px] font-bold">סרטון</span>
+                <input type="file" class="hidden" accept="video/*" onchange="handleUpload(event, 'vid')">
             </label>
-            <label class="bg-zinc-900 p-4 rounded-2xl border border-zinc-800 flex flex-col items-center gap-2 active-btn cursor-pointer">
-                <i data-lucide="camera" class="text-green-500 w-5 h-5"></i>
-                <span class="text-[9px] font-bold">מצלמה</span>
-                <input type="file" class="hidden" accept="image/*,video/*" capture="environment" onchange="loadFile(event, 'any')">
+            <label class="tool-btn p-4 flex flex-col items-center gap-2 cursor-pointer">
+                <i data-lucide="camera" class="text-green-400"></i>
+                <span class="text-[10px] font-bold">מצלמה</span>
+                <input type="file" class="hidden" accept="image/*,video/*" capture="environment" onchange="handleUpload(event, 'cam')">
             </label>
         </div>
 
-        <!-- פונקציות מתקדמות מהאפיון -->
-        <div class="space-y-2">
-            <button onclick="alert('פתח עורך פילטרים: שחור לבן, מסך ירוק...')" class="w-full bg-[#0A0A0B] p-4 rounded-xl border border-zinc-900 flex justify-between items-center active-btn">
-                <span class="text-xs font-bold flex items-center gap-2"><i data-lucide="palette" class="w-4 h-4 text-purple-500"></i> פילטרים</span>
+        <!-- אזור 5: עריכה מתקדמת -->
+        <div class="space-y-3">
+            <button onclick="toggleSheet('filters')" class="w-full tool-btn p-4 flex justify-between items-center">
+                <span class="text-sm font-bold flex items-center gap-3"><i data-lucide="palette" class="w-5 h-5 text-purple-400"></i> פילטרים וצבעים</span>
                 <i data-lucide="chevron-left" class="w-4 h-4 opacity-30"></i>
             </button>
-            <button onclick="alert('פתח עורך אפקטים: אש, גשם, מים...')" class="w-full bg-[#0A0A0B] p-4 rounded-xl border border-zinc-900 flex justify-between items-center active-btn">
-                <span class="text-xs font-bold flex items-center gap-2"><i data-lucide="zap" class="w-4 h-4 text-purple-500"></i> עורך אפקטים</span>
+            <button onclick="toggleSheet('effects')" class="w-full tool-btn p-4 flex justify-between items-center">
+                <span class="text-sm font-bold flex items-center gap-3"><i data-lucide="zap" class="w-5 h-5 text-purple-400"></i> עורך אפקטים (אש, גשם, מים)</span>
                 <i data-lucide="chevron-left" class="w-4 h-4 opacity-30"></i>
             </button>
-            <button onclick="alert('Voice Clone: הקלט 5 שניות עכשיו')" class="w-full bg-[#0A0A0B] p-4 rounded-xl border border-zinc-900 flex justify-between items-center active-btn">
-                <span class="text-xs font-bold flex items-center gap-2"><i data-lucide="mic" class="w-4 h-4 text-purple-500"></i> שיבוט קולי</span>
+            <button onclick="alert('שיבוט קולי: הקלט 5 שניות עכשיו...')" class="w-full tool-btn p-4 flex justify-between items-center">
+                <span class="text-sm font-bold flex items-center gap-3"><i data-lucide="mic" class="w-5 h-5 text-purple-400"></i> שיבוט קולי (Voice Clone)</span>
                 <i data-lucide="plus" class="w-4 h-4 opacity-30"></i>
             </button>
-            <button onclick="alert('Lip Sync: בחר קובץ שמע לדיבור')" class="w-full bg-[#0A0A0B] p-4 rounded-xl border border-zinc-900 flex justify-between items-center active-btn">
-                <span class="text-xs font-bold flex items-center gap-2"><i data-lucide="languages" class="w-4 h-4 text-purple-500"></i> סנכרון שפתיים</span>
+            <button onclick="alert('סנכרון שפתיים: בחר קובץ שמע לדיבור')" class="w-full tool-btn p-4 flex justify-between items-center">
+                <span class="text-sm font-bold flex items-center gap-3"><i data-lucide="languages" class="w-5 h-5 text-purple-400"></i> סנכרון שפתיים (Lip-Sync)</span>
                 <i data-lucide="plus" class="w-4 h-4 opacity-30"></i>
             </button>
         </div>
-    </div>
 
-    <!-- כפתורי שמירה וייצוא קבועים למטה -->
-    <footer class="p-4 bg-black/90 border-t border-[#1A1A1A] flex gap-2 z-20">
-        <button onclick="save()" class="flex-[3] bg-white text-black py-4 rounded-2xl font-bold active-btn flex items-center justify-center gap-2">
-            <i data-lucide="download" class="w-5 h-5"></i> שמור לגלריה
-        </button>
-        <button onclick="location.reload()" class="flex-1 bg-zinc-900 rounded-2xl flex items-center justify-center active-btn">
-            <i data-lucide="refresh-cw" class="w-5 h-5"></i>
-        </button>
-    </footer>
-
-    <script>
-        lucide.createIcons();
-
-        function loadFile(event, mode) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const url = URL.createObjectURL(file);
-            const img = document.getElementById('outputImg');
-            const vid = document.getElementById('outputVid');
-            document.getElementById('placeholder').classList.add('hidden');
-
-            if (file.type.startsWith('image/')) {
-                img.src = url; img.classList.remove('hidden'); vid.classList.add('hidden');
-            } else {
-                vid.src = url; vid.classList.remove('hidden'); img.classList.add('hidden');
-            }
-        }
-
-        async function generateAI() {
-            const prompt = document.getElementById('prompt').value.trim();
-            if(!prompt) return alert("רשום תיאור");
-
-            const loader = document.getElementById('loader');
-            const label = document.getElementById('percentLabel');
-            const img = document.getElementById('outputImg');
-
-            loader.classList.remove('hidden');
-            
-            let p = 0;
-            const interval = setInterval(() => {
-                p += Math.floor(Math.random() * 15) + 1;
-                if (p >= 100) {
-                    p = 100;
-                    clearInterval(interval);
-                    label.innerText = "100%";
-                    // אם ה-100% נתקע, אנחנו "מכריחים" את התמונה לעלות
-                    setTimeout(() => {
-                         const seed = Math.floor(Math.random() * 999999);
-                         const finalUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1080&height=1920&seed=${seed}&model=flux&nologo=true`;
-                         img.src = finalUrl;
-                         img.onload = () => {
-                            img.classList.remove('hidden');
-                            document.getElementById('outputVid').classList.add('hidden');
-                            document.getElementById('placeholder').classList.add('hidden');
-                            loader.classList.add('hidden');
-                         };
-                    }, 500);
-                } else {
-                    label.innerText = p + "%";
-                }
-            }, 300);
-        }
-
-        function randomPrompt() {
-            const list = ["Futuristic city neon", "Cyberpunk cat", "Gold dragon 4k", "Astronaut on horse"];
-            document.getElementById('prompt').value = list[Math.floor(Math.random()*list.length)];
-        }
-
-        function save() {
-            const img = document.getElementById('outputImg');
-            if(img.src) window.open(img.src, '_blank');
-        }
-
-        function togglePlay() {
-            const vid = document.getElementById('outputVid');
-            if(!vid.classList.contains('hidden')) vid.paused ? vid.play() : vid.pause();
-        }
-
-        function seek(s) {
-            const vid = document.getElementById('outputVid');
-            if(!vid.classList.contains('hidden')) vid.currentTime += s;
-        }
-    </script>
-</body>
-</html>
+        <!-- אזור 7: ספרייה אישית -->
+        <section>
+            <h3 class="font-bold text-xs mb-4 opacity-50 tracking-widest uppercase">My Gallery</h3>
+            <
