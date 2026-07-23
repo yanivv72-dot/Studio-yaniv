@@ -381,39 +381,6 @@
       color: #fff;
     }
 
-    /* Genres */
-    .genre-selector-container {
-      background: #141417;
-      border: 1px solid #27272a;
-      border-radius: 20px;
-      padding: 12px;
-    }
-
-    .genre-grid {
-      display: flex;
-      overflow-x: auto;
-      gap: 8px;
-      padding-bottom: 4px;
-    }
-
-    .genre-btn {
-      background: #27272a;
-      color: #d4d4d8;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    .genre-btn.active {
-      background: #8b5cf6;
-      color: #fff;
-    }
-
     /* Samsung AI Prompt Box */
     .prompt-box {
       background: #141417;
@@ -760,14 +727,13 @@
     .btn-action-download { background-color: #3b82f6; color: #fff; }
     .btn-action-delete { background-color: #ef4444; color: #fff; }
 
-    .filters-grid::-webkit-scrollbar, .genre-grid::-webkit-scrollbar { height: 4px; }
-    .filters-grid::-webkit-scrollbar-thumb, .genre-grid::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 2px; }
+    .filters-grid::-webkit-scrollbar { height: 4px; }
+    .filters-grid::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 2px; }
   </style>
 </head>
 <body>
 
   <div class="app-container" id="app-container">
-    <!-- Samsung Header -->
     <header>
       <div class="samsung-title-badge">
         <div class="user-profile">⚙️</div>
@@ -776,13 +742,11 @@
       <div class="settings-btn" id="settings-btn">🔑</div>
     </header>
 
-    <!-- Universal API Key Config -->
     <div class="api-key-container" id="api-key-container">
       <label for="api-key">מפתח API (OpenAI / Gemini / Runway):</label>
       <input type="password" id="api-key" placeholder="הכנס את המפתח שלך כאן להפעלת AI...">
     </div>
 
-    <!-- Enhanced Preview Card -->
     <div class="preview-card" id="preview-card">
       <div class="preview-header-actions">
         <span class="preview-tag" id="preview-tag-label">תצוגה ראשית</span>
@@ -799,7 +763,6 @@
         <span class="placeholder-text" id="placeholder-text">אין מדיה מוצגת</span>
       </div>
       
-      <!-- Video Player Controls -->
       <div class="player-controls">
         <div class="progress-container" id="progress-container">
           <div class="progress-bar-thick">
@@ -817,18 +780,15 @@
       </div>
     </div>
 
-    <!-- AI Prompt Section -->
     <div class="prompt-box">
       <textarea id="ai-prompt" placeholder="תאר מה ליצור או לערוך ב-AI עבור התמונה/הסרטון..."></textarea>
       <button class="surprise-btn" id="surprise-btn">הפתע אותי 🪄</button>
     </div>
 
-    <!-- Create & Extend Buttons (Placed Directly Under Text) -->
     <div class="action-create-row">
       <button class="btn-create-edit" id="btn-create-edit">✨ צור ב-AI (10 שניות)</button>
       <button class="btn-extend-video" id="btn-extend-video">➕ 10 ש' נוספות</button>
 
-      <!-- Image Options Modal -->
       <div class="create-options-modal" id="create-options-modal">
         <button class="create-option-btn" id="opt-image-to-video">🎥 צור וידאו ב-AI (10 שניות)</button>
         <button class="create-option-btn" id="opt-edit-image">🖼️ ערוך תמונה ב-AI</button>
@@ -839,7 +799,6 @@
       התוכן שודרג בהצלחה דרך ה-AI! ✅
     </div>
 
-    <!-- Aspect Ratio Selector -->
     <div class="size-selector-container">
       <div class="section-title">📐 גודל פריים ויחס תצוגה:</div>
       <div class="size-buttons-grid">
@@ -850,19 +809,6 @@
       </div>
     </div>
 
-    <!-- Style / Genre Picker -->
-    <div class="genre-selector-container">
-      <div class="section-title">🎬 סגנון קולנועי:</div>
-      <div class="genre-grid">
-        <button class="genre-btn active">💥 אקשן דרמטי</button>
-        <button class="genre-btn">🚀 מדע בדיוני</button>
-        <button class="genre-btn">🎨 אנימציה 3D</button>
-        <button class="genre-btn">🎙️ דוקומנטרי</button>
-        <button class="genre-btn">🧙‍♂️ פנטזיה</button>
-      </div>
-    </div>
-
-    <!-- Media Source Selector -->
     <div class="media-type-selector">
       <label class="media-type-btn">
         🖼️ תמונה
@@ -877,7 +823,6 @@
       </button>
     </div>
 
-    <!-- Camera Submenu -->
     <div class="camera-options-menu" id="camera-options-menu">
       <label class="cam-opt-btn">
         📷 צלם תמונה
@@ -889,18 +834,20 @@
       </label>
     </div>
 
-    <!-- Filters Section -->
     <div class="filters-container">
       <div class="section-title">🎨 פילטרים ואפקטים:</div>
       <div class="filters-grid" id="filters-grid">
         <button class="filter-btn active" data-filter="none">ללא פילטר</button>
+        <button class="filter-btn" data-filter="glow">🌟 זוהר</button>
+        <button class="filter-btn" data-filter="blinding-glow">💫 זוהר מסנוור</button>
+        <button class="filter-btn" data-filter="night-vision">🟢 ראיית לילה</button>
+        <button class="filter-btn" data-filter="xray">🩻 רנטגן</button>
+        <button class="filter-btn" data-filter="xray-electric">⚡ רנטגן חשמלי</button>
         <button class="filter-btn" data-filter="golden-hour">🌅 שעת הזהב</button>
         <button class="filter-btn" data-filter="bw-dramatic">🎬 שחור-לבן</button>
         <button class="filter-btn" data-filter="cyberpunk">⚡ סייברפאנק</button>
         <button class="filter-btn" data-filter="emerald-night">🌃 ליל אזמרגד</button>
         <button class="filter-btn" data-filter="vintage">📜 וינטג'</button>
-        <button class="filter-btn" data-filter="infrared">🔴 אינפרא-אדום</button>
-        <button class="filter-btn" data-filter="invert">🔄 נגטיב</button>
         <button class="filter-btn" data-filter="blur">🌫️ טשטוש</button>
         <button class="filter-btn" data-filter="high-contrast">🌓 קונטרסט</button>
       </div>
@@ -914,13 +861,11 @@
       </div>
     </div>
 
-    <!-- Actions -->
     <div class="action-buttons">
       <button class="btn-main btn-download-main" id="download-btn">⬇ הורדה</button>
       <button class="btn-main btn-share-main" id="share-btn">🔗 שיתוף</button>
     </div>
 
-    <!-- Gallery -->
     <div class="gallery-section">
       <h3>ספרית מדיה</h3>
       <div class="gallery-grid" id="gallery-grid"></div>
@@ -945,7 +890,6 @@
     
     const filterButtons = document.querySelectorAll('.filter-btn');
     const sizeButtons = document.querySelectorAll('.size-btn');
-    const genreButtons = document.querySelectorAll('.genre-btn');
     const intensitySlider = document.getElementById('intensity-slider');
     const intensityValue = document.getElementById('intensity-value');
     const downloadBtn = document.getElementById('download-btn');
@@ -967,12 +911,12 @@
 
     let currentMedia = null;
     let mediaType = null; // 'image' or 'video'
+    let rawFile = null;
     let fileName = 'edited_media';
     let selectedFilter = 'none';
     let filterIntensity = 100;
     let isDraggingProgress = false;
-    let lastProcessedBlob = null;
-    let videoDurationSeconds = 10; // Default 10 seconds for AI video
+    let videoDurationSeconds = 10;
 
     camToggleBtn.addEventListener('click', () => {
       cameraOptionsMenu.classList.toggle('active');
@@ -987,13 +931,6 @@
         sizeButtons.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         previewScreen.style.height = btn.dataset.height;
-      });
-    });
-
-    genreButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        genreButtons.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
       });
     });
 
@@ -1017,6 +954,7 @@
         if (!file) return;
 
         cameraOptionsMenu.classList.remove('active');
+        rawFile = file;
         fileName = file.name;
         const fileUrl = URL.createObjectURL(file);
         clearPreview();
@@ -1033,6 +971,7 @@
       clearPreview();
       mediaType = 'image';
       currentMedia = document.createElement('img');
+      currentMedia.crossOrigin = "anonymous";
       currentMedia.src = url;
       placeholderText.style.display = 'none';
       previewScreen.appendChild(currentMedia);
@@ -1043,6 +982,7 @@
       clearPreview();
       mediaType = 'video';
       currentMedia = document.createElement('video');
+      currentMedia.crossOrigin = "anonymous";
       currentMedia.src = url;
       currentMedia.controls = false;
       currentMedia.autoplay = true;
@@ -1086,7 +1026,7 @@
       previewScreen.classList.remove('playing');
       samsungPlayIcon.textContent = '▶';
       editStatusMsg.style.display = 'none';
-      lastProcessedBlob = null;
+      rawFile = null;
     }
 
     deleteTopBtn.addEventListener('click', clearPreview);
@@ -1159,16 +1099,32 @@
       const f = filterIntensity / 100;
 
       switch (selectedFilter) {
-        case 'golden-hour': return `sepia(${0.5 * f}) saturate(${1 + 0.8 * f}) brightness(${1 + 0.1 * f})`;
-        case 'bw-dramatic': return `grayscale(${f}) contrast(${1 + 1.5 * f})`;
-        case 'cyberpunk': return `hue-rotate(${180 * f}deg) saturate(${1 + 2 * f})`;
-        case 'emerald-night': return `hue-rotate(${100 * f}deg) saturate(${1 + 1.2 * f}) brightness(${1 - 0.2 * f})`;
-        case 'vintage': return `sepia(${0.6 * f}) contrast(${1 - 0.1 * f})`;
-        case 'infrared': return `invert(${0.9 * f}) hue-rotate(${170 * f}deg) saturate(${1 + 2 * f})`;
-        case 'invert': return `invert(${f})`;
-        case 'blur': return `blur(${4 * f}px)`;
-        case 'high-contrast': return `contrast(${1 + f})`;
-        default: return 'none';
+        case 'glow': 
+          return `brightness(${1 + 0.3 * f}) drop-shadow(0 0 ${12 * f}px rgba(255,255,255,0.8)) saturate(${1 + 0.2 * f})`;
+        case 'blinding-glow': 
+          return `brightness(${1 + 1.2 * f}) contrast(${1 + 0.8 * f}) drop-shadow(0 0 ${25 * f}px #ffffff)`;
+        case 'night-vision': 
+          return `hue-rotate(${90 * f}deg) saturate(${1 + 3 * f}) brightness(${1 + 0.4 * f}) contrast(${1 + 0.5 * f})`;
+        case 'xray': 
+          return `invert(${f}) grayscale(${f}) contrast(${1 + 2 * f}) brightness(${1 - 0.1 * f})`;
+        case 'xray-electric': 
+          return `invert(${f}) hue-rotate(${190 * f}deg) saturate(${1 + 4 * f}) contrast(${1 + 2.5 * f})`;
+        case 'golden-hour': 
+          return `sepia(${0.5 * f}) saturate(${1 + 0.8 * f}) brightness(${1 + 0.1 * f})`;
+        case 'bw-dramatic': 
+          return `grayscale(${f}) contrast(${1 + 1.5 * f})`;
+        case 'cyberpunk': 
+          return `hue-rotate(${180 * f}deg) saturate(${1 + 2 * f})`;
+        case 'emerald-night': 
+          return `hue-rotate(${100 * f}deg) saturate(${1 + 1.2 * f}) brightness(${1 - 0.2 * f})`;
+        case 'vintage': 
+          return `sepia(${0.6 * f}) contrast(${1 - 0.1 * f})`;
+        case 'blur': 
+          return `blur(${4 * f}px)`;
+        case 'high-contrast': 
+          return `contrast(${1 + f})`;
+        default: 
+          return 'none';
       }
     }
 
@@ -1178,12 +1134,9 @@
       }
     }
 
-    /* Core AI Execution with API Key Sync */
+    /* AI Creation Flow */
     btnCreateEdit.addEventListener('click', () => {
-      const apiKey = apiKeyInput.value.trim();
-      
       if (mediaType === 'image') {
-        // If image uploaded, offer choices
         createOptionsModal.classList.toggle('active');
       } else {
         createOptionsModal.classList.remove('active');
@@ -1201,7 +1154,6 @@
       runAIGeneration('image-edit');
     });
 
-    /* Extend Video (+10 Seconds) */
     btnExtendVideo.addEventListener('click', async () => {
       if (!currentMedia || mediaType !== 'video') {
         alert('אנא בחר או צור סרטון תחילה כדי להאריך אותו.');
@@ -1235,11 +1187,9 @@
         aiLoadingText.textContent = `מייצר וידאו ב-AI מתיאור הטקסט (10 שניות)...`;
       }
 
-      // Simulate API Processing & Key Sync
       await new Promise(r => setTimeout(r, 1800));
 
       if (mode === 'image-edit') {
-        // Keep as image, apply AI update
         const canvas = document.createElement('canvas');
         canvas.width = 800; canvas.height = 600;
         const ctx = canvas.getContext('2d');
@@ -1249,9 +1199,12 @@
         ctx.font = '24px sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText(promptText || "עריכת תמונה ב-AI הושלמה", canvas.width/2, canvas.height/2);
-        setMediaImage(canvas.toDataURL());
+        
+        canvas.toBlob((blob) => {
+          rawFile = new File([blob], `ai_edited_${Date.now()}.png`, { type: 'image/png' });
+          setMediaImage(URL.createObjectURL(blob));
+        }, 'image/png');
       } else {
-        // Create/Update 10s (or Extended) Canvas Video Stream
         const canvas = document.createElement('canvas');
         canvas.width = 640; canvas.height = 360;
         const ctx = canvas.getContext('2d');
@@ -1270,13 +1223,12 @@
 
         recorder.start();
         let frame = 0;
-        const maxFrames = 30 * Math.min(videoDurationSeconds, 30); // 30 FPS * seconds
+        const maxFrames = 30 * Math.min(videoDurationSeconds, 30);
 
         function drawAnimatedFrame() {
           ctx.fillStyle = '#09090b';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
           
-          // Dynamic Wave Animation
           ctx.beginPath();
           ctx.strokeStyle = '#3b82f6';
           ctx.lineWidth = 4;
@@ -1301,9 +1253,8 @@
 
         drawAnimatedFrame();
         const generatedBlob = await videoDonePromise;
-        const newMediaUrl = URL.createObjectURL(generatedBlob);
-        setMediaVideo(newMediaUrl);
-        lastProcessedBlob = { blob: generatedBlob, type: 'video', extension: 'webm', mime: 'video/webm' };
+        rawFile = new File([generatedBlob], `ai_video_${Date.now()}.webm`, { type: 'video/webm' });
+        setMediaVideo(URL.createObjectURL(generatedBlob));
       }
 
       appContainer.classList.remove('app-blur-effect');
@@ -1315,23 +1266,32 @@
         : `העריכה הושלמה והוחזרה למסך! ✅`;
     }
 
-    async function createProcessedBlob() {
+    /* Fixed Direct Download & Share System */
+    async function getExportableFile() {
       if (!currentMedia) return null;
 
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
 
       if (mediaType === 'image') {
-        canvas.width = currentMedia.naturalWidth || 800;
-        canvas.height = currentMedia.naturalHeight || 600;
+        canvas.width = currentMedia.naturalWidth || currentMedia.width || 800;
+        canvas.height = currentMedia.naturalHeight || currentMedia.height || 600;
 
         ctx.filter = getCSSFilterString();
         ctx.drawImage(currentMedia, 0, 0, canvas.width, canvas.height);
 
         return new Promise(resolve => {
-          canvas.toBlob(blob => resolve({ blob, type: 'image', extension: 'png', mime: 'image/png' }), 'image/png');
+          canvas.toBlob(blob => {
+            if (!blob) return resolve(null);
+            const file = new File([blob], `image_${Date.now()}.png`, { type: 'image/png' });
+            resolve({ blob, file, type: 'image', ext: 'png' });
+          }, 'image/png');
         });
       } else if (mediaType === 'video') {
+        if (rawFile && selectedFilter === 'none') {
+          return { blob: rawFile, file: rawFile, type: 'video', ext: rawFile.name.split('.').pop() || 'webm' };
+        }
+
         canvas.width = currentMedia.videoWidth || 640;
         canvas.height = currentMedia.videoHeight || 360;
 
@@ -1344,7 +1304,8 @@
         return new Promise(resolve => {
           recorder.onstop = () => {
             const blob = new Blob(chunks, { type: 'video/webm' });
-            resolve({ blob, type: 'video', extension: 'webm', mime: 'video/webm' });
+            const file = new File([blob], `video_${Date.now()}.webm`, { type: 'video/webm' });
+            resolve({ blob, file, type: 'video', ext: 'webm' });
           };
 
           currentMedia.currentTime = 0;
@@ -1365,24 +1326,28 @@
       }
     }
 
-    function saveFileToDevice(blob, filename) {
-      const a = document.createElement('a');
+    function triggerDeviceDownload(blob, filename) {
       const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
       a.href = url;
       a.download = filename;
       document.body.appendChild(a);
       a.click();
-      document.body.removeChild(a);
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 100);
     }
 
-    function addItemToFolder(blobData) {
-      const url = URL.createObjectURL(blobData.blob);
+    function addToGallery(exportData) {
+      const url = URL.createObjectURL(exportData.blob);
       const item = document.createElement('div');
       item.className = 'gallery-item';
 
-      const mediaEl = blobData.type === 'image' ? document.createElement('img') : document.createElement('video');
+      const mediaEl = exportData.type === 'image' ? document.createElement('img') : document.createElement('video');
       mediaEl.src = url;
-      if (blobData.type === 'video') mediaEl.controls = true;
+      if (exportData.type === 'video') mediaEl.controls = true;
 
       const actions = document.createElement('div');
       actions.className = 'gallery-actions';
@@ -1390,7 +1355,7 @@
       const downloadBtnSmall = document.createElement('button');
       downloadBtnSmall.className = 'btn-action btn-action-download';
       downloadBtnSmall.textContent = 'הורד';
-      downloadBtnSmall.onclick = () => saveFileToDevice(blobData.blob, `edited_${Date.now()}.${blobData.extension}`);
+      downloadBtnSmall.onclick = () => triggerDeviceDownload(exportData.blob, `samsung_studio_${Date.now()}.${exportData.ext}`);
 
       const deleteBtnSmall = document.createElement('button');
       deleteBtnSmall.className = 'btn-action btn-action-delete';
@@ -1405,40 +1370,51 @@
     }
 
     downloadBtn.addEventListener('click', async () => {
-      if (!currentMedia) return;
-      downloadBtn.textContent = 'מוריד...';
-
-      let processed = lastProcessedBlob;
-      if (!processed) {
-        if (mediaType === 'video' && currentMedia) currentMedia.pause();
-        appContainer.classList.add('app-blur-effect');
-        aiLoadingOverlay.classList.add('active');
-        processed = await createProcessedBlob();
-        aiLoadingOverlay.classList.remove('active');
-        appContainer.classList.remove('app-blur-effect');
+      if (!currentMedia) {
+        alert('אין מדיה להורדה.');
+        return;
       }
-
-      if (processed) {
-        saveFileToDevice(processed.blob, `samsung_studio_${fileName.split('.')[0]}.${processed.extension}`);
-        addItemToFolder(processed);
+      downloadBtn.textContent = 'מעבד הורדה...';
+      
+      try {
+        const exportData = await getExportableFile();
+        if (exportData) {
+          triggerDeviceDownload(exportData.blob, `samsung_studio_${Date.now()}.${exportData.ext}`);
+          addToGallery(exportData);
+        }
+      } catch (err) {
+        console.error(err);
+        alert('אירעה שגיאה בזמן יצירת הקובץ להורדה.');
+      } finally {
+        downloadBtn.textContent = '⬇ הורדה';
       }
-      downloadBtn.textContent = '⬇ הורדה';
     });
 
     shareBtn.addEventListener('click', async () => {
-      if (!currentMedia) return;
-      shareBtn.textContent = 'מעבד...';
-      if (mediaType === 'video' && currentMedia) currentMedia.pause();
-      let processed = lastProcessedBlob || await createProcessedBlob();
-      shareBtn.textContent = '🔗 שיתוף';
-      if (!processed) return;
+      if (!currentMedia) {
+        alert('אין מדיה לשיתוף.');
+        return;
+      }
+      shareBtn.textContent = 'מעבד שיתוף...';
 
-      const file = new File([processed.blob], `samsung_studio_${fileName.split('.')[0]}.${processed.extension}`, { type: processed.mime });
-
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({ title: 'מדיה ערוכה Samsung Studio', files: [file] });
-      } else {
-        saveFileToDevice(processed.blob, file.name);
+      try {
+        const exportData = await getExportableFile();
+        if (exportData && exportData.file) {
+          if (navigator.canShare && navigator.canShare({ files: [exportData.file] })) {
+            await navigator.share({
+              title: 'Samsung Studio AI',
+              text: 'שתף מתוך Samsung Studio AI',
+              files: [exportData.file]
+            });
+          } else {
+            triggerDeviceDownload(exportData.blob, exportData.file.name);
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        alert('שיתוף קבצים אינו נתמך בדפדפן זה, הקובץ יורד במקום.');
+      } finally {
+        shareBtn.textContent = '🔗 שיתוף';
       }
     });
   </script>
