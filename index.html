@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Studio Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { background-color: #0A0A0B; color: white; font-family: system-ui, -apple-system, sans-serif; }
+        .purple-gradient { background: linear-gradient(135deg, #7C3AED 0%, #4C1D95 100%); }
+        textarea::placeholder { text-align: right; }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden">
+
+    <!-- נגן / תצוגה -->
+    <div id="player" class="w-full h-[40vh] bg-black border-b border-zinc-800 flex items-center justify-center relative">
+        <div id="placeholder" class="text-zinc-600 flex flex-col items-center text-center p-4">
+            <i data-lucide="play-circle" class="w-16 h-16 mb-2"></i>
+            <span class="text-sm font-bold">הסטודיו מוכן</span>
+            <p class="text-[10px] mt-1">כתוב תיאור למטה ולחץ על "צור"</p>
+        </div>
+        <img id="outputImage" class="hidden w-full h-full object-contain">
+        <div id="loader" class="hidden absolute inset-0 bg-black/70 flex flex-col items-center justify-center">
+            <div class="w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+            <p class="mt-4 font-bold text-purple-400" id="statusLabel">מרנדר בענן...</p>
+        </div>
+    </div>
+
+    <!-- פקדי נגן -->
+    <div class="flex justify-around p-3 bg-zinc-900/50 border-b border-zinc-800">
+        <i data-lucide="skip-back" class="w-6 h-6 opacity-50"></i>
+        <i data-lucide="pause" class="w-6 h-6 opacity-50"></i>
+        <i data-lucide="play" class="w-6 h-6 text-purple-500"></i>
+        <i data-lucide="skip-forward" class="w-6 h-6 opacity-50"></i>
+    </div>
+
+    <!-- אזור יצירה -->
+    <div class="flex-1 overflow-y-auto p-4 space-y-6 bg-[#0A0A0B]">
+        <div class="bg-zinc-900 p-4 rounded-2xl border border-zinc-800 shadow-xl">
+            <h3 class="font-bold mb-3 flex items-center gap-2">
+                <i data-lucide="sparkles" class="w-4 h-4 text-purple-400"></i> יצירת AI מהירה
+            </h3>
+            <textarea id="prompt" placeholder="תאר מה תרצה ליצור... (למשל: אריה זהב בשמי הלילה)" 
+                class="w-full bg-black border border-zinc-700 rounded-xl p-3 text-sm h-24 outline-none focus:border-purple-500 text-right"></textarea>
+            
+            <button onclick="generate()" class="w-full mt-4 purple-gradient py-4 rounded-xl font-bold flex items-center justify-center gap-2 active:scale-95 transition-transform shadow-lg shadow-purple-900/20">
+                <i data-lucide="wand-2" class="w-5 h-5"></i> צור יצירה
+            </button>
+        </div>
+
+        <!-- פונקציות גלריה ומצלמה (מעטפת) -->
+        <div class="grid grid-cols-2 gap-3">
+            <div class="bg-zinc-900 p-4 rounded-xl border border-zinc-800 flex flex-col items-center gap-2 opacity-80">
+                <i data-lucide="image" class="text-purple-400"></i>
+                <span class="text-xs">גלריה</span>
+            </div>
+            <div class="bg-zinc-900 p-4 rounded-xl border border-zinc-800 flex flex-col items-center gap-2 opacity-80">
+                <i data-lucide="camera" class="text-purple-400"></i>
+                <span class="text-xs">מצלמה</span>
+            </div>
+        </div>
+        
+        <div class="bg-zinc-900/40 p-3 rounded-xl border border-zinc-800/50 flex justify-between items-center opacity-40">
+            <span class="text-xs">👄 שיבוט קול (Lip-Sync)</span>
+            <span class="text-[8px] bg-zinc-800 px-2 py-0.5 rounded">מצב פיתוח</span>
+        </div>
+    </div>
+
+    <!-- כפתור שמירה תחתון -->
+    <div class="p-4 bg-black border-t border-zinc-800">
+        <button onclick="downloadImage()" class="w-full bg-zinc-800 py-3 rounded-xl font-bold flex items-center justify-center gap-2 active:bg-zinc-700">
+            <i data-lucide="download" class="w-5 h-5 text-green-500"></i> שמור לגלריה
+        </button>
+    </div>
+
+    <script>
+        // אתחול אייקונים
+        lucide.createIcons();
+
+        async function generate() {
+            const promptText = document.getElementById('prompt').value;
+            if (!promptText) {
+                alert("אנא כתוב תיאור ליצירה");
+                return;
+            }
+
+            const loader = document.getElementById('loader');
+            const output = document.getElementById('outputImage');
+            const placeholder = document.getElementById('placeholder');
+            
+            // הצגת טעינה
+            loader.classList.remove('hidden');
+            output.classList.add('hidden');
+            placeholder.classList.add('hidden');
+
+            try {
+                const seed = Math.floor(Math.random() * 9999999);
+                // שימוש במנוע Flux החדש ביותר דרך Pollinations (חינם וללא הרשמה)
+                const imageUrl = `https://pollinations.ai/p/${encodeURIComponent(promptText)}?width=1080&height=1920&seed=${seed}&model=flux&nologo=true`;
+                
+                const img = new Image();
+                img.src = imageUrl;
+                img.onload = () => {
+                    output.src = imageUrl;
+                    output.classList.remove('hidden');
+                    loader.classList.add('hidden');
+                };
+                img.onerror = () => {
+                    alert("שגיאה בחיבור לשרת ה-AI");
+                    loader.classList.add('hidden');
+                    placeholder.classList.remove('hidden');
+                };
+            } catch (e) {
+                console.error(e);
+                loader.classList.add('hidden');
+                placeholder.classList.remove('hidden');
+            }
+        }
+
+        function downloadImage() {
+            const img = document.getElementById('outputImage');
+            if (!img.src || img.classList.contains('hidden')) {
+                alert("אין עדיין יצירה לשמור");
+                return;
+            }
+            // פתיחת התמונה בחלון חדש לשמירה קלה בגלקסי
+            window.open(img.src, '_blank');
+        }
+    </script>
+</body>
+</html>
