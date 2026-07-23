@@ -175,10 +175,10 @@
       color: #fff;
     }
 
-    /* Preview Screen */
+    /* Preview Screen - Fixed 21:9 Aspect Ratio */
     .preview-screen {
       width: 100%;
-      height: 320px;
+      height: 220px;
       background-color: #000000;
       border-radius: 18px;
       overflow: hidden;
@@ -187,7 +187,6 @@
       justify-content: center;
       position: relative;
       cursor: pointer;
-      transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       border: 1px solid #18181b;
     }
 
@@ -208,7 +207,7 @@
       width: auto;
       height: auto;
       object-fit: contain;
-      transition: filter 0.3s;
+      transition: filter 0.3s, transform 0.3s;
     }
 
     /* AI Rendering Overlay inside Screen Only */
@@ -314,7 +313,7 @@
       transition: width 0.1s linear;
     }
 
-    /* Player Controls Container - Hidden by default on media load, toggles on screen click */
+    /* Player Controls Container */
     .player-controls {
       display: flex;
       flex-direction: column;
@@ -365,38 +364,6 @@
       color: #9ca3af;
       margin-bottom: 8px;
       font-weight: 600;
-    }
-
-    /* Aspect Ratio Selector */
-    .size-selector-container {
-      background: #141417;
-      border: 1px solid #27272a;
-      border-radius: 20px;
-      padding: 12px;
-    }
-
-    .size-buttons-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-    }
-
-    .size-btn {
-      background: #27272a;
-      color: #d4d4d8;
-      border: none;
-      padding: 10px 0;
-      border-radius: 14px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.2s;
-    }
-
-    .size-btn.active {
-      background: #3b82f6;
-      color: #fff;
     }
 
     /* Samsung AI Prompt Box */
@@ -602,7 +569,7 @@
       gap: 6px;
     }
 
-    /* Filters Section including Natural Reflection Effect */
+    /* Filters Section */
     .filters-container {
       display: flex;
       flex-direction: column;
@@ -761,7 +728,7 @@
       <div class="settings-btn" id="settings-btn">🔑</div>
     </header>
 
-    <!-- Universal API Key Config (Supports Grok 4 / xAI, OpenAI, Gemini) -->
+    <!-- Universal API Key Config -->
     <div class="api-key-container" id="api-key-container">
       <label for="ai-model-provider">ספק AI בסינכרון מלא:</label>
       <select id="ai-model-provider">
@@ -776,11 +743,11 @@
     <!-- Enhanced Preview Card Container -->
     <div class="preview-card" id="preview-card">
       <div class="preview-header-actions">
-        <span class="preview-tag" id="preview-tag-label">תצוגה ראשית</span>
+        <span class="preview-tag" id="preview-tag-label">תצוגה ראשית (21:9)</span>
         <button class="delete-media-btn" id="delete-top-btn">🗑️ מחק מדיה</button>
       </div>
 
-      <!-- Preview Screen -->
+      <!-- Preview Screen - 21:9 Fixed -->
       <div class="preview-screen" id="preview-screen">
         <div class="ai-loading-overlay" id="ai-loading-overlay">
           <div class="ai-spinner"></div>
@@ -792,7 +759,7 @@
         <span class="placeholder-text" id="placeholder-text">אין מדיה מוצגת</span>
       </div>
       
-      <!-- Video Player Controls - Hides automatically on load, shows on screen click -->
+      <!-- Video Player Controls -->
       <div class="player-controls" id="player-controls">
         <div class="progress-container" id="progress-container">
           <div class="progress-bar-thick">
@@ -832,17 +799,6 @@
       התוכן שודרג ועובד בהצלחה ב-100%! ✅
     </div>
 
-    <!-- Aspect Ratio Selector -->
-    <div class="size-selector-container">
-      <div class="section-title">📐 גודל פריים ויחס תצוגה:</div>
-      <div class="size-buttons-grid">
-        <button class="size-btn active" data-height="320px">16:9 🖥️</button>
-        <button class="size-btn" data-height="420px">9:16 📱</button>
-        <button class="size-btn" data-height="340px">1:1 ⏹️</button>
-        <button class="size-btn" data-height="240px">21:9 🎬</button>
-      </div>
-    </div>
-
     <!-- Universal Media Upload Selector -->
     <div class="media-type-selector">
       <label class="media-type-btn">
@@ -870,12 +826,12 @@
       </label>
     </div>
 
-    <!-- Filters Section including Natural Reflection Effect -->
+    <!-- Filters Section with True Reflection & Skin Tone Preserve -->
     <div class="filters-container">
       <div class="section-title">🎨 פילטרים ואפקטים:</div>
       <div class="filters-grid" id="filters-grid">
         <button class="filter-btn active" data-filter="none">ללא פילטר</button>
-        <button class="filter-btn" data-filter="natural-reflection">🪞 שיקוף טבעי (צבע גוף מקורי)</button>
+        <button class="filter-btn" data-filter="natural-reflection">🪞 שיקוף אמיתי (צבע עור טבעי)</button>
         <button class="filter-btn" data-filter="body-scan">🔬 שיקוף סורק</button>
         <button class="filter-btn" data-filter="glow">🌟 זוהר</button>
         <button class="filter-btn" data-filter="blinding-glow">💫 זוהר מסנוור</button>
@@ -931,7 +887,6 @@
     const progressFill = document.getElementById('progress-fill');
     
     const filterButtons = document.querySelectorAll('.filter-btn');
-    const sizeButtons = document.querySelectorAll('.size-btn');
     const intensitySlider = document.getElementById('intensity-slider');
     const intensityValue = document.getElementById('intensity-value');
     const downloadBtn = document.getElementById('download-btn');
@@ -952,7 +907,7 @@
     const cameraOptionsMenu = document.getElementById('camera-options-menu');
 
     let currentMedia = null;
-    let mediaType = null; // 'image' or 'video'
+    let mediaType = null;
     let rawFile = null;
     let selectedFilter = 'none';
     let filterIntensity = 100;
@@ -962,14 +917,6 @@
 
     camToggleBtn.addEventListener('click', () => cameraOptionsMenu.classList.toggle('active'));
     settingsBtn.addEventListener('click', () => apiKeyContainer.classList.toggle('active'));
-
-    sizeButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        sizeButtons.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        previewScreen.style.height = btn.dataset.height;
-      });
-    });
 
     const prompts = [
       "אריה רץ בסוואנה בשעת השקיעה עם אפקטים של ניאון בהפקה של Grok 4",
@@ -982,14 +929,12 @@
       aiPrompt.value = prompts[Math.floor(Math.random() * prompts.length)];
     });
 
-    // Helper to hide controls on load
     function hideScreenControls() {
       areControlsVisible = false;
       playerControls.classList.remove('visible');
       samsungPlayIcon.classList.remove('visible');
     }
 
-    // Toggle controls display on screen click
     function toggleScreenControls() {
       if (!currentMedia) return;
       areControlsVisible = !areControlsVisible;
@@ -1001,7 +946,6 @@
       }
     }
 
-    // Upload Handler with 0-100% Loader
     ['input-video', 'input-image', 'input-camera-photo', 'input-camera-video'].forEach(id => {
       const el = document.getElementById(id);
       if (!el) return;
@@ -1012,7 +956,6 @@
         cameraOptionsMenu.classList.remove('active');
         rawFile = file;
 
-        // Screen blur & 0-100% rendering
         await simulateScreenRender(0, 100, 1200, "טוען ומעבד קובץ מדיה...");
 
         const fileUrl = URL.createObjectURL(file);
@@ -1064,7 +1007,7 @@
       placeholderText.style.display = 'none';
       previewScreen.appendChild(currentMedia);
       applyFilter();
-      hideScreenControls(); // Hide play/pause controls on load
+      hideScreenControls();
     }
 
     function setMediaVideo(url) {
@@ -1079,17 +1022,13 @@
       currentMedia.playsInline = true;
 
       currentMedia.addEventListener('timeupdate', updateProgressBar);
-      currentMedia.addEventListener('play', () => {
-        samsungPlayIcon.textContent = '❚❚';
-      });
-      currentMedia.addEventListener('pause', () => {
-        samsungPlayIcon.textContent = '▶';
-      });
+      currentMedia.addEventListener('play', () => { samsungPlayIcon.textContent = '❚❚'; });
+      currentMedia.addEventListener('pause', () => { samsungPlayIcon.textContent = '▶'; });
 
       placeholderText.style.display = 'none';
       previewScreen.appendChild(currentMedia);
       applyFilter();
-      hideScreenControls(); // Hide play/pause controls on load
+      hideScreenControls();
     }
 
     function clearPreview() {
@@ -1116,7 +1055,6 @@
 
     deleteTopBtn.addEventListener('click', clearPreview);
 
-    // Click on preview screen toggles controls visibility and handles play/pause
     previewScreen.addEventListener('click', (e) => {
       if (e.target === deleteTopBtn || e.target.closest('.delete-media-btn')) return;
       if (!currentMedia) return;
@@ -1191,8 +1129,7 @@
 
       switch (selectedFilter) {
         case 'natural-reflection':
-          // Reflection effect keeping original body skin/clothing tones intact
-          return `drop-shadow(0px ${15 * f}px ${12 * f}px rgba(255,255,255,0.45)) contrast(${1 + 0.08 * f}) brightness(${1 + 0.05 * f})`;
+          return `contrast(${1 + 0.05 * f}) brightness(${1 + 0.04 * f})`;
         case 'body-scan':
           return `invert(${0.9 * f}) hue-rotate(${140 * f}deg) saturate(${1 + 4 * f}) contrast(${1 + 3 * f}) brightness(${1.1 * f})`;
         case 'glow': 
@@ -1227,10 +1164,15 @@
     function applyFilter() {
       if (currentMedia) {
         currentMedia.style.filter = getCSSFilterString();
+        // Apply true horizontal mirror (scaleX(-1)) for natural reflection filter
+        if (selectedFilter === 'natural-reflection') {
+          currentMedia.style.transform = 'scaleX(-1)';
+        } else {
+          currentMedia.style.transform = 'scaleX(1)';
+        }
       }
     }
 
-    /* Grok 4 & AI Creation Flow synced 100% */
     btnCreateEdit.addEventListener('click', () => {
       if (mediaType === 'image') {
         createOptionsModal.classList.toggle('active');
@@ -1261,7 +1203,6 @@
 
     async function runAIGeneration(mode) {
       const promptText = aiPrompt.value.trim();
-      const apiKey = apiKeyInput.value.trim();
 
       if (mediaType === 'video' && currentMedia && typeof currentMedia.pause === 'function') {
         currentMedia.pause();
@@ -1272,7 +1213,6 @@
       else if (mode === 'image-to-video') statusMsg = `Grok 4 יוצר וידאו מושלם מתיאור התמונה...`;
       else if (mode === 'image-edit') statusMsg = `Grok 4 עורך תמונה ב-AI בסינכרון מלא...`;
 
-      // 0% to 100% Screen Blur Simulation
       await simulateScreenRender(0, 100, 2200, statusMsg);
 
       if (mode === 'image-edit') {
@@ -1354,7 +1294,6 @@
       editStatusMsg.textContent = `עובד ב-100% ע"י Grok 4 והועבר למסך! ✅`;
     }
 
-    /* Exportable File Generation */
     async function getExportableFile() {
       if (!currentMedia) return null;
 
@@ -1365,8 +1304,14 @@
         canvas.width = currentMedia.naturalWidth || 1080;
         canvas.height = currentMedia.naturalHeight || 1080;
 
+        ctx.save();
+        if (selectedFilter === 'natural-reflection') {
+          ctx.translate(canvas.width, 0);
+          ctx.scale(-1, 1);
+        }
         ctx.filter = getCSSFilterString();
         ctx.drawImage(currentMedia, 0, 0, canvas.width, canvas.height);
+        ctx.restore();
 
         return new Promise(resolve => {
           canvas.toBlob(blob => {
@@ -1405,8 +1350,14 @@
               recorder.stop();
               return;
             }
+            ctx.save();
+            if (selectedFilter === 'natural-reflection') {
+              ctx.translate(canvas.width, 0);
+              ctx.scale(-1, 1);
+            }
             ctx.filter = getCSSFilterString();
             ctx.drawImage(currentMedia, 0, 0, canvas.width, canvas.height);
+            ctx.restore();
             requestAnimationFrame(renderFrame);
           };
           renderFrame();
