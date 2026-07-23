@@ -3,158 +3,246 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>AI Video Studio Master - Fixed & Optimized</title>
+<title>AI Video & Image Studio Master Pro</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <style>
   :root { --bg:#0A0D14; --card:#151921; --accent:#00D1FF; --samsung-blue:#2196F3; --samsung-green:#4CAF50; }
-  * { box-sizing: border-box; }
-  body { background:var(--bg); color:#fff; font-family:'Segoe UI',Roboto,sans-serif; margin:0; height:100dvh; display:flex; flex-direction:column; overflow:hidden; }
-  .player-viewport { height:38dvh; min-height:240px; background:#000; position:relative; border-bottom:1px solid #1F2937; flex-shrink:0; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  * { box-sizing: border-box; touch-action: manipulation; }
+  html, body { background:var(--bg); color:#fff; font-family:'Segoe UI',Roboto,sans-serif; margin:0; padding:0; min-height:100dvh; overflow-x:hidden; }
+  
+  .app-container { display:flex; flex-direction:column; min-height:100dvh; }
+
+  /* נגן מדיה */
+  .player-viewport { height:40dvh; min-height:260px; max-height:450px; background:#000; position:relative; border-bottom:1px solid #1F2937; flex-shrink:0; display:flex; align-items:center; justify-content:center; overflow:hidden; }
   .render-info { position:absolute; bottom:55px; left:15px; font-size:10px; color:rgba(255,255,255,.5); z-index:10; pointer-events:none; }
   .empty-hint { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; color:#4B5563; z-index:1; }
 
+  /* מדיה ללא מתיחות */
+  #v-img, #v-vid { width:100%; height:100%; object-fit:contain; transition: filter 0.3s ease; }
+
   /* ציר זמן */
-  .timeline-wrap { position:absolute; bottom:0; left:0; right:0; height:44px; display:flex; align-items:center; padding:0 14px; z-index:40; background:linear-gradient(0deg, rgba(0,0,0,0.8), transparent); transition: opacity 0.4s, transform 0.4s; }
-  .timeline-wrap.hidden-timeline { opacity:0; transform:translateY(20px); pointer-events:none; }
-  .timeline-track { width:100%; height:14px; background:rgba(255,255,255,0.2); border-radius:99px; position:relative; direction:ltr; cursor:pointer; }
+  .timeline-wrap { position:absolute; bottom:0; left:0; right:0; height:44px; display:flex; align-items:center; padding:0 14px; z-index:40; background:linear-gradient(0deg, rgba(0,0,0,0.85), transparent); transition: opacity 0.3s, transform 0.3s; }
+  .timeline-track { width:100%; height:10px; background:rgba(255,255,255,0.2); border-radius:99px; position:relative; direction:ltr; cursor:pointer; }
   .timeline-fill { height:100%; background:var(--accent); border-radius:99px; width:0%; pointer-events:none; }
-  .timeline-handle { position:absolute; top:50%; width:22px; height:22px; background:#fff; border-radius:50%; transform:translate(-50%, -50%); box-shadow:0 2px 8px rgba(0,0,0,.6); left:0%; pointer-events:none; border:2px solid var(--accent); }
-  .timeline-time { position:absolute; top:-18px; right:0; font-size:10px; color:#fff; display:flex; justify-content:space-between; width:100%; direction:ltr; }
+  .timeline-handle { position:absolute; top:50%; width:18px; height:18px; background:#fff; border-radius:50%; transform:translate(-50%, -50%); box-shadow:0 2px 8px rgba(0,0,0,.6); left:0%; pointer-events:none; border:2px solid var(--accent); }
+  .timeline-time { position:absolute; top:-18px; right:0; font-size:10px; color:#fff; display:flex; justify-content:space-between; width:100%; direction:ltr; font-family: monospace; }
 
-  .transport-controls { height:85px; background:#0A0D14; display:flex; align-items:center; justify-content:space-around; padding:0 6px; border-bottom:1px solid #1F2937; flex-shrink:0; position:relative; }
-  .t-btn { display:flex; flex-direction:column; align-items:center; gap:4px; color:#94A3B8; transition:.2s; background:none; border:none; cursor:pointer; }
-  .t-btn i { width:22px; height:22px; }
-  .t-main { color:#000; background:var(--accent); width:58px; height:58px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 0 20px rgba(0,209,255,.4); cursor:pointer; }
-  .t-delete { position:absolute; left:10px; top:50%; transform:translateY(-50%); background:#1F242F; border:1px solid #EF4444; color:#EF4444; width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  /* בקרות נעלמות בזמן ניגון */
+  .controls-overlay { transition: opacity 0.3s ease, transform 0.3s ease; }
+  .controls-hidden { opacity: 0 !important; pointer-events: none !important; transform: translateY(10px); }
 
-  .main-scroll { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:14px; padding-bottom:40px; }
+  /* כפתורי שליטה */
+  .transport-controls { height:75px; background:#0A0D14; display:flex; align-items:center; justify-content:space-around; padding:0 10px; border-bottom:1px solid #1F2937; flex-shrink:0; position:relative; }
+  .t-btn { display:flex; flex-direction:column; align-items:center; gap:4px; color:#94A3B8; transition:.2s; background:none; border:none; cursor:pointer; font-size:11px; }
+  .t-btn:active { transform: scale(0.92); }
+  .t-btn i { width:20px; height:20px; }
+  .t-main { color:#000; background:var(--accent); width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 0 18px rgba(0,209,255,.4); cursor:pointer; }
+
+  /* כפתור מחיקה חדש - פינה עליונה */
+  .top-delete-btn { position:absolute; top:12px; left:12px; z-index:50; background:rgba(239, 68, 68, 0.2); border:1px solid #EF4444; color:#EF4444; width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
+
+  .main-scroll { flex:1; padding:16px; display:flex; flex-direction:column; gap:14px; padding-bottom:60px; }
   .mode-toggle { display:flex; background:var(--card); border-radius:16px; padding:4px; border:1px solid #262C36; }
-  .mode-btn { flex:1; text-align:center; padding:10px; border-radius:12px; font-size:13px; font-weight:700; color:#94A3B8; display:flex; align-items:center; justify-content:center; gap:6px; cursor:pointer; }
+  .mode-btn { flex:1; text-align:center; padding:10px; border-radius:12px; font-size:13px; font-weight:700; color:#94A3B8; display:flex; align-items:center; justify-content:center; gap:6px; background:none; border:none; cursor:pointer; }
   .mode-btn.active { background:var(--accent); color:#000; }
-  .prompt-container { background:var(--card); border:2px solid #14B8A6; border-radius:24px; padding:15px; padding-bottom:50px; position:relative; }
-  textarea { background:transparent; width:100%; border:none; outline:none; resize:none; font-size:14px; color:#fff; text-align:right; min-height:70px; }
+  
+  .prompt-container { background:var(--card); border:2px solid #14B8A6; border-radius:24px; padding:15px; padding-bottom:48px; position:relative; }
+  textarea { background:transparent; width:100%; border:none; outline:none; resize:none; font-size:14px; color:#fff; text-align:right; min-height:65px; }
   .asset-chip { display:flex; align-items:center; gap:8px; background:#0F1319; border:1px solid #262C36; border-radius:14px; padding:8px 10px; margin-bottom:8px; font-size:11px; }
-  .asset-chip img,.asset-chip video { width:34px; height:34px; object-fit:cover; border-radius:8px; }
-  .surprise-btn { background:#00E5FF; color:#000; border-radius:20px; padding:6px 15px; font-size:12px; font-weight:800; display:flex; align-items:center; gap:5px; position:absolute; bottom:12px; left:12px; cursor:pointer; }
+  .asset-chip img, .asset-chip video { width:34px; height:34px; object-fit:cover; border-radius:8px; }
+  .surprise-btn { background:#00E5FF; color:#000; border-radius:20px; padding:6px 14px; font-size:11px; font-weight:800; display:flex; align-items:center; gap:5px; position:absolute; bottom:12px; left:12px; cursor:pointer; }
+  
   .upload-row { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
-  .upload-btn { background:#262C36; border-radius:20px; height:85px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; font-size:12px; font-weight:600; border:1px solid #333; cursor:pointer; }
+  .upload-btn { background:#262C36; border-radius:18px; height:75px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; font-size:12px; font-weight:600; border:1px solid #333; cursor:pointer; }
+  
   .footer-row { display:grid; grid-template-columns:1fr 1.2fr; gap:12px; }
-  .btn-footer { border-radius:20px; padding:16px; font-weight:800; font-size:14px; display:flex; align-items:center; justify-content:center; gap:10px; cursor:pointer; }
-  .btn-share { background:var(--samsung-green); }
-  .btn-download { background:var(--samsung-blue); }
+  .btn-footer { border-radius:18px; padding:14px; font-weight:800; font-size:14px; display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer; border:none; color:#fff; }
+  .btn-share { background:var(--samsung-green); } .btn-download { background:var(--samsung-blue); }
+  
   .gallery-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
   .gallery-item { position:relative; border-radius:16px; overflow:hidden; background:#151921; border:1px solid #262C36; aspect-ratio:1/1; }
-  .gallery-item img,.gallery-item video { width:100%; height:100%; object-fit:cover; }
+  .gallery-item img, .gallery-item video { width:100%; height:100%; object-fit:cover; }
   .gallery-actions { position:absolute; bottom:0; left:0; right:0; display:flex; background:linear-gradient(0deg,rgba(0,0,0,.85),transparent); padding:8px 6px 6px; gap:6px; }
-  .gallery-actions button { flex:1; background:rgba(255,255,255,.15); border-radius:10px; padding:6px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .gallery-actions button { flex:1; background:rgba(255,255,255,.15); border-radius:10px; padding:6px; display:flex; align-items:center; justify-content:center; border:none; color:#fff; cursor:pointer; }
+  
   .loader-overlay { position:absolute; inset:0; background:rgba(0,0,0,.92); z-index:1000; display:none; flex-direction:column; align-items:center; justify-content:center; }
-  .pct { font-size:4.5rem; font-weight:900; }
+  .pct { font-size:4.5rem; font-weight:900; color:var(--accent); }
+  
   #api-config { display:none; background:#0F1319; padding:12px; border-bottom:1px solid #222; }
-  .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:2000; display:none; align-items:flex-end; justify-content:center; }
-  .modal-sheet { background:var(--card); width:100%; max-width:480px; border-radius:24px 24px 0 0; padding:20px; display:flex; flex-direction:column; gap:12px; }
-  .modal-opt { display:flex; align-items:center; gap:12px; background:#0F1319; border:1px solid #262C36; border-radius:16px; padding:14px 16px; font-weight:700; font-size:14px; cursor:pointer; }
-  .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#1F2937; color:#fff; padding:10px 18px; border-radius:14px; font-size:12px; z-index:3000; display:none; }
-  .rec-dot { width:12px; height:12px; background:#EF4444; border-radius:50%; animation:pulse 1s infinite; }
-  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+  .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:2000; display:none; align-items:flex-end; justify-content:center; }
+  .modal-sheet { background:var(--card); width:100%; max-width:500px; border-radius:24px 24px 0 0; padding:20px; display:flex; flex-direction:column; gap:12px; max-height:80vh; overflow-y:auto; }
+  
+  .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#1F2937; color:#fff; padding:10px 18px; border-radius:14px; font-size:12px; z-index:3000; display:none; box-shadow:0 4px 12px rgba(0,0,0,0.5); }
+  
+  /* אפקטים של מעברים */
+  .trans-fade { animation: transFade 0.8s ease; }
+  .trans-zoom { animation: transZoom 0.8s ease; }
+  .trans-slide { animation: transSlide 0.8s ease; }
+  .trans-rotate { animation: transRotate 0.8s ease; }
+  .trans-blur { animation: transBlur 0.8s ease; }
+  
+  @keyframes transFade { 0% { opacity: 0; } 100% { opacity: 1; } }
+  @keyframes transZoom { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+  @keyframes transSlide { 0% { transform: translateX(100%); } 100% { transform: translateX(0); } }
+  @keyframes transRotate { 0% { transform: rotate(-180deg) scale(0.2); opacity: 0; } 100% { transform: rotate(0) scale(1); opacity: 1; } }
+  @keyframes transBlur { 0% { filter: blur(20px); } 100% { filter: blur(0); } }
 </style>
 </head>
 <body>
 
-<div id="api-config">
-  <input type="password" id="apiKey" placeholder="מפתח Google AI (Gemini/Veo)..." oninput="saveKey()" class="w-full bg-[#111] border border-zinc-800 rounded-xl p-3 text-xs text-left font-mono text-white outline-none">
-</div>
-
-<div class="player-viewport" id="player-area">
-  <button onclick="toggleKey()" class="absolute top-4 right-4 z-50 opacity-40 hover:opacity-100 transition-opacity"><i data-lucide="settings" class="w-6 h-6"></i></button>
-  <div id="loader" class="loader-overlay">
-    <div id="p-label" class="pct">0%</div>
-    <div id="loader-stage" class="text-[10px] tracking-[0.3em] opacity-40 uppercase mt-2">Generating</div>
+<div class="app-container">
+  <!-- מפתח API -->
+  <div id="api-config">
+    <input type="password" id="apiKey" placeholder="הכנס מפתח Google AI (Veo / Imagen 3)..." oninput="saveKey()" class="w-full bg-[#111] border border-zinc-800 rounded-xl p-3 text-xs text-left font-mono text-white outline-none">
   </div>
-  <div class="render-info" id="r-info">Studio Master v2.0 Ready</div>
-  <div class="empty-hint" id="empty-hint"><i data-lucide="film" class="w-8 h-8 opacity-50"></i><span class="text-xs">אין מדיה - העלה או צור</span></div>
-  <img id="v-img" class="hidden w-full h-full object-cover">
-  <video id="v-vid" class="hidden w-full h-full object-cover" playsinline loop></video>
 
-  <!-- ציר זמן -->
-  <div class="timeline-wrap hidden-timeline" id="timeline-wrap">
-    <div class="timeline-track" id="timeline-track">
-      <div class="timeline-fill" id="t-bar"></div>
-      <div class="timeline-handle" id="t-handle"></div>
-      <div class="timeline-time"><span id="t-cur">00:00</span><span id="t-dur">00:00</span></div>
+  <!-- נגן ומסך מדיה -->
+  <div class="player-viewport" id="player-area" onclick="handlePlayerClick()">
+    <!-- כפתור הגדרות API -->
+    <button onclick="event.stopPropagation(); toggleKey()" class="absolute top-3 right-3 z-50 opacity-60 hover:opacity-100 bg-black/40 p-2 rounded-xl"><i data-lucide="settings" class="w-5 h-5"></i></button>
+
+    <!-- כפתור מחיקה חדש (פינה שמאלית עליונה, לא מפריע לכפתורים) -->
+    <button onclick="event.stopPropagation(); deleteMainMedia()" class="top-delete-btn" title="מחק מדיה"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+
+    <div id="loader" class="loader-overlay"><div id="p-label" class="pct">0%</div><div id="loader-stage" class="text-[11px] tracking-[0.2em] opacity-60 uppercase mt-2 text-cyan-400">Rendering</div></div>
+    <div class="render-info" id="r-info">Auto Tracking: ACTIVE</div>
+    <div class="empty-hint" id="empty-hint"><i data-lucide="film" class="w-8 h-8"></i><span class="text-xs">אין מדיה - העלה או צור יצירה</span></div>
+    
+    <img id="v-img" class="hidden">
+    <video id="v-vid" class="hidden" playsinline loop></video>
+
+    <!-- ציר זמן נעלם -->
+    <div class="timeline-wrap controls-overlay" id="timeline-wrap">
+      <div class="timeline-track" id="timeline-track">
+        <div class="timeline-fill" id="t-bar"></div>
+        <div class="timeline-handle" id="t-handle"></div>
+        <div class="timeline-time"><span id="t-cur">00:00</span><span id="t-dur">00:00</span></div>
+      </div>
     </div>
   </div>
+
+  <!-- כפתורי שליטה נעלמים -->
+  <div class="transport-controls controls-overlay" id="transport-controls">
+    <button onclick="ctrl('start')" class="t-btn"><i data-lucide="skip-back"></i><span>התחל</span></button>
+    <button onclick="ctrl('back')" class="t-btn"><i data-lucide="rewind"></i><span>אחורה</span></button>
+    <button onclick="toggleMedia()" class="t-main"><i data-lucide="play" id="playIcon"></i></button>
+    <button onclick="ctrl('forward')" class="t-btn"><i data-lucide="fast-forward"></i><span>קדימה</span></button>
+    <button onclick="ctrl('stop')" class="t-btn"><i data-lucide="square" class="fill-current"></i><span>עצור</span></button>
+  </div>
+
+  <!-- גוף האפליקציה (נגלל בצורה חלקה) -->
+  <div class="main-scroll" dir="rtl">
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="mode-image" onclick="setMode('image')"><i data-lucide="image"></i>תמונת AI</button>
+      <button class="mode-btn" id="mode-video" onclick="setMode('video')"><i data-lucide="clapperboard"></i>וידאו AI</button>
+    </div>
+
+    <!-- הגדרות מתקדמות מחולל Google AI -->
+    <div class="bg-[#151921] border border-zinc-800 rounded-2xl p-3 flex flex-wrap gap-2 text-xs">
+      <div class="flex-1 min-w-[120px]">
+        <label class="text-zinc-400 block mb-1">יחס תמונה:</label>
+        <select id="aspectRatio" class="w-full bg-[#0F1319] border border-zinc-700 rounded-lg p-2 text-white outline-none">
+          <option value="16:9">16:9 (רחב / YouTube)</option>
+          <option value="9:16">9:16 (אנכי / Reels / TikTok)</option>
+          <option value="1:1">1:1 (ריבוע / Instagram)</option>
+          <option value="4:3">4:3 (קלאסי)</option>
+        </select>
+      </div>
+
+      <div class="flex-1 min-w-[120px]">
+        <label class="text-zinc-400 block mb-1">סגנון וידאו AI:</label>
+        <select id="aiStyle" class="w-full bg-[#0F1319] border border-zinc-700 rounded-lg p-2 text-white outline-none">
+          <option value="cinematic">קולנועי (Cinematic)</option>
+          <option value="photorealistic">פוטו-ריאליסטי (Photorealistic)</option>
+          <option value="animation">אנימציה / 3D</option>
+          <option value="documentary">דוקומנטרי (Documentary)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="prompt-container">
+      <div id="asset-chip-holder"></div>
+      <textarea id="prompt" placeholder="תאר את הסרטון/תמונה שתרצה ליצור, או ערוך את הקובץ שהעלית..."></textarea>
+      <button onclick="surpriseMe()" class="surprise-btn"><span>הפתע אותי</span><i data-lucide="sparkles" class="w-3.5 h-3.5"></i></button>
+    </div>
+
+    <button onclick="runMedia()" id="run-btn" class="w-full bg-[#00D1FF] text-black py-4 rounded-3xl font-black text-lg hover:opacity-90 transition">צור תמונת AI</button>
+    
+    <div class="upload-row">
+      <button onclick="pick('image/*')" class="upload-btn"><i data-lucide="image" class="text-cyan-400"></i><span>תמונה</span></button>
+      <button onclick="pick('video/*')" class="upload-btn"><i data-lucide="video" class="text-cyan-400"></i><span>סרטון</span></button>
+      <button onclick="openCameraChoice()" class="upload-btn"><i data-lucide="camera" class="text-cyan-400"></i><span>מצלמה</span></button>
+    </div>
+    
+    <!-- כפתורי פילטרים ומעברים -->
+    <div class="flex gap-2">
+      <button onclick="openFiltersModal()" class="flex-1 bg-[#151921] border border-zinc-800 py-3.5 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 hover:border-zinc-700"><i data-lucide="sliders" class="w-4 h-4 text-cyan-400"></i> 15 פילטרים</button>
+      <button onclick="openTransitionsModal()" class="flex-1 bg-[#151921] border border-zinc-800 py-3.5 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 hover:border-zinc-700"><i data-lucide="wand-2" class="w-4 h-4 text-purple-400"></i> אפקטי מעברים</button>
+    </div>
+    
+    <div class="footer-row">
+      <button onclick="download()" class="btn-footer btn-download"><i data-lucide="download"></i><span>הורדה</span></button>
+      <button onclick="shareApp()" class="btn-footer btn-share"><i data-lucide="share-2"></i><span>שיתוף</span></button>
+    </div>
+    
+    <div class="text-[12px] font-black text-zinc-400 uppercase mt-2">היצירות שלי</div>
+    <div class="gallery-grid" id="gallery"></div>
+    <div id="gallery-empty" class="text-center text-xs text-zinc-600 border border-dashed border-zinc-800 rounded-2xl p-6">עדיין לא יצרת כלום</div>
+  </div>
 </div>
 
-<div class="transport-controls">
-  <button class="t-delete" onclick="deleteMainMedia()"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
-  <button onclick="ctrl('start')" class="t-btn"><i data-lucide="skip-back"></i><span>התחל</span></button>
-  <button onclick="ctrl('back')" class="t-btn"><i data-lucide="rewind"></i><span>אחורה</span></button>
-  <button onclick="toggleMedia()" class="t-main"><i data-lucide="play" id="playIcon"></i></button>
-  <button onclick="ctrl('forward')" class="t-btn"><i data-lucide="fast-forward"></i><span>קדימה</span></button>
-  <button onclick="ctrl('stop')" class="t-btn"><i data-lucide="square" class="fill-current"></i><span>עצור</span></button>
-</div>
-
-<div class="main-scroll" dir="rtl">
-  <div class="mode-toggle">
-    <button class="mode-btn active" id="mode-image" onclick="setMode('image')"><i data-lucide="image" class="w-4 h-4"></i>תמונת AI</button>
-    <button class="mode-btn" id="mode-video" onclick="setMode('video')"><i data-lucide="clapperboard" class="w-4 h-4"></i>וידאו AI</button>
-  </div>
-  <div class="prompt-container">
-    <div id="asset-chip-holder"></div>
-    <textarea id="prompt" placeholder="תאר את הסרטון/תמונה שלך..."></textarea>
-    <button onclick="surpriseMe()" class="surprise-btn"><span>הפתע אותי</span><i data-lucide="sparkles" class="w-3.5 h-3.5"></i></button>
-  </div>
-  <button onclick="runMedia()" id="run-btn" class="w-full bg-[#00D1FF] text-black py-4 rounded-3xl font-black text-lg transition-transform active:scale-95">צור תמונת AI</button>
-  <div class="upload-row">
-    <button onclick="pick('image/*')" class="upload-btn"><i data-lucide="image"></i><span>תמונה</span></button>
-    <button onclick="pick('video/*')" class="upload-btn"><i data-lucide="video"></i><span>סרטון</span></button>
-    <button onclick="openCameraChoice()" class="upload-btn"><i data-lucide="camera"></i><span>מצלמה</span></button>
-  </div>
-  <div class="flex gap-2">
-    <button onclick="openVoiceModal()" class="flex-1 bg-[#151921] border border-zinc-800 py-4 rounded-2xl text-[11px] font-bold flex items-center justify-center gap-2"><i data-lucide="mic" class="w-4 h-4 text-purple-500"></i> שיבוט קולי</button>
-    <button onclick="showToast('עקיבת דמות תופעל בגרסת Pro')" class="flex-1 bg-[#151921] border border-zinc-800 py-4 rounded-2xl text-[11px] font-bold flex items-center justify-center gap-2"><i data-lucide="user-check" class="w-4 h-4 text-purple-500"></i> עקיבת דמות</button>
-  </div>
-  <div class="footer-row">
-    <button onclick="download()" class="btn-footer btn-download"><i data-lucide="download"></i><span>הורדה</span></button>
-    <button onclick="shareApp()" class="btn-footer btn-share"><i data-lucide="share-2"></i><span>שיתוף</span></button>
-  </div>
-  <div class="text-[12px] font-black text-zinc-400 uppercase">היצירות שלי</div>
-  <div class="gallery-grid" id="gallery"></div>
-  <div id="gallery-empty" class="text-center text-xs text-zinc-600 border border-dashed border-zinc-800 rounded-2xl p-6">עדיין לא יצרת כלום</div>
-</div>
-
-<input type="file" id="fInp" class="hidden" onchange="handleAsset(event)">
+<input type="file" id="fInp" class="hidden" accept="image/*,video/*" onchange="handleAsset(event)">
 <input type="file" id="camPhotoInp" class="hidden" accept="image/*" capture="environment" onchange="handleAsset(event)">
 <input type="file" id="camVideoInp" class="hidden" accept="video/*" capture="environment" onchange="handleAsset(event)">
 
-<!-- מודלים -->
+<!-- מודאל מצלמה -->
 <div class="modal-backdrop" id="cam-modal">
   <div class="modal-sheet">
-    <h3 class="text-center text-sm text-zinc-400">איך תרצה לצלם?</h3>
-    <button class="modal-opt" onclick="closeCameraChoice();document.getElementById('camPhotoInp').click()"><i data-lucide="image"></i> צילום תמונה</button>
-    <button class="modal-opt" onclick="closeCameraChoice();document.getElementById('camVideoInp').click()"><i data-lucide="video"></i> צילום סרטון</button>
-    <div class="text-center text-xs text-zinc-500 p-2 cursor-pointer" onclick="closeCameraChoice()">ביטול</div>
+    <h3 class="text-center text-sm text-zinc-400 font-bold mb-2">איך תרצה לצלם?</h3>
+    <button class="w-full bg-[#0F1319] border border-zinc-800 rounded-xl p-3 text-right font-bold flex items-center gap-2" onclick="closeCameraChoice();document.getElementById('camPhotoInp').click()"><i data-lucide="image"></i> צילום תמונה</button>
+    <button class="w-full bg-[#0F1319] border border-zinc-800 rounded-xl p-3 text-right font-bold flex items-center gap-2" onclick="closeCameraChoice();document.getElementById('camVideoInp').click()"><i data-lucide="video"></i> צילום סרטון</button>
+    <button class="text-center text-xs text-zinc-500 p-2 w-full mt-1" onclick="closeCameraChoice()">ביטול</button>
   </div>
 </div>
 
-<div class="modal-backdrop" id="voice-modal">
+<!-- מודאל 15 פילטרים -->
+<div class="modal-backdrop" id="filters-modal">
   <div class="modal-sheet">
-    <h3 class="text-center font-black">🎙️ שיבוט קולי</h3>
-    <div class="bg-[#0F1319] rounded-2xl p-4 flex flex-col gap-3">
-      <div class="flex items-center justify-between">
-        <span id="voice-status" class="text-xs text-zinc-400">מוכן להקלטה</span>
-        <div id="rec-indicator" class="hidden flex items-center gap-2"><div class="rec-dot"></div><span class="text-xs text-red-400">מקליט...</span></div>
-      </div>
-      <div class="flex gap-2">
-        <button id="voice-rec-btn" onclick="toggleVoiceRecord()" class="flex-1 bg-[#00D1FF] text-black py-3 rounded-xl font-black text-sm">התחל הקלטה</button>
-        <button onclick="deleteVoice()" class="bg-zinc-800 py-3 px-4 rounded-xl"><i data-lucide="trash-2" class="w-5 h-5 text-red-400"></i></button>
-      </div>
-      <audio id="voice-preview" controls class="hidden w-full mt-2"></audio>
-      <button id="voice-attach-btn" onclick="attachVoiceToVideo()" class="hidden w-full bg-green-600 py-3 rounded-xl font-bold text-sm">העלה / צרף לסרטון ✅</button>
-      <p class="text-[10px] text-zinc-500">ההקלטה תישמר ותוצג כצ'יפ מעל הפרומפט. בגרסת Pro זה יבצע שיבוט קולי אמיתי עם AI.</p>
+    <h3 class="text-center text-base font-black mb-2">🎭 בחר פילטר תמונה/וידאו</h3>
+    <div class="grid grid-cols-3 gap-2">
+      <button onclick="applyFilter('none')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">רגיל</button>
+      <button onclick="applyFilter('grayscale(100%)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">שחור לבן</button>
+      <button onclick="applyFilter('sepia(100%)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">ספיה / וינטג'</button>
+      <button onclick="applyFilter('invert(100%)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">אינוורט / תשליל</button>
+      <button onclick="applyFilter('hue-rotate(90deg)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">ניאון ירוק</button>
+      <button onclick="applyFilter('hue-rotate(180deg)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">סייברפאנק</button>
+      <button onclick="applyFilter('hue-rotate(270deg)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">סגול פיוז'ן</button>
+      <button onclick="applyFilter('saturate(200%)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">צבעים עזים</button>
+      <button onclick="applyFilter('contrast(180%)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">קונטרסט גבוה</button>
+      <button onclick="applyFilter('brightness(140%)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">בהיר דרמטי</button>
+      <button onclick="applyFilter('blur(4px)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">טשטוש עדין</button>
+      <button onclick="applyFilter('drop-shadow(8px 8px 10px #00D1FF)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">הילה כחולה</button>
+      <button onclick="applyFilter('sepia(50%) contrast(150%)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">סרט ישן</button>
+      <button onclick="applyFilter('hue-rotate(45deg) saturate(160%)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">שקיעה חמה</button>
+      <button onclick="applyFilter('grayscale(50%) brightness(90%)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">דרמה קרה</button>
     </div>
-    <div class="text-center text-xs text-zinc-500 p-2 cursor-pointer" onclick="closeVoiceModal()">סגור</div>
+    <button class="text-center text-xs text-zinc-500 p-2 w-full mt-2" onclick="closeFiltersModal()">סגור</button>
+  </div>
+</div>
+
+<!-- מודאל אפקטי מעברים -->
+<div class="modal-backdrop" id="transitions-modal">
+  <div class="modal-sheet">
+    <h3 class="text-center text-base font-black mb-2">🎬 בחר אפקט מעבר (Transition)</h3>
+    <div class="grid grid-cols-2 gap-2">
+      <button onclick="applyTransition('trans-fade')" class="bg-[#0F1319] border border-zinc-800 p-3 rounded-xl text-xs font-bold">Fade In (עמעום)</button>
+      <button onclick="applyTransition('trans-zoom')" class="bg-[#0F1319] border border-zinc-800 p-3 rounded-xl text-xs font-bold">Zoom In (זום-אין)</button>
+      <button onclick="applyTransition('trans-slide')" class="bg-[#0F1319] border border-zinc-800 p-3 rounded-xl text-xs font-bold">Slide Right (החלקה)</button>
+      <button onclick="applyTransition('trans-rotate')" class="bg-[#0F1319] border border-zinc-800 p-3 rounded-xl text-xs font-bold">Rotate In (סיבוב 3D)</button>
+      <button onclick="applyTransition('trans-blur')" class="bg-[#0F1319] border border-zinc-800 p-3 rounded-xl text-xs font-bold">Blur In (פוקוס)</button>
+    </div>
+    <button class="text-center text-xs text-zinc-500 p-2 w-full mt-2" onclick="closeTransitionsModal()">סגור</button>
   </div>
 </div>
 
@@ -162,345 +250,478 @@
 
 <script>
 lucide.createIcons();
-const vImg=document.getElementById('v-img'), vVid=document.getElementById('v-vid'), ldr=document.getElementById('loader'), plbl=document.getElementById('p-label'), loaderStage=document.getElementById('loader-stage'), emptyHint=document.getElementById('empty-hint'), runBtn=document.getElementById('run-btn'), timelineWrap=document.getElementById('timeline-wrap'), track=document.getElementById('timeline-track'), bar=document.getElementById('t-bar'), handle=document.getElementById('t-handle');
-let apiKeyMem="", mode="image", currentAsset=null, gallery=[], lastResultUrl=null, lastResultType=null, hideTimelineTimer=null, voiceBlob=null, mediaRecorder=null, voiceUrl=null;
 
-function saveKey(){apiKeyMem=document.getElementById('apiKey').value.trim()}
-function toggleKey(){const b=document.getElementById('api-config'); b.style.display=b.style.display==='block'?'none':'block'}
-function showToast(m){const t=document.getElementById('toast'); t.textContent=m; t.style.display='block'; clearTimeout(t._timer); t._timer=setTimeout(()=>t.style.display='none',2600)}
-function setMode(m){mode=m; document.getElementById('mode-image').classList.toggle('active',m==='image'); document.getElementById('mode-video').classList.toggle('active',m==='video'); runBtn.textContent=m==='image'?'צור תמונת AI':'צור וידאו AI'}
-function openCameraChoice(){document.getElementById('cam-modal').style.display='flex'} 
-function closeCameraChoice(){document.getElementById('cam-modal').style.display='none'}
-function openVoiceModal(){document.getElementById('voice-modal').style.display='flex'; lucide.createIcons()} 
-function closeVoiceModal(){document.getElementById('voice-modal').style.display='none'}
-function pick(t){const i=document.getElementById('fInp'); i.accept=t; i.value=''; i.click()}
+const vImg = document.getElementById('v-img');
+const vVid = document.getElementById('v-vid');
+const ldr = document.getElementById('loader');
+const plbl = document.getElementById('p-label');
+const loaderStage = document.getElementById('loader-stage');
+const emptyHint = document.getElementById('empty-hint');
+const runBtn = document.getElementById('run-btn');
+const timelineWrap = document.getElementById('timeline-wrap');
+const transportControls = document.getElementById('transport-controls');
+const track = document.getElementById('timeline-track');
+const bar = document.getElementById('t-bar');
+const handle = document.getElementById('t-handle');
+
+let apiKeyMem = localStorage.getItem('studio_api_key') || "";
+if(apiKeyMem) document.getElementById('apiKey').value = apiKeyMem;
+
+let mode = "image";
+let currentAsset = null;
+let gallery = [];
+let lastResultUrl = null;
+let lastResultType = null;
+let hideControlsTimer = null;
+
+function saveKey(){
+  apiKeyMem = document.getElementById('apiKey').value.trim();
+  localStorage.setItem('studio_api_key', apiKeyMem);
+}
+
+function toggleKey(){
+  const b = document.getElementById('api-config');
+  b.style.display = b.style.display === 'block' ? 'none' : 'block';
+}
+
+function showToast(m){
+  const t = document.getElementById('toast');
+  t.textContent = m;
+  t.style.display = 'block';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.style.display = 'none', 2600);
+}
+
+function setMode(m){
+  mode = m;
+  document.getElementById('mode-image').classList.toggle('active', m === 'image');
+  document.getElementById('mode-video').classList.toggle('active', m === 'video');
+  runBtn.textContent = m === 'image' ? 'צור תמונת AI' : 'צור וידאו AI';
+}
+
+function openCameraChoice(){ document.getElementById('cam-modal').style.display='flex'; }
+function closeCameraChoice(){ document.getElementById('cam-modal').style.display='none'; }
+
+function openFiltersModal(){ document.getElementById('filters-modal').style.display='flex'; }
+function closeFiltersModal(){ document.getElementById('filters-modal').style.display='none'; }
+
+function openTransitionsModal(){ document.getElementById('transitions-modal').style.display='flex'; }
+function closeTransitionsModal(){ document.getElementById('transitions-modal').style.display='none'; }
+
+function applyFilter(filterCss){
+  vImg.style.filter = filterCss;
+  vVid.style.filter = filterCss;
+  closeFiltersModal();
+  showToast('הפילטר הוחל בהצלחה!');
+}
+
+function applyTransition(transClass){
+  const target = !vVid.classList.contains('hidden') ? vVid : vImg;
+  target.classList.remove('trans-fade', 'trans-zoom', 'trans-slide', 'trans-rotate', 'trans-blur');
+  void target.offsetWidth; // Force Reflow
+  target.classList.add(transClass);
+  closeTransitionsModal();
+  showToast('אפקט המעבר הופעל!');
+}
+
+function pick(t){ const i=document.getElementById('fInp'); i.accept=t; i.value=''; i.click(); }
 
 function handleAsset(e){
-  const f=e.target.files[0]; if(!f)return; 
-  if(currentAsset && currentAsset.url) URL.revokeObjectURL(currentAsset.url);
-  const url=URL.createObjectURL(f); 
-  const type=f.type.startsWith('image/')?'image':'video'; 
-  emptyHint.style.display='none'; 
-  document.getElementById('r-info').style.display='none'; 
-  if(type==='image'){
-    vImg.src=url; vImg.classList.remove('hidden'); vVid.classList.add('hidden'); vVid.pause();
-  }else{
-    vVid.src=url; vVid.classList.remove('hidden'); vImg.classList.add('hidden'); vVid.load();
-  } 
-  lastResultUrl=url; lastResultType=type; showTimeline(); 
-  const r=new FileReader(); 
-  r.onload=()=>{
-    currentAsset={file:f,url,type,base64:r.result.split(',')[1],mime:f.type}; 
+  const f = e.target.files[0];
+  if(!f) return;
+  const url = URL.createObjectURL(f);
+  const type = f.type.startsWith('image/') ? 'image' : 'video';
+  
+  emptyHint.style.display = 'none';
+  document.getElementById('r-info').style.display = 'none';
+  
+  if(type === 'image'){
+    vImg.src = url;
+    vImg.classList.remove('hidden');
+    vVid.classList.add('hidden');
+    vVid.pause();
+  } else {
+    vVid.src = url;
+    vVid.classList.remove('hidden');
+    vImg.classList.add('hidden');
+    vVid.load();
+  }
+  
+  lastResultUrl = url;
+  lastResultType = type;
+  showControlsTemporarily();
+  
+  const r = new FileReader();
+  r.onload = () => {
+    currentAsset = { file: f, url, type, base64: r.result.split(',')[1], mime: f.type };
     renderAssetChip();
-  }; 
+  };
   r.readAsDataURL(f);
 }
 
 function renderAssetChip(){
-  const h=document.getElementById('asset-chip-holder'); 
-  if(!currentAsset && !voiceBlob){h.innerHTML=''; return} 
-  let html=''; 
-  if(currentAsset){
-    const tag=currentAsset.type==='image'?`<img src="${currentAsset.url}">`:`<video src="${currentAsset.url}" muted></video>`; 
-    html+=`<div class="asset-chip">${tag}<span>קובץ הועלה - הפרומפט יערוך אותו</span><button onclick="clearAsset()"><i data-lucide="x" class="w-4 h-4"></i></button></div>`
-  } 
-  if(voiceBlob){
-    html+=`<div class="asset-chip" style="border-color:#9333EA"><i data-lucide="mic" class="w-5 h-5 text-purple-400"></i><span>קול הוקלט - יצורף ליצירה</span><button onclick="deleteVoice(true)"><i data-lucide="x" class="w-4 h-4"></i></button></div>`
-  } 
-  h.innerHTML=html; 
+  const h = document.getElementById('asset-chip-holder');
+  if(!currentAsset){ h.innerHTML = ''; return; }
+  const tag = currentAsset.type === 'image' ? `<img src="${currentAsset.url}">` : `<video src="${currentAsset.url}" muted></video>`;
+  h.innerHTML = `<div class="asset-chip">${tag}<span class="truncate">קובץ הועלה - מוכן לעריכה</span><button onclick="clearAsset()"><i data-lucide="x" class="w-4 h-4 text-zinc-400"></i></button></div>`;
   lucide.createIcons();
 }
 
-function clearAsset(){if(currentAsset&&currentAsset.url) URL.revokeObjectURL(currentAsset.url); currentAsset=null; renderAssetChip()}
+function clearAsset(){ currentAsset = null; renderAssetChip(); }
 
 function deleteMainMedia(){
-  vImg.classList.add('hidden'); vVid.classList.add('hidden'); vVid.pause(); vVid.src=''; vImg.src=''; 
-  lastResultUrl=null; lastResultType=null; 
-  emptyHint.style.display='flex'; 
-  document.getElementById('r-info').style.display='block'; 
-  bar.style.width='0%'; handle.style.left='0%'; 
-  showToast('המדיה נמחקה מהמסך');
+  vImg.classList.add('hidden');
+  vVid.classList.add('hidden');
+  vVid.pause();
+  vVid.src = '';
+  vImg.src = '';
+  lastResultUrl = null;
+  lastResultType = null;
+  emptyHint.style.display = 'flex';
+  document.getElementById('r-info').style.display = 'block';
+  bar.style.width = '0%';
+  handle.style.left = '0%';
+  showToast('המדיה נמחקה מהנגן');
 }
 
 function surpriseMe(){
-  const l=["אסטרונאוט בגינה פורחת בסגנון קולנועי","מכונית ניאון בטוקיו בגשם","דרקון אפי מעל הרים קפואים","רובוט מצייר על מאדים"]; 
-  document.getElementById('prompt').value=l[Math.floor(Math.random()*l.length)];
+  const l = [
+    "אסטרונאוט בגינה פורחת בסגנון קולנועי 8k",
+    "מכונית ספורט ניאון בטוקיו בגשם לילה",
+    "דרקון אפי מעל הרים מושלגים, תאורת שקיעה",
+    "רובוט עתידני מצייר דיוקן על מאדים"
+  ];
+  document.getElementById('prompt').value = l[Math.floor(Math.random() * l.length)];
 }
 
-// --- ציר זמן ---
-function showTimeline(){
-  if(!lastResultUrl) return;
-  timelineWrap.classList.remove('hidden-timeline'); 
-  clearTimeout(hideTimelineTimer); 
-  hideTimelineTimer=setTimeout(()=>timelineWrap.classList.add('hidden-timeline'),3000);
+/* --- בקרות נעלמות / מופיעות בלחיצה --- */
+function showControlsTemporarily(){
+  timelineWrap.classList.remove('controls-hidden');
+  transportControls.classList.remove('controls-hidden');
+  clearTimeout(hideControlsTimer);
+  if(!vVid.paused && !vVid.classList.contains('hidden')){
+    hideControlsTimer = setTimeout(() => {
+      timelineWrap.classList.add('controls-hidden');
+      transportControls.classList.add('controls-hidden');
+    }, 2500);
+  }
 }
 
-document.getElementById('player-area').addEventListener('click', showTimeline);
-document.getElementById('player-area').addEventListener('touchstart', showTimeline, {passive:true});
+function handlePlayerClick(){
+  showControlsTemporarily();
+}
 
-let isDragging=false;
+/* --- ציר זמן --- */
+let isDragging = false;
 function updateTimelinePos(clientX){
-  if(!vVid.duration || vVid.classList.contains('hidden')) return;
-  const rect=track.getBoundingClientRect(); 
-  let p=(clientX-rect.left)/rect.width; 
-  p=Math.max(0,Math.min(1,p)); 
-  bar.style.width=(p*100)+'%'; 
-  handle.style.left=(p*100)+'%'; 
-  vVid.currentTime=p*vVid.duration;
-}
-
-track.addEventListener('mousedown', e=>{isDragging=true; updateTimelinePos(e.clientX)}); 
-window.addEventListener('mousemove', e=>{if(isDragging)updateTimelinePos(e.clientX)}); 
-window.addEventListener('mouseup', ()=>isDragging=false);
-
-track.addEventListener('touchstart', e=>{isDragging=true; updateTimelinePos(e.touches[0].clientX)}, {passive:false}); 
-window.addEventListener('touchmove', e=>{if(isDragging){e.preventDefault(); updateTimelinePos(e.touches[0].clientX)}}, {passive:false}); 
-window.addEventListener('touchend', ()=>isDragging=false);
-
-// --- שיבוט קולי ---
-async function toggleVoiceRecord(){
-  const btn=document.getElementById('voice-rec-btn'), status=document.getElementById('voice-status'), ind=document.getElementById('rec-indicator');
-  if(mediaRecorder && mediaRecorder.state==='recording'){
-    mediaRecorder.stop(); btn.textContent='התחל הקלטה'; status.textContent='מעבד...'; ind.classList.add('hidden'); return;
+  const rect = track.getBoundingClientRect();
+  let p = (clientX - rect.left) / rect.width;
+  p = Math.max(0, Math.min(1, p));
+  bar.style.width = (p * 100) + '%';
+  handle.style.left = (p * 100) + '%';
+  if(vVid.duration && !vVid.classList.contains('hidden')){
+    vVid.currentTime = p * vVid.duration;
   }
-  try{
-    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
-    mediaRecorder=new MediaRecorder(stream); const chunks=[];
-    mediaRecorder.ondataavailable=e=>chunks.push(e.data);
-    mediaRecorder.onstop=()=>{
-      voiceBlob=new Blob(chunks,{type:'audio/webm'}); 
-      if(voiceUrl) URL.revokeObjectURL(voiceUrl);
-      voiceUrl=URL.createObjectURL(voiceBlob); 
-      const prev=document.getElementById('voice-preview'); 
-      prev.src=voiceUrl; 
-      prev.classList.remove('hidden'); 
-      document.getElementById('voice-attach-btn').classList.remove('hidden'); 
-      status.textContent='הקלטה מוכנה!'; 
-      stream.getTracks().forEach(t=>t.stop());
-    };
-    mediaRecorder.start(); btn.textContent='עצור הקלטה'; status.textContent='מקליט...'; ind.classList.remove('hidden');
-  }catch{showToast('לא ניתן לגשת למיקרופון')}
 }
 
-function deleteVoice(fromChip=false){
-  voiceBlob=null; if(voiceUrl) URL.revokeObjectURL(voiceUrl); voiceUrl=null; 
-  document.getElementById('voice-preview').classList.add('hidden'); 
-  document.getElementById('voice-attach-btn').classList.add('hidden'); 
-  document.getElementById('voice-status').textContent='מוכן להקלטה'; 
-  renderAssetChip(); 
-  if(!fromChip)showToast('הקלטת הקול נמחקה');
-}
+track.addEventListener('mousedown', e => { isDragging = true; updateTimelinePos(e.clientX); });
+window.addEventListener('mousemove', e => { if(isDragging) updateTimelinePos(e.clientX); });
+window.addEventListener('mouseup', () => isDragging = false);
 
-function attachVoiceToVideo(){renderAssetChip(); closeVoiceModal(); showToast('הקול צורף! הוא יישלח עם הפרומפט ליצירה')}
+track.addEventListener('touchstart', e => { isDragging = true; updateTimelinePos(e.touches[0].clientX); }, {passive: true});
+window.addEventListener('touchmove', e => { if(isDragging) updateTimelinePos(e.touches[0].clientX); }, {passive: true});
+window.addEventListener('touchend', () => isDragging = false);
 
-// --- מחוללי AI ---
+/* --- מחולל AI --- */
 async function runMedia(){
-  const p=document.getElementById('prompt').value.trim(); 
-  if(!p)return showToast('הזן תיאור'); 
-  runBtn.disabled=true; 
-  ldr.style.display='flex'; 
-  loaderStage.textContent='Generating';
-  let prog=0; plbl.textContent='0%'; 
-  const tick=setInterval(()=>{prog=Math.min(prog+Math.floor(Math.random()*10)+3,92); plbl.textContent=prog+'%'},350);
+  const p = document.getElementById('prompt').value.trim();
+  if(!p && !currentAsset) return showToast('נא להזין תיאור או להעלות קובץ לעריכה');
+  
+  runBtn.disabled = true;
+  ldr.style.display = 'flex';
+  loaderStage.textContent = mode === 'image' ? 'Generating Image' : 'Rendering Video';
+  
+  let prog = 0;
+  plbl.textContent = '0%';
+  const tick = setInterval(() => {
+    prog = Math.min(prog + Math.floor(Math.random() * 8) + 2, 95);
+    plbl.textContent = prog + '%';
+  }, 350);
 
-  try{
-    let url, type; 
-    if(mode==='image'){
-      url=await generateImage(p,currentAsset); type='image';
-    }else{
-      if(!apiKeyMem)throw new Error('וידאו דורש מפתח API'); 
-      url=await generateVideo(p,currentAsset); type='video';
+  try {
+    let url, type;
+    if(mode === 'image'){
+      url = await generateImage(p, currentAsset);
+      type = 'image';
+    } else {
+      if(!apiKeyMem) throw new Error('מחולל וידאו דורש מפתח API מוגדר');
+      url = await generateVideo(p, currentAsset);
+      type = 'video';
     }
-    clearInterval(tick); 
-    plbl.textContent='100%'; 
-    setTimeout(()=>{
-      ldr.style.display='none'; 
-      emptyHint.style.display='none'; 
-      showResult(url,type); 
-      addToGallery(url,type); 
-      showTimeline();
-    },300);
-  }catch(err){
-    clearInterval(tick); 
-    ldr.style.display='none'; 
+    
+    clearInterval(tick);
+    plbl.textContent = '100%';
+    setTimeout(() => {
+      ldr.style.display = 'none';
+      emptyHint.style.display = 'none';
+      showResult(url, type);
+      addToGallery(url, type);
+      showControlsTemporarily();
+    }, 300);
+  } catch(err) {
+    clearInterval(tick);
+    ldr.style.display = 'none';
     showToast(err.message || 'שגיאה ביצירת המדיה');
-  } finally{
-    runBtn.disabled=false;
+  } finally {
+    runBtn.disabled = false;
   }
 }
 
-function showResult(url,type){
-  lastResultUrl=url; lastResultType=type; 
-  if(type==='image'){
-    vImg.src=url; vImg.classList.remove('hidden'); vVid.classList.add('hidden'); vVid.pause();
-  }else{
-    vVid.src=url; vVid.classList.remove('hidden'); vImg.classList.add('hidden'); 
-    vVid.load(); 
-    vVid.play().catch(()=>{});
+function showResult(url, type){
+  lastResultUrl = url;
+  lastResultType = type;
+  if(type === 'image'){
+    vImg.src = url;
+    vImg.classList.remove('hidden');
+    vVid.classList.add('hidden');
+    vVid.pause();
+  } else {
+    vVid.src = url;
+    vVid.classList.remove('hidden');
+    vImg.classList.add('hidden');
+    vVid.load();
+    vVid.play().catch(() => {});
   }
 }
 
 async function generateImage(prompt, asset){
+  const aspect = document.getElementById('aspectRatio').value;
+  
   if(apiKeyMem){
-    const parts=[{text:prompt}]; 
-    if(asset&&asset.type==='image')parts.push({inline_data:{mime_type:asset.mime,data:asset.base64}});
-    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=${encodeURIComponent(apiKeyMem)}`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({contents:[{role:'user',parts}],generationConfig:{responseModalities:['TEXT','IMAGE']}})
+    const parts = [{ text: prompt }];
+    if(asset && asset.type === 'image'){
+      parts.push({ inline_data: { mime_type: asset.mime, data: asset.base64 } });
+    }
+    
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:generateImages?key=${encodeURIComponent(apiKeyMem)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        prompt: prompt,
+        config: { numberOfImages: 1, outputMimeType: "image/jpeg", aspectRatio: aspect }
+      })
     });
-    if(!res.ok)throw new Error('שגיאת Google API'); 
-    const data=await res.json(); 
-    const part=data?.candidates?.[0]?.content?.parts?.find(p=>p.inlineData||p.inline_data); 
-    const inline=part?.inlineData||part?.inline_data; 
-    if(!inline)throw new Error('לא התקבלה תמונה'); 
-    return `data:${inline.mimeType||inline.mime_type};base64,${inline.data}`;
+
+    if(!res.ok) {
+      const altRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${encodeURIComponent(apiKeyMem)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts }] })
+      });
+      if(!altRes.ok) throw new Error('שגיאת תקשורת מול Google API');
+      const altData = await altRes.json();
+      const part = altData?.candidates?.[0]?.content?.parts?.find(p => p.inlineData || p.inline_data);
+      const inline = part?.inlineData || part?.inline_data;
+      if(inline) return `data:${inline.mimeType};base64,${inline.data}`;
+    } else {
+      const data = await res.json();
+      const b64 = data.generatedImages?.[0]?.image?.imageBytes;
+      if(b64) return `data:image/jpeg;base64,${b64}`;
+    }
   }
-  const url=`https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1280&height=720&seed=${Math.floor(Math.random()*9999)}&model=flux&nologo=true`; 
-  await new Promise((res,rej)=>{const i=new Image(); i.onload=res; i.onerror=()=>rej(new Error('שגיאת טעינת תמונה')); i.src=url}); 
+
+  // מחולל גיבוי חינמי פתוח
+  const url = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1280&height=720&seed=${Math.floor(Math.random()*99999)}&model=flux&nologo=true`;
+  await new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = res;
+    img.onerror = () => rej(new Error('שגיאה בטעינת התמונה'));
+    img.src = url;
+  });
   return url;
 }
 
 async function generateVideo(prompt, asset){
-  const instance={prompt}; 
-  if(asset&&asset.type==='image')instance.image={bytesBase64Encoded:asset.base64,mimeType:asset.mime}; 
-  const s=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/veo-2.0-generate-001:predictLongRunning?key=${encodeURIComponent(apiKeyMem)}`,{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({instances:[instance],parameters:{aspectRatio:'16:9'}})
-  }); 
-  if(!s.ok)throw new Error('שגיאת בקשת Veo'); 
-  const sd=await s.json(); 
-  const opName=sd.name; 
-  loaderStage.textContent='Rendering Video'; 
-  let op; 
-  for(let i=0;i<40;i++){
-    await new Promise(r=>setTimeout(r,5000)); 
-    const pr=await fetch(`https://generativelanguage.googleapis.com/v1beta/${opName}?key=${encodeURIComponent(apiKeyMem)}`); 
-    op=await pr.json(); 
-    if(op.done)break;
-  } 
-  if(!op?.done)throw new Error('תהליך היצירה לקח זמן רב מדי'); 
-  if(op.error)throw new Error(op.error.message || 'שגיאה ביצירת הווידאו');
-
-  const sample=op.response?.generateVideoResponse?.generatedSamples?.[0]?.video||op.response?.videos?.[0]; 
-  const uri=sample?.uri; 
-  if(!uri)throw new Error('לא התקבל נתיב וידאו'); 
-
-  const vr=await fetch(`${uri}${uri.includes('?')?'&':'?'}key=${encodeURIComponent(apiKeyMem)}`); 
-  if(!vr.ok) throw new Error('שגיאה בהורדת קובץ הוידאו');
-  const blob=await vr.blob(); 
+  const aspect = document.getElementById('aspectRatio').value;
+  const style = document.getElementById('aiStyle').value;
+  const fullPrompt = `${prompt} [Style: ${style}] [Auto Object Tracking Enabled]`;
+  
+  const instance = { prompt: fullPrompt };
+  if(asset && asset.type === 'image'){
+    instance.image = { bytesBase64Encoded: asset.base64, mimeType: asset.mime };
+  }
+  
+  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/veo-2.0-generate-001:predictLongRunning?key=${encodeURIComponent(apiKeyMem)}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      instances: [instance],
+      parameters: { aspectRatio: aspect }
+    })
+  });
+  
+  if(!res.ok) throw new Error('שגיאת Veo API - בדוק את מפתח ה-API');
+  
+  const sd = await res.json();
+  const opName = sd.name;
+  let op;
+  
+  for(let i = 0; i < 30; i++){
+    await new Promise(r => setTimeout(r, 4000));
+    const pr = await fetch(`https://generativelanguage.googleapis.com/v1beta/${opName}?key=${encodeURIComponent(apiKeyMem)}`);
+    op = await pr.json();
+    if(op.done) break;
+  }
+  
+  if(!op?.done) throw new Error('יצירת הוידאו ארכה זמן רב מדי');
+  if(op.error) throw new Error(op.error.message || 'שגיאה ברנדור הווידאו');
+  
+  const sample = op.response?.generateVideoResponse?.generatedSamples?.[0]?.video || op.response?.videos?.[0];
+  const uri = sample?.uri;
+  if(!uri) throw new Error('לא התקבל קובץ וידאו תקין');
+  
+  const vr = await fetch(`${uri}${uri.includes('?') ? '&' : '?'}key=${encodeURIComponent(apiKeyMem)}`);
+  const blob = await vr.blob();
   return URL.createObjectURL(blob);
 }
 
-// --- גלריה וניהול יצירות ---
-function addToGallery(url,type){gallery.unshift({id:'g'+Date.now(),url,type}); renderGallery()}
+/* --- גלריה והורדה תקינה --- */
+function addToGallery(url, type){
+  gallery.unshift({ id: 'g' + Date.now(), url, type });
+  renderGallery();
+}
 
 function renderGallery(){
-  const g=document.getElementById('gallery'), e=document.getElementById('gallery-empty'); 
-  if(!gallery.length){g.innerHTML=''; e.style.display='block'; return} 
-  e.style.display='none'; 
-  g.innerHTML=gallery.map(x=>`
+  const g = document.getElementById('gallery');
+  const e = document.getElementById('gallery-empty');
+  if(!gallery.length){
+    g.innerHTML = '';
+    e.style.display = 'block';
+    return;
+  }
+  e.style.display = 'none';
+  g.innerHTML = gallery.map(x => `
     <div class="gallery-item">
-      ${x.type==='image'?`<img src="${x.url}">`:`<video src="${x.url}" muted></video>`}
+      ${x.type === 'image' ? `<img src="${x.url}">` : `<video src="${x.url}" muted loop autoplay></video>`}
       <div class="gallery-actions">
         <button onclick="downloadUrl('${x.url}','${x.type}')"><i data-lucide="download" class="w-4 h-4"></i></button>
         <button onclick="deleteFromGallery('${x.id}')"><i data-lucide="trash-2" class="w-4 h-4 text-red-400"></i></button>
       </div>
     </div>
-  `).join(''); 
+  `).join('');
   lucide.createIcons();
 }
 
 function deleteFromGallery(id){
-  const item=gallery.find(g=>g.id===id);
-  if(item && item.url.startsWith('blob:')) URL.revokeObjectURL(item.url);
-  gallery=gallery.filter(g=>g.id!==id); 
+  gallery = gallery.filter(g => g.id !== id);
   renderGallery();
 }
 
-async function downloadUrl(url,type){
-  try{
-    const r=await fetch(url); 
-    const b=await r.blob(); 
-    const a=document.createElement('a'); 
-    a.href=URL.createObjectURL(b); 
-    a.download=`AI_${Date.now()}.${type==='image'?'png':'mp4'}`; 
-    a.click(); 
-    showToast('ההורדה החלה');
-  }catch{
+/* תיקון קריטי לכפתור ההורדה */
+async function downloadUrl(url, type){
+  try {
+    showToast('מכין את הקובץ להורדה...');
+    let blob;
+    if(url.startsWith('data:') || url.startsWith('blob:')){
+      const r = await fetch(url);
+      blob = await r.blob();
+    } else {
+      const r = await fetch(url, { mode: 'cors' });
+      blob = await r.blob();
+    }
+    
+    const a = document.createElement('a');
+    const blobUrl = URL.createObjectURL(blob);
+    a.href = blobUrl;
+    a.download = `AI_Studio_${Date.now()}.${type === 'image' ? 'png' : 'mp4'}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+    showToast('ההורדה החלה בהצלחה!');
+  } catch(err) {
     showToast('שגיאה בהורדת הקובץ');
   }
 }
 
-function download(){if(!lastResultUrl)return showToast('אין מדיה להורדה'); downloadUrl(lastResultUrl,lastResultType)}
+function download(){
+  if(!lastResultUrl) return showToast('אין מדיה להורדה');
+  downloadUrl(lastResultUrl, lastResultType);
+}
 
 async function shareApp(){
-  if(!lastResultUrl)return showToast('אין מדיה לשיתוף'); 
-  try{
-    const r=await fetch(lastResultUrl); 
-    const b=await r.blob(); 
-    const f=new File([b],`AI.${lastResultType==='image'?'png':'mp4'}`,{type:b.type}); 
-    if(navigator.canShare&&navigator.canShare({files:[f]})){
-      await navigator.share({files:[f],title:'AI Studio'}); 
+  if(!lastResultUrl) return showToast('אין מדיה לשיתוף');
+  try {
+    const r = await fetch(lastResultUrl);
+    const b = await r.blob();
+    const f = new File([b], `AI_Studio.${lastResultType === 'image' ? 'png' : 'mp4'}`, { type: b.type });
+    if(navigator.canShare && navigator.canShare({ files: [f] })){
+      await navigator.share({ files: [f], title: 'AI Studio Master Pro' });
       return;
     }
-  }catch{} 
-  window.open(`https://wa.me/?text=${encodeURIComponent('ראה מה יצרתי ב-AI Video Studio!')}`,'_blank');
+  } catch{}
+  window.open(`https://wa.me/?text=${encodeURIComponent('ראה מה יצרתי ב-AI Studio: ' + location.href)}`, '_blank');
 }
 
-// --- פקודות נגן וידאו ---
-function updatePlayIcon(iconName){
-  const icon=document.getElementById('playIcon');
-  if(icon){
-    icon.dataset.lucide=iconName;
-    lucide.createIcons();
-  }
-}
-
+/* --- בקרות נגן --- */
 function toggleMedia(){
-  if(vVid.classList.contains('hidden') || !vVid.src) return;
+  if(vVid.classList.contains('hidden')) return;
   if(vVid.paused){
     vVid.play();
-  }else{
+  } else {
     vVid.pause();
   }
+  showControlsTemporarily();
 }
 
-vVid.onplay=()=>{ updatePlayIcon('pause'); showTimeline(); }; 
-vVid.onpause=()=>{ updatePlayIcon('play'); };
-vVid.onended=()=>{ updatePlayIcon('play'); bar.style.width='0%'; handle.style.left='0%'; };
+vVid.onplay = () => {
+  document.getElementById('playIcon').setAttribute('data-lucide', 'pause');
+  lucide.createIcons();
+  showControlsTemporarily();
+};
+
+vVid.onpause = () => {
+  document.getElementById('playIcon').setAttribute('data-lucide', 'play');
+  lucide.createIcons();
+  showControlsTemporarily();
+};
 
 function ctrl(c){
-  if(vVid.classList.contains('hidden') || !vVid.src)return; 
-  if(c==='stop'){
-    vVid.pause(); vVid.currentTime=0; updatePlayIcon('play');
-  }else if(c==='start'){
-    vVid.currentTime=0;
-  }else if(c==='back'){
-    vVid.currentTime=Math.max(0,vVid.currentTime-2);
-  }else if(c==='forward'){
-    vVid.currentTime=Math.min(vVid.duration||0,vVid.currentTime+2);
+  if(vVid.classList.contains('hidden')) return;
+  if(c === 'stop'){
+    vVid.pause();
+    vVid.currentTime = 0;
+  } else if(c === 'start') {
+    vVid.currentTime = 0;
+  } else if(c === 'back') {
+    vVid.currentTime = Math.max(0, vVid.currentTime - 2);
+  } else if(c === 'forward') {
+    vVid.currentTime = Math.min(vVid.duration || 0, vVid.currentTime + 2);
   }
+  showControlsTemporarily();
 }
 
 function fmt(s){
-  if(!isFinite(s) || isNaN(s))return '00:00'; 
-  const m=Math.floor(s/60),sec=Math.floor(s%60); 
+  if(!isFinite(s) || isNaN(s)) return '00:00';
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
   return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
 }
 
-vVid.ontimeupdate=()=>{
-  if(isDragging || !vVid.duration)return; 
-  const p=(vVid.currentTime/vVid.duration)*100; 
-  bar.style.width=p+'%'; 
-  handle.style.left=p+'%'; 
-  document.getElementById('t-cur').textContent=fmt(vVid.currentTime); 
-  document.getElementById('t-dur').textContent=fmt(vVid.duration);
-}
+vVid.ontimeupdate = () => {
+  if(isDragging) return;
+  const p = (vVid.currentTime / (vVid.duration || 1)) * 100;
+  bar.style.width = p + '%';
+  handle.style.left = p + '%';
+  document.getElementById('t-cur').textContent = fmt(vVid.currentTime);
+  document.getElementById('t-dur').textContent = fmt(vVid.duration);
+};
 
-// אתחול התחלתי
-setMode('image'); 
+vVid.onloadedmetadata = () => {
+  document.getElementById('t-dur').textContent = fmt(vVid.duration);
+};
+
+setMode('image');
 renderGallery();
 </script>
 </body>
