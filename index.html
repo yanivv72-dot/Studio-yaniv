@@ -3,113 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Studio Pro | Master</title>
+    <title>AI Studio Elite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        :root { --bg: #000000; --border: #202327; --accent: #ffffff; }
+        :root { --bg: #000000; --border: #1F1F1F; --accent: #7C3AED; --samsung-grey: #121212; }
         body { background-color: var(--bg); color: #fff; font-family: -apple-system, system-ui, sans-serif; margin: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
         
-        .viewport { height: 32dvh; background: #000; position: relative; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .app-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
-
-        /* Grok Dock */
-        .grok-dock { background: #000; border: 1px solid var(--border); border-radius: 26px; padding: 8px 15px; display: flex; items: center; gap: 12px; }
-        textarea { background: transparent; width: 100%; border: none; outline: none; resize: none; font-size: 16px; color: #fff; text-align: right; max-height: 100px; padding: 10px 0; }
+        /* אזור 1: הנגן (32% גובה) */
+        .player-viewport { height: 32dvh; background: #000; position: relative; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
         
-        .btn-send { background: #fff; color: #000; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: 0.2s; }
-        .btn-send:active { transform: scale(0.9); }
+        /* אזור 2: פס תחבורה סמסונג (70px גובה) */
+        .transport-bar { height: 75px; background: #000; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-around; flex-shrink: 0; padding: 0 10px; }
         
-        .chip-bar { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 5px 0; }
-        .chip-bar::-webkit-scrollbar { display: none; }
-        .chip { background: #000; border: 1px solid var(--border); border-radius: 18px; padding: 8px 16px; font-size: 11px; font-weight: 600; white-space: nowrap; color: #a1a1aa; display: flex; items: center; gap: 6px; }
-        .chip:active { background: #111; }
+        /* אזור 3: תוכן נגלל (כל השאר) */
+        .app-content { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 15px; padding-bottom: 40px; }
 
-        .loader { position: absolute; inset: 0; background: #000; z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .pct { font-size: 5rem; font-weight: 900; letter-spacing: -3px; }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 500; align-items: center; justify-content: center; }
+        /* כפתורי סמסונג One UI */
+        .samsung-btn { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--samsung-grey); border: 1px solid #222; transition: 0.15s; }
+        .samsung-btn:active { transform: scale(0.88); background: #222; }
+        .samsung-btn.main { width: 54px; height: 54px; background: #fff; color: #000; border: none; }
+        .samsung-btn i { width: 20px; height: 20px; }
 
-        /* Footer Actions */
-        .footer-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; padding-bottom: 20px; }
-        .action-sub-btn { background: #0D0D0D; border: 1px solid var(--border); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 10px; font-weight: 600; color: #888; }
+        /* פקדים בתוך הנגן */
+        .player-overlay-btn { position: absolute; background: rgba(255,255,255,0.1); backdrop-filter: blur(5px); border-radius: 50%; padding: 20px; border: 1px solid rgba(255,255,255,0.2); transition: 0.3s; opacity: 0; }
+        .player-viewport:active .player-overlay-btn { opacity: 1; }
+        .timeline-container { position: absolute; bottom: 0; width: 100%; height: 4px; background: rgba(255,255,255,0.1); }
+        .timeline-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.1s linear; }
+
+        /* UI Elements */
+        .grok-dock { background: #0A0A0A; border: 1px solid var(--border); border-radius: 26px; padding: 10px 18px; display: flex; items: center; gap: 12px; }
+        textarea { background: transparent; width: 100%; border: none; outline: none; resize: none; font-size: 15px; color: #fff; text-align: right; max-height: 80px; }
+        .chip { background: #000; border: 1px solid var(--border); border-radius: 20px; padding: 8px 16px; font-size: 11px; font-weight: 600; white-space: nowrap; color: #888; display: flex; items: center; gap: 6px; }
+        .loader-overlay { position: absolute; inset: 0; background: #000; z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .percent { font-size: 5rem; font-weight: 900; color: #fff; letter-spacing: -3px; }
     </style>
 </head>
 <body>
 
-    <!-- אזור הנגן -->
-    <div class="viewport">
-        <div id="loader" class="loader">
-            <div id="p-label" class="pct">0%</div>
-            <div class="text-[9px] tracking-[0.4em] opacity-40 font-bold uppercase">Processing Asset</div>
+    <!-- אזור 1: הנגן המקצועי -->
+    <div class="player-viewport">
+        <div id="loader" class="loader-overlay">
+            <div id="p-label" class="percent">0%</div>
+            <div class="text-[9px] tracking-[0.4em] opacity-40 font-bold">GENERATING ASSET</div>
         </div>
         
-        <div id="placeholder" class="opacity-10"><i data-lucide="layers" class="w-16 h-16"></i></div>
+        <div id="placeholder" class="opacity-10"><i data-lucide="aperture" class="w-16 h-16"></i></div>
         
+        <!-- כפתור נגן פנימי -->
+        <button onclick="toggleMedia()" class="player-overlay-btn" id="innerPlayBtn">
+            <i data-lucide="play" class="w-8 h-8 fill-white"></i>
+        </button>
+
         <img id="v-img" class="hidden w-full h-full object-contain">
-        <video id="v-vid" class="hidden w-full h-full object-contain" controls playsinline></video>
-        <div id="v-txt" class="hidden p-8 text-sm text-right overflow-y-auto max-h-full leading-relaxed text-zinc-300"></div>
+        <video id="v-vid" class="hidden w-full h-full object-contain" playsinline loop></video>
+
+        <!-- סרגל ניווט פנימי -->
+        <div class="timeline-container">
+            <div id="t-fill" class="timeline-fill"></div>
+        </div>
     </div>
 
-    <!-- ממשק גוף -->
-    <div class="app-container" dir="rtl">
-        
-        <input type="password" id="apiKey" placeholder="מפתח API (נשמר אוטומטית)..." oninput="saveKey()" 
-               class="text-[10px] text-zinc-800 bg-transparent border-none outline-none text-left font-mono">
+    <!-- אזור 2: פס תחבורה סמסונג (Transport) -->
+    <div class="transport-bar">
+        <button onclick="seek('start')" class="samsung-btn" title="התחל"><i data-lucide="skip-back"></i></button>
+        <button onclick="seek(-2)" class="samsung-btn" title="-2 שניות"><i data-lucide="rewind"></i></button>
+        <button onclick="toggleMedia()" class="samsung-btn main shadow-xl" id="mainPlayBtn"><i data-lucide="play" class="fill-current"></i></button>
+        <button onclick="seek(2)" class="samsung-btn" title="+2 שניות"><i data-lucide="fast-forward"></i></button>
+        <button onclick="seek('stop')" class="samsung-btn text-red-500 border-red-900/20" title="עצור"><i data-lucide="square" class="fill-current"></i></button>
+    </div>
 
-        <!-- סרגל כלים עליון -->
-        <div class="chip-bar">
+    <!-- אזור 3: ממשק עבודה נגלל -->
+    <div class="app-content" dir="rtl">
+        
+        <!-- מפתח API (נשמר במכשיר) -->
+        <input type="password" id="apiKey" placeholder="הגדר מפתח API (לפעם אחת)..." oninput="saveKey()" 
+               class="text-[9px] text-zinc-800 bg-transparent border-none outline-none text-left px-2">
+
+        <!-- סרגל כלים -->
+        <div class="flex gap-2 overflow-x-auto scrollbar-hide">
             <button onclick="pick('image/*')" class="chip"><i data-lucide="image" class="w-3.5 h-3.5 text-blue-500"></i>גלריה</button>
             <button onclick="pick('video/*')" class="chip"><i data-lucide="video" class="w-3.5 h-3.5 text-red-500"></i>סרטון</button>
             <button onclick="openCam()" class="chip border-zinc-700"><i data-lucide="camera" class="w-3.5 h-3.5 text-green-500"></i>מצלמה</button>
             <button onclick="openVoice()" class="chip"><i data-lucide="mic" class="w-3.5 h-3.5 text-purple-500"></i>שיבוט</button>
         </div>
 
-        <!-- כפתורי פונקציות AI -->
-        <div class="grid grid-cols-2 gap-2 mt-2">
-            <button onclick="runMedia()" class="bg-[#0D0D0D] border border-zinc-800 py-4 rounded-2xl text-xs font-bold active:scale-95 transition-all flex items-center justify-center gap-2">
-                <i data-lucide="sparkles" class="w-4 h-4 text-purple-400"></i> יצירת מדיה 4K
-            </button>
-            <button onclick="alert('Persistence ON')" class="bg-[#0D0D0D] border border-zinc-800 py-4 rounded-2xl text-xs font-bold active:scale-95 transition-all">
-                מנוע עקיבת דמות
-            </button>
+        <!-- דוק כתיבה -->
+        <div class="grok-dock shadow-xl">
+            <textarea id="prompt" placeholder="שאל שאלה או תאר משהו..." rows="1" oninput="this.style.height='5px';this.style.height=this.scrollHeight+'px'"></textarea>
+            <button onclick="runAI('text')" class="btn-send"><i data-lucide="arrow-up" class="w-5 h-5"></i></button>
         </div>
 
-        <!-- דוק כתיבה -->
-        <div class="grok-dock shadow-2xl mt-auto">
-            <button class="opacity-20"><i data-lucide="plus" class="w-6 h-6"></i></button>
-            <textarea id="prompt" placeholder="שאל שאלה או תאר משהו..." rows="1" oninput="autoGrow(this)"></textarea>
-            <button onclick="runText()" class="btn-send shadow-lg"><i data-lucide="arrow-up" class="w-5 h-5"></i></button>
+        <!-- כפתורי AI -->
+        <div class="grid grid-cols-2 gap-2">
+            <button onclick="runAI('media')" class="bg-[#111] border border-zinc-800 py-4 rounded-2xl text-xs font-bold active:scale-95 flex items-center justify-center gap-2 transition-all">
+                <i data-lucide="sparkles" class="w-4 h-4 text-purple-400"></i> יצירת מדיה 4K
+            </button>
+            <button onclick="alert('Character Persistence Enabled')" class="bg-[#111] border border-zinc-800 py-4 rounded-2xl text-xs font-bold active:scale-95 flex items-center justify-center gap-2 transition-all text-zinc-400">
+                <i data-lucide="lock" class="w-3 h-3"></i> עקיבת דמות
+            </button>
         </div>
 
         <!-- תחתית: הורדה, שיתוף, הפתע אותי -->
-        <div class="footer-actions">
-            <button onclick="surpriseMe()" class="action-sub-btn active:bg-zinc-900">
-                <i data-lucide="dices" class="w-5 h-5 text-purple-500"></i>
-                <span>הפתע אותי</span>
+        <div class="grid grid-cols-3 gap-2 mt-2">
+            <button onclick="surpriseMe()" class="bg-[#0D0D0D] border border-zinc-800 p-4 rounded-xl flex flex-col items-center gap-2 active:scale-95">
+                <i data-lucide="dices" class="text-purple-500 w-5 h-5"></i>
+                <span class="text-[9px] font-bold">הפתע אותי</span>
             </button>
-            <button onclick="download()" class="action-sub-btn active:bg-zinc-900">
-                <i data-lucide="download" class="w-5 h-5 text-white"></i>
-                <span>הורדה</span>
+            <button onclick="download()" class="bg-[#0D0D0D] border border-zinc-800 p-4 rounded-xl flex flex-col items-center gap-2 active:scale-95">
+                <i data-lucide="download" class="text-white w-5 h-5"></i>
+                <span class="text-[9px] font-bold">הורדה</span>
             </button>
-            <button onclick="shareApp()" class="action-sub-btn active:bg-zinc-900">
-                <i data-lucide="share-2" class="w-5 h-5 text-blue-400"></i>
-                <span>שיתוף</span>
+            <button onclick="shareApp()" class="bg-[#0D0D0D] border border-zinc-800 p-4 rounded-xl flex flex-col items-center gap-2 active:scale-95">
+                <i data-lucide="share-2" class="text-blue-500 w-5 h-5"></i>
+                <span class="text-[9px] font-bold">שיתוף</span>
             </button>
         </div>
     </div>
 
-    <!-- מודל קול -->
+    <!-- מודל שיבוט קולי -->
     <div id="v-modal" class="modal">
-        <div class="bg-[#0A0A0B] border border-zinc-800 p-8 rounded-3xl w-full max-w-xs text-center shadow-2xl">
-            <h2 class="font-bold mb-6">שיבוט קולי</h2>
+        <div class="bg-[#0A0A0A] border border-zinc-800 p-10 rounded-3xl w-80 text-center shadow-2xl">
+            <h2 class="font-bold mb-6">שיבוט קול</h2>
             <div id="v-timer" class="text-6xl font-black text-white mb-8 tracking-tighter">05:00</div>
             <div class="space-y-3" id="v-actions">
                 <button id="r-btn" onclick="startRec()" class="w-full bg-red-600 py-4 rounded-xl font-bold">הקלטה (5 שניות)</button>
                 <div id="r-done" class="hidden space-y-3">
-                    <button onclick="playRec()" class="w-full bg-zinc-800 py-3 rounded-xl font-bold">שמע הקלטה</button>
+                    <button onclick="playRec()" class="w-full bg-zinc-800 py-3 rounded-xl font-bold border border-zinc-700">שמע הקלטה</button>
                     <button onclick="confirmClone()" class="w-full bg-white text-black py-3 rounded-xl font-bold">אשר ושבט</button>
                 </div>
-                <button onclick="closeVoice()" class="text-xs opacity-30 pt-4 block w-full text-center">ביטול</button>
+                <button onclick="closeVoice()" class="text-xs opacity-30 pt-4 block w-full">ביטול</button>
             </div>
         </div>
     </div>
@@ -119,149 +142,84 @@
 
     <script>
         lucide.createIcons();
-        const vImg = document.getElementById('v-img');
-        const vVid = document.getElementById('v-vid');
-        const vTxt = document.getElementById('v-txt');
-        const ldr = document.getElementById('loader');
-        const plbl = document.getElementById('p-label');
-
+        const vImg = document.getElementById('v-img'), vVid = document.getElementById('v-vid'), ldr = document.getElementById('loader'), plbl = document.getElementById('p-label');
         let mediaRecorder, audioChunks = [], audioUrl = null;
 
-        window.onload = () => {
-            const key = localStorage.getItem('master_api_key');
-            if(key) document.getElementById('apiKey').value = key;
-        };
-        function saveKey() { localStorage.setItem('master_api_key', document.getElementById('apiKey').value); }
+        // זיכרון
+        window.onload = () => { const key = localStorage.getItem('ak'); if(key) document.getElementById('apiKey').value = key; };
+        function saveKey() { localStorage.setItem('ak', document.getElementById('apiKey').value); }
 
-        function openCam() { document.getElementById('c-inp').click(); }
-        function pick(type) { 
-            const i = document.getElementById('f-inp');
-            i.accept = type;
-            i.click(); 
+        // פקדי מדיה
+        function toggleMedia() {
+            if(!vVid.classList.contains('hidden')) {
+                vVid.paused ? vVid.play() : vVid.pause();
+                const icon = vVid.paused ? 'play' : 'pause';
+                document.getElementById('mainPlayBtn').innerHTML = `<i data-lucide="${icon}" class="fill-current"></i>`;
+                document.getElementById('innerPlayBtn').innerHTML = `<i data-lucide="${icon}" class="w-8 h-8 fill-white"></i>`;
+                lucide.createIcons();
+            }
         }
+        function seek(cmd) {
+            if(cmd === 'stop') { vVid.pause(); vVid.currentTime = 0; }
+            else if(cmd === 'start') vVid.currentTime = 0;
+            else vVid.currentTime += cmd;
+        }
+        vVid.ontimeupdate = () => { document.getElementById('t-fill').style.width = (vVid.currentTime/vVid.duration*100) + "%"; };
 
+        // מצלמה וגלריה
+        function openCam() { document.getElementById('c-inp').click(); }
+        function pick(type) { const i = document.getElementById('f-inp'); i.accept = type; i.click(); }
         function handleAsset(e) {
-            const f = e.target.files[0];
-            if(!f) return;
+            const f = e.target.files[0]; if(!f) return;
             const u = URL.createObjectURL(f);
             document.getElementById('placeholder').classList.add('hidden');
-            vTxt.classList.add('hidden');
-            if(f.type.startsWith('image/')) {
-                vImg.src = u; vImg.classList.remove('hidden'); vVid.classList.add('hidden');
-            } else {
-                vVid.src = u; vVid.classList.remove('hidden'); vImg.classList.add('hidden');
-            }
+            if(f.type.startsWith('image/')) { vImg.src = u; vImg.classList.remove('hidden'); vVid.classList.add('hidden'); }
+            else { vVid.src = u; vVid.classList.remove('hidden'); vImg.classList.add('hidden'); }
         }
 
-        // --- הפתע אותי ---
-        function surpriseMe() {
-            const prompts = [
-                "A cinematic 4k shot of a futuristic cyberpunk city in the rain with neon purple lights",
-                "A majestic golden lion standing on a crystal mountain, digital art style",
-                "A cool robot chef cooking a cosmic pizza in a high-tech space station",
-                "Hyper-realistic portrait of a space traveler looking at a nebula",
-                "An enchanted forest with glowing plants and floating water droplets, 8k resolution"
-            ];
-            const random = prompts[Math.floor(Math.random() * prompts.length)];
-            document.getElementById('prompt').value = random;
-            autoGrow(document.getElementById('prompt'));
-        }
-
-        // --- שיתוף ---
-        function shareApp() {
-            if (navigator.share) {
-                navigator.share({
-                    title: 'Yaniv AI Studio',
-                    text: 'תראה מה יצרתי בסטודיו AI שלי!',
-                    url: window.location.href
-                });
-            } else {
-                window.open(`https://wa.me/?text=ראה מה יצרתי בסטודיו AI שלי: ${window.location.href}`, '_blank');
-            }
-        }
-
-        // --- הורדה ---
-        function download() {
-            if (vImg.src && !vImg.classList.contains('hidden')) {
-                const link = document.createElement('a');
-                link.href = vImg.src;
-                link.download = `AI_Studio_${Date.now()}.png`;
-                link.click();
-            } else {
-                alert("אין תוכן מרונדר להורדה כרגע");
-            }
-        }
-
-        // --- AI לוגיקה ---
-        async function runText() {
+        // AI
+        async function runAI(mode) {
             const key = document.getElementById('apiKey').value.trim();
             const p = document.getElementById('prompt').value.trim();
-            if(!key) return alert("הזן מפתח API");
-            if(!p) return alert("הזן שאלה");
-            
+            if(!p) return alert("הזן תיאור");
             showLdr();
-            try {
-                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ contents: [{ parts: [{ text: p }] }] })
-                });
-                const d = await r.json();
-                vTxt.innerText = d.candidates[0].content.parts[0].text;
-                hideLdr();
-                vTxt.classList.remove('hidden'); vImg.classList.add('hidden'); vVid.classList.add('hidden');
-                document.getElementById('placeholder').classList.add('hidden');
-            } catch(e) { alert("שגיאה בחיבור"); hideLdr(); }
+            if(mode === 'text') {
+                try {
+                    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
+                        method: 'POST', headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ contents: [{ parts: [{ text: p }] }] })
+                    });
+                    const d = await r.json();
+                    document.getElementById('v-txt').innerText = d.candidates[0].content.parts[0].text;
+                    hideLdr(); document.getElementById('v-txt').classList.remove('hidden'); vImg.classList.add('hidden'); vVid.classList.add('hidden');
+                } catch(e) { alert("שגיאה במפתח API"); hideLdr(); }
+            } else {
+                const u = `https://pollinations.ai/p/${encodeURIComponent(p)}?width=1080&height=1920&seed=${Math.floor(Math.random()*999)}&model=flux&nologo=true`;
+                const t = new Image(); t.src = u;
+                t.onload = () => { vImg.src = u; hideLdr(); vImg.classList.remove('hidden'); vVid.classList.add('hidden'); document.getElementById('v-txt').classList.add('hidden'); };
+            }
         }
 
-        async function runMedia() {
-            const p = document.getElementById('prompt').value.trim();
-            if(!p) return alert("תאר מה ליצור");
-            showLdr();
-            const u = `https://pollinations.ai/p/${encodeURIComponent(p)}?width=1080&height=1920&seed=${Math.floor(Math.random()*99999)}&model=flux&nologo=true`;
-            const t = new Image();
-            t.src = u;
-            t.onload = () => {
-                vImg.src = u; hideLdr();
-                vImg.classList.remove('hidden'); vVid.classList.add('hidden'); vTxt.classList.add('hidden');
-                document.getElementById('placeholder').classList.add('hidden');
-            };
-        }
-
-        function showLdr() {
-            ldr.style.display = 'flex';
-            let p = 0;
-            const t = setInterval(() => {
-                p += Math.floor(Math.random()*15)+2;
-                if(p >= 100) { p = 100; clearInterval(t); plbl.innerText = "100%"; }
-                else { plbl.innerText = p + "%"; }
-            }, 250);
-            window.activeT = t;
-        }
+        function showLdr() { ldr.style.display = 'flex'; let p = 0; const t = setInterval(() => { p += 15; if(p >= 100) { p = 100; clearInterval(t); plbl.innerText = "100%"; } else { plbl.innerText = p + "%"; } }, 200); window.activeT = t; }
         function hideLdr() { clearInterval(window.activeT); ldr.style.display = 'none'; plbl.innerText = "0%"; }
+        
+        function surpriseMe() { const list = ["Cinematic cyberpunk Tel Aviv rain", "Golden dragon over mountains 4k", "Astronaut cooking in space station", "Hyper-realistic forest glowing plants"]; document.getElementById('prompt').value = list[Math.floor(Math.random()*list.length)]; }
+        function shareApp() { navigator.share ? navigator.share({title:'AI Studio', url:window.location.href}) : window.open(`https://wa.me/?text=${window.location.href}`); }
+        function download() { if(vImg.src) { const a = document.createElement('a'); a.href = vImg.src; a.download = `AI_Asset_${Date.now()}.png`; a.click(); } }
 
+        // שיבוט
         function openVoice() { document.getElementById('v-modal').style.display = 'flex'; }
         function closeVoice() { document.getElementById('v-modal').style.display = 'none'; }
         async function startRec() {
             const s = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(s);
-            audioChunks = [];
+            mediaRecorder = new MediaRecorder(s); audioChunks = [];
             mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-            mediaRecorder.onstop = () => {
-                audioUrl = URL.createObjectURL(new Blob(audioChunks, { type: 'audio/wav' }));
-                document.getElementById('r-btn').classList.add('hidden');
-                document.getElementById('r-done').classList.remove('hidden');
-            };
-            let c = 5;
-            mediaRecorder.start();
-            const i = setInterval(() => {
-                c--; document.getElementById('v-timer').innerText = `0${c}:00`;
-                if(c <= 0) { clearInterval(i); mediaRecorder.stop(); document.getElementById('v-timer').innerText = "DONE"; }
-            }, 1000);
+            mediaRecorder.onstop = () => { audioUrl = URL.createObjectURL(new Blob(audioChunks, { type: 'audio/wav' })); document.getElementById('r-btn').classList.add('hidden'); document.getElementById('r-done').classList.remove('hidden'); };
+            let c = 5; mediaRecorder.start();
+            const i = setInterval(() => { c--; document.getElementById('v-timer').innerText = `0${c}:00`; if(c <= 0) { clearInterval(i); mediaRecorder.stop(); document.getElementById('v-timer').innerText = "DONE"; } }, 1000);
         }
         function playRec() { new Audio(audioUrl).play(); }
-        function confirmClone() { alert("קול שובט למערכת!"); closeVoice(); }
-        function autoGrow(element) { element.style.height = "5px"; element.style.height = (element.scrollHeight) + "px"; }
+        function confirmClone() { alert("הקול שובט למערכת!"); closeVoice(); }
     </script>
 </body>
 </html>
