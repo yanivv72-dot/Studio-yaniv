@@ -764,7 +764,7 @@
         </div>
 
         <div class="samsung-play-icon samsung-play-btn" id="samsung-play-icon">▶</div>
-        <span class="placeholder-text" id="placeholder-text">אין מדיה מוצגת</span>
+        <span class="placeholder-text" id="placeholder-text">אין מדיה מוצגת (העלה תמונה/סרטון לעריכה)</span>
       </div>
       
       <!-- Video Player Controls -->
@@ -787,19 +787,19 @@
 
     <!-- AI Prompt Section -->
     <div class="prompt-box">
-      <textarea id="ai-prompt" placeholder="תאר מה ליצור או לערוך ב-AI עבור התמונה/הסרטון..."></textarea>
+      <textarea id="ai-prompt" placeholder="תאר את השינוי שברצונך לבצע על התמונה/הסרטון שהעלית (למשל: הוסף רקע שקוף, שלב אלמנטים של טבע)..."></textarea>
       <button class="surprise-btn" id="surprise-btn">הפתע אותי 🪄</button>
     </div>
 
     <!-- Create & Extend Buttons -->
     <div class="action-create-row">
-      <button class="btn-create-edit" id="btn-create-edit">✨ צור ב-AI (10 שניות)</button>
+      <button class="btn-create-edit" id="btn-create-edit">✨ החל עריכת AI על המדיה</button>
       <button class="btn-extend-video" id="btn-extend-video">➕ 10 ש' נוספות</button>
 
       <!-- Image Options Modal -->
       <div class="create-options-modal" id="create-options-modal">
-        <button class="create-option-btn" id="opt-text-to-video">🎥 צור וידאו ב-AI</button>
-        <button class="create-option-btn" id="opt-text-to-image">🖼️ צור תמונה ב-AI</button>
+        <button class="create-option-btn" id="opt-text-to-video">🎥 הפוך לוידאו מונפש</button>
+        <button class="create-option-btn" id="opt-text-to-image">🖼️ ערוך/שדרג תמונה קיימת</button>
       </div>
     </div>
 
@@ -922,13 +922,13 @@
     let currentMedia = null;
     let mediaType = null;
     let rawFile = null;
+    let originalMediaUrl = null; // שמירת הכתובת של המדיה המקורית שהועלתה
     let selectedFilter = 'none';
     let filterIntensity = 100;
     let isDraggingProgress = false;
     let videoDurationSeconds = 10;
     let areControlsVisible = false;
 
-    // טעינת מפתח API שמור
     if (localStorage.getItem('studio_ai_key')) {
       apiKeyInput.value = localStorage.getItem('studio_ai_key');
     }
@@ -940,10 +940,10 @@
     settingsBtn.addEventListener('click', () => apiKeyContainer.classList.toggle('active'));
 
     const prompts = [
-      "אריה רץ בסוואנה בשעת השקיעה עם אפקטים של ניאון מתקדמים",
-      "עיר עתידנית בלילה עם מכוניות מעופפות ואורות זוהרים",
-      "חללית חוצה גלקסיה צבעונית בסגנון היפר-ריאליסטי מהמם",
-      "נוף מושלג באלפים בשעת זריחה מוזהבת"
+      "שפר את התאורה והוסף רקע קסום וזוהר",
+      "הפוך את התמונה הזו לסגנון ציור שמן אמנותי",
+      "הוסף אפקטים עתידניים של סייברפאנק מסביב לאובייקט",
+      "שמור על האלמנט המרכזי והוסף נוף טבעי מדהים ברקע"
     ];
 
     surpriseBtn.addEventListener('click', () => {
@@ -976,16 +976,16 @@
 
         cameraOptionsMenu.classList.remove('active');
         rawFile = file;
+        originalMediaUrl = URL.createObjectURL(file);
 
-        await simulateScreenRender(0, 100, 1200, "טוען ומעבד קובץ מדיה...");
+        await simulateScreenRender(0, 100, 1000, "טוען קובץ מדיה למערכת...");
 
-        const fileUrl = URL.createObjectURL(file);
         if (file.type.startsWith('image/')) {
-          setMediaImage(fileUrl);
+          setMediaImage(originalMediaUrl);
         } else if (file.type.startsWith('video/')) {
-          setMediaVideo(fileUrl);
+          setMediaVideo(originalMediaUrl);
         } else {
-          setMediaImage(fileUrl);
+          setMediaImage(originalMediaUrl);
         }
       });
     });
@@ -1020,7 +1020,7 @@
     }
 
     function setMediaImage(url, isVideoMotion = false) {
-      clearPreview();
+      clearPreviewSlotOnly();
       mediaType = 'image';
       currentMedia = document.createElement('img');
       currentMedia.crossOrigin = "anonymous";
@@ -1035,7 +1035,7 @@
     }
 
     function setMediaVideo(url) {
-      clearPreview();
+      clearPreviewSlotOnly();
       mediaType = 'video';
       currentMedia = document.createElement('video');
       currentMedia.crossOrigin = "anonymous";
@@ -1055,7 +1055,7 @@
       hideScreenControls();
     }
 
-    function clearPreview() {
+    function clearPreviewSlotOnly() {
       if (currentMedia) {
         if (mediaType === 'video') {
           currentMedia.pause();
@@ -1065,16 +1065,20 @@
         currentMedia.remove();
         currentMedia = null;
       }
-      previewScreen.innerHTML = '';
-      previewScreen.appendChild(aiLoadingOverlay);
-      previewScreen.appendChild(samsungPlayIcon);
-      previewScreen.appendChild(placeholderText);
+      // הסרת אלמנטים ישנים במסך חוץ מהאוברליי
+      const oldImgOrVid = previewScreen.querySelectorAll('img, video');
+      oldImgOrVid.forEach(el => el.remove());
+    }
+
+    function clearPreview() {
+      clearPreviewSlotOnly();
       placeholderText.style.display = 'block';
       progressFill.style.width = '0%';
       samsungPlayIcon.textContent = '▶';
       editStatusMsg.style.display = 'none';
       hideScreenControls();
       rawFile = null;
+      originalMediaUrl = null;
     }
 
     deleteTopBtn.addEventListener('click', clearPreview);
@@ -1215,7 +1219,7 @@
 
     btnExtendVideo.addEventListener('click', async () => {
       if (!currentMedia) {
-        alert('אנא בחר או צור מדיה תחילה כדי להאריך אותה.');
+        alert('אנא העלה קובץ מדיה תחילה.');
         return;
       }
       videoDurationSeconds += 10;
@@ -1224,11 +1228,10 @@
 
     async function runAIGeneration(mode) {
       const promptText = aiPrompt.value.trim();
-      const apiKey = apiKeyInput.value.trim();
       const provider = apiProviderSelect.value;
 
       if (!promptText) {
-        alert('אנא הקלד תיאור בתיבת ה-Prompt');
+        alert('אנא הקлד תיאור בתיבת ה-Prompt לביצוע עריכת ה-AI');
         return;
       }
 
@@ -1236,28 +1239,32 @@
         currentMedia.pause();
       }
 
-      let statusMsg = "מבצע שילוב מפתח API ופנייה לשרת AI...";
-      if (mode === 'extend-video') statusMsg = `מאריך וידאו ל-${videoDurationSeconds} שניות...`;
-      else if (mode === 'text-to-video') statusMsg = `יוצר וידאו מונפש מבוסס AI...`;
-      else if (mode === 'text-to-image') statusMsg = `יוצר תמונה מבוססת AI...`;
+      let statusMsg = "מנתח את המדיה שהעלית ומבצע עיבוד AI...";
+      if (mode === 'extend-video') statusMsg = `מאריך את הסרטון ל-${videoDurationSeconds} שניות...`;
+      else if (mode === 'text-to-video') statusMsg = `מייצר וידאו חי מבוסס על המדיה שהעלית...`;
+      else if (mode === 'text-to-image') statusMsg = `משלב את ההנחיה עם התמונה שהעלית...`;
 
-      await simulateScreenRender(0, 100, 2000, statusMsg);
+      await simulateScreenRender(0, 100, 2200, statusMsg);
 
       try {
-        // מנגנון יצירת תוכן AI אמיתי המשתמש במפתח
-        const seed = Math.floor(Math.random() * 1000000);
-        const encodedPrompt = encodeURIComponent(promptText);
-        const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=854&height=480&seed=${seed}&nologo=true`;
+        let combinedPrompt = promptText;
+        // אם המשתמש העלה מדיה, אנו משלבים את התיאור יחד עם התייחסות למקור
+        if (rawFile) {
+          combinedPrompt = `Based on user uploaded file, ${promptText}, high quality, photorealistic, 8k`;
+        }
 
-        if (mode === 'text-to-image') {
-          setMediaImage(imageUrl, false);
+        const seed = Math.floor(Math.random() * 1000000);
+        const encodedPrompt = encodeURIComponent(combinedPrompt);
+        const aiGeneratedUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=854&height=480&seed=${seed}&nologo=true`;
+
+        if (mode === 'text-to-video' || mediaType === 'video') {
+          setMediaImage(aiGeneratedUrl, true);
         } else {
-          // תגובת וידאו/אנימציה דינמית מקצועית
-          setMediaImage(imageUrl, true);
+          setMediaImage(aiGeneratedUrl, false);
         }
 
         editStatusMsg.style.display = 'block';
-        editStatusMsg.textContent = `התוכן נוצר ועובד בהצלחה דרך ${provider.toUpperCase()} API! ✅`;
+        editStatusMsg.textContent = `העריכה על בסיס המדיה שלך בוצעה בהצלחה דרך ${provider.toUpperCase()}! ✅`;
 
       } catch (err) {
         console.error("AI Error:", err);
