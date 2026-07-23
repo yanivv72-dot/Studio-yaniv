@@ -23,6 +23,7 @@
       overflow-x: hidden;
     }
 
+    /* אפקט טשטוש ותנועה לכל האפליקציה בזמן עיבוד */
     .app-container {
       width: 100%;
       max-width: 420px;
@@ -36,6 +37,14 @@
       gap: 16px;
       max-height: 95vh;
       overflow-y: auto;
+      transition: transform 0.4s ease, filter 0.4s ease, opacity 0.4s ease;
+    }
+
+    .app-container.app-blur-effect {
+      filter: blur(8px) brightness(0.7);
+      transform: scale(0.97) translateY(-4px);
+      pointer-events: none;
+      user-select: none;
     }
 
     /* Header Design */
@@ -661,7 +670,7 @@
 </head>
 <body>
 
-  <div class="app-container">
+  <div class="app-container" id="app-container">
     <!-- Header -->
     <header>
       <div class="user-profile">👤</div>
@@ -816,6 +825,7 @@
   </div>
 
   <script>
+    const appContainer = document.getElementById('app-container');
     const settingsBtn = document.getElementById('settings-btn');
     const apiKeyContainer = document.getElementById('api-key-container');
     const previewCard = document.getElementById('preview-card');
@@ -1149,7 +1159,7 @@
       galleryGrid.prepend(item);
     }
 
-    // Button Click: Create Edit
+    // Button Click: Create Edit (עם אפקט טשטוש ותנועה לכל المسך)
     btnCreateEdit.addEventListener('click', async () => {
       if (!currentMedia) {
         editStatusMsg.style.display = 'block';
@@ -1160,15 +1170,19 @@
         return;
       }
 
+      // הוספת אפקט טשטוש ותנועה לאפליקציה
+      appContainer.classList.add('app-blur-effect');
       aiLoadingOverlay.classList.add('active');
       const origText = btnCreateEdit.textContent;
       btnCreateEdit.textContent = 'מעבד עריכה... ⏳';
       btnCreateEdit.disabled = true;
       editStatusMsg.style.display = 'none';
 
-      await new Promise(r => setTimeout(r, 1000));
+      await new Promise(r => setTimeout(r, 1200));
       lastProcessedBlob = await createProcessedBlob();
 
+      // הסרת הטשטוש והחזרת המצב
+      appContainer.classList.remove('app-blur-effect');
       aiLoadingOverlay.classList.remove('active');
       btnCreateEdit.textContent = origText;
       btnCreateEdit.disabled = false;
@@ -1189,9 +1203,11 @@
 
       let processed = lastProcessedBlob;
       if (!processed) {
+        appContainer.classList.add('app-blur-effect');
         aiLoadingOverlay.classList.add('active');
         processed = await createProcessedBlob();
         aiLoadingOverlay.classList.remove('active');
+        appContainer.classList.remove('app-blur-effect');
       }
 
       if (processed) {
