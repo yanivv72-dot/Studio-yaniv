@@ -3,129 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Grok AI Studio</title>
+    <title>AI Studio Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        :root { --accent: #fff; --bg: #000; --border: #27272a; }
-        body { background-color: var(--bg); color: #fff; font-family: -apple-system, system-ui, sans-serif; margin: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+        :root { --bg: #000000; --card: #0A0A0A; --border: #1A1A1A; --accent: #ffffff; }
+        body { background-color: var(--bg); color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* נגן עליון 30% - סגנון Grok */
-        .viewport { height: 32dvh; background: #000; position: relative; border-bottom: 1px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+        /* נגן עליון - 30% */
+        .player-area { height: 35dvh; background: #000; position: relative; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         
-        .grok-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+        /* אזור תוכן נגלל */
+        .content-area { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
 
-        /* אלמנטים של Grok */
-        .grok-input-wrapper { background: #000; border: 1px solid var(--border); border-radius: 24px; padding: 12px 20px; transition: 0.2s; }
-        .grok-input-wrapper:focus-within { border-color: #555; }
-        textarea { background: transparent; width: 100%; border: none; outline: none; resize: none; font-size: 16px; color: #fff; text-align: right; }
+        /* אלמנטים עיצוביים */
+        .input-group { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 15px; }
+        textarea { background: transparent; width: 100%; border: none; outline: none; resize: none; font-size: 16px; color: #fff; text-align: right; min-height: 80px; }
         
-        .btn-send { background: #fff; color: #000; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-        .btn-send:active { transform: scale(0.9); }
+        .action-btn { background: var(--accent); color: #000; font-weight: 700; border-radius: 12px; padding: 12px; transition: 0.2s; text-align: center; }
+        .action-btn:active { transform: scale(0.98); opacity: 0.9; }
         
-        .tool-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .tool-card { background: #000; border: 1px solid var(--border); border-radius: 16px; padding: 15px; display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 11px; font-weight: 500; }
-        .tool-card:active { background: #111; }
+        .tool-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .tool-item { background: var(--card); border: 1px solid var(--border); border-radius: 15px; padding: 15px; display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; color: #888; }
+        .tool-item i { color: #fff; }
 
-        .render-overlay { position: absolute; inset: 0; background: #000; z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .percent { font-size: 5rem; font-weight: 900; letter-spacing: -2px; }
+        .loader-screen { position: absolute; inset: 0; background: #000; z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .percent-num { font-size: 5rem; font-weight: 900; letter-spacing: -3px; }
 
-        /* מודלים */
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 500; align-items: center; justify-content: center; padding: 20px; }
     </style>
 </head>
 <body>
 
-    <!-- נגן Grok Pro -->
-    <div class="viewport">
-        <div id="loader" class="render-overlay">
-            <div id="p-label" class="percent">0%</div>
-            <div class="text-[10px] tracking-[0.3em] font-bold opacity-40">GENERATING</div>
+    <!-- אזור הנגן -->
+    <div class="player-area">
+        <div id="loader" class="loader-screen">
+            <div id="p-label" class="percent-num">0%</div>
+            <div class="text-[10px] tracking-[0.4em] opacity-40 font-bold uppercase">Processing Asset</div>
         </div>
         
         <div id="placeholder" class="opacity-10">
-            <i data-lucide="brain" class="w-16 h-16"></i>
+            <i data-lucide="layers" class="w-16 h-16"></i>
         </div>
         
         <img id="v-img" class="hidden w-full h-full object-contain">
         <video id="v-vid" class="hidden w-full h-full object-contain" controls playsinline></video>
-        <div id="v-txt" class="hidden p-8 text-sm text-right overflow-y-auto max-h-full leading-relaxed text-zinc-300"></div>
+        <div id="v-txt" class="hidden p-8 text-sm text-right overflow-y-auto max-h-full leading-relaxed"></div>
     </div>
 
     <!-- גוף האפליקציה -->
-    <div class="grok-container" dir="rtl">
+    <div class="content-area">
         
-        <!-- הגדרת API - פעם אחת בלבד -->
-        <input type="password" id="apiKey" placeholder="הדבק מפתח API כאן..." 
-            oninput="saveKey()" class="text-[10px] text-zinc-600 bg-transparent border-none outline-none text-left font-mono">
+        <!-- הגדרת מפתח סודית (נשמרת במכשיר) -->
+        <input type="password" id="apiKey" placeholder="מפתח API (AIzaSy...)" 
+            oninput="saveKey()" class="text-[10px] text-zinc-800 bg-transparent border-none outline-none text-left">
 
-        <!-- שורת כתיבה בסגנון גרוק -->
-        <div class="grok-input-wrapper flex items-end gap-3 shadow-2xl">
-            <textarea id="prompt" placeholder="שאל את גרוק משהו..." rows="2"></textarea>
-            <button onclick="runGemini()" class="btn-send">
-                <i data-lucide="arrow-up" class="w-5 h-5"></i>
-            </button>
+        <!-- תיבת הפרומפט -->
+        <div class="input-group shadow-2xl">
+            <textarea id="prompt" placeholder="מה תרצה ליצור היום?"></textarea>
+            <div class="flex gap-2 mt-2">
+                <button onclick="runText()" class="flex-1 action-btn">שאל AI</button>
+                <button onclick="runMedia()" class="w-14 bg-zinc-800 rounded-xl flex items-center justify-center active:scale-90 transition-all"><i data-lucide="sparkles" class="w-5 h-5 text-purple-400"></i></button>
+            </div>
         </div>
 
-        <!-- כפתורי פעולה מהירים -->
-        <div class="flex gap-2">
-            <button onclick="runMedia()" class="flex-1 bg-zinc-900 text-white py-3 rounded-2xl text-xs font-bold border border-zinc-800 active:scale-95 transition-all">יצירת תמונה 4K</button>
-            <button onclick="alert('Video Mode Active')" class="flex-1 bg-zinc-900 text-white py-3 rounded-2xl text-xs font-bold border border-zinc-800 active:scale-95 transition-all">יצירת וידאו</button>
-        </div>
-
-        <!-- פקדים Native (מצלמה אמיתית) -->
-        <div class="tool-row">
-            <button onclick="triggerInput('image/*')" class="tool-card">
-                <i data-lucide="image" class="text-blue-500"></i>
+        <!-- פקדי מדיה Native -->
+        <div class="tool-grid">
+            <button onclick="pick('image/*')" class="tool-item">
+                <i data-lucide="image"></i>
                 <span>גלריה</span>
             </button>
-            <button onclick="triggerInput('video/*')" class="tool-card">
-                <i data-lucide="video" class="text-red-500"></i>
+            <button onclick="pick('video/*')" class="tool-item">
+                <i data-lucide="video"></i>
                 <span>סרטון</span>
             </button>
-            <!-- הכפתור שמכריח מצלמה בגלקסי -->
-            <button onclick="openRealCam()" class="tool-card border-zinc-700">
+            <!-- מצלמה אמיתית לגלקסי -->
+            <button onclick="openCamera()" class="tool-item border-zinc-700">
                 <i data-lucide="camera" class="text-green-500"></i>
                 <span>מצלמה</span>
             </button>
         </div>
 
-        <!-- תוספים -->
+        <!-- תוספים מתקדמים -->
         <div class="space-y-3">
-            <div onclick="openVoiceModal()" class="tool-card !flex-row !justify-between w-full">
+            <div onclick="openVoice()" class="tool-item !flex-row !justify-between w-full">
                 <div class="flex items-center gap-3">
-                    <i data-lucide="mic" class="text-zinc-400 w-4 h-4"></i>
-                    <span class="text-xs font-bold">שיבוט קולי</span>
+                    <i data-lucide="mic" class="w-4 h-4"></i>
+                    <span class="text-xs">שיבוט קולי (הקלטה)</span>
                 </div>
                 <i data-lucide="plus" class="w-3 h-3 opacity-20"></i>
             </div>
         </div>
 
-        <button onclick="download()" class="w-full text-zinc-500 text-[10px] font-bold uppercase tracking-widest mt-2">
-            Save Asset to Gallery
+        <button onclick="download()" class="w-full text-zinc-600 text-[10px] font-bold uppercase tracking-widest mt-4">
+            Save to Device
         </button>
     </div>
 
-    <!-- מודל שיבוט קולי -->
+    <!-- מודל שיבוט קול -->
     <div id="voice-modal" class="modal">
-        <div class="bg-[#0a0a0a] border border-zinc-800 p-8 rounded-3xl w-full max-w-xs text-center">
+        <div class="bg-[#0A0A0A] border border-zinc-800 p-8 rounded-3xl w-full max-w-xs text-center">
             <h2 class="text-lg font-bold mb-6">שיבוט קול</h2>
             <div id="timer" class="text-6xl font-black text-white mb-8">05:00</div>
             
-            <div class="space-y-3" id="rec-controls">
-                <button id="rec-btn" onclick="startRecording()" class="w-full bg-red-600 py-4 rounded-xl font-bold">הקלטה</button>
-                <div id="after-rec" class="hidden space-y-3">
-                    <button onclick="previewAudio()" class="w-full bg-zinc-800 py-3 rounded-xl font-bold">שמע</button>
-                    <button onclick="confirmClone()" class="w-full bg-white text-black py-3 rounded-xl font-bold">שבט והדבק</button>
+            <div class="space-y-3" id="voice-actions">
+                <button id="rec-btn" onclick="startRec()" class="w-full bg-red-600 py-4 rounded-xl font-bold">הקלטה (5 שניות)</button>
+                <div id="rec-done" class="hidden space-y-3">
+                    <button onclick="playRec()" class="w-full bg-zinc-800 py-3 rounded-xl font-bold">שמע הקלטה</button>
+                    <button onclick="confirmClone()" class="w-full bg-white text-black py-3 rounded-xl font-bold">אשר ושבט</button>
                 </div>
-                <button onclick="closeVoice()" class="text-xs opacity-30 pt-4 block w-full">ביטול</button>
+                <button onclick="closeVoice()" class="text-xs opacity-30 pt-4 block w-full text-center">ביטול</button>
             </div>
         </div>
     </div>
 
-    <!-- כניסות מוסתרות -->
-    <input type="file" id="h-inp" class="hidden" onchange="loadAsset(event)">
-    <input type="file" id="c-inp" class="hidden" capture="environment" accept="image/*,video/*" onchange="loadAsset(event)">
+    <!-- קלטים מוסתרים -->
+    <input type="file" id="fileInp" class="hidden" onchange="handleFile(event)">
+    <input type="file" id="camInp" class="hidden" capture="environment" accept="image/*,video/*" onchange="handleFile(event)">
 
     <script>
         lucide.createIcons();
@@ -139,20 +133,20 @@
 
         // טעינת מפתח
         window.onload = () => {
-            const key = localStorage.getItem('grok_key');
+            const key = localStorage.getItem('api_key');
             if(key) document.getElementById('apiKey').value = key;
         };
-        function saveKey() { localStorage.setItem('grok_key', document.getElementById('apiKey').value); }
+        function saveKey() { localStorage.setItem('api_key', document.getElementById('apiKey').value); }
 
-        // מצלמה אמיתית
-        function openRealCam() { document.getElementById('c-inp').click(); }
-        function triggerInput(accept) { 
-            const i = document.getElementById('h-inp');
-            i.accept = accept;
+        // מצלמה וגלריה
+        function openCamera() { document.getElementById('camInp').click(); }
+        function pick(type) { 
+            const i = document.getElementById('fileInp');
+            i.accept = type;
             i.click(); 
         }
 
-        function loadAsset(e) {
+        function handleFile(e) {
             const f = e.target.files[0];
             if(!f) return;
             const u = URL.createObjectURL(f);
@@ -166,10 +160,10 @@
         }
 
         // שיבוט קולי
-        function openVoiceModal() { document.getElementById('voice-modal').style.display = 'flex'; }
+        function openVoice() { document.getElementById('voice-modal').style.display = 'flex'; }
         function closeVoice() { document.getElementById('voice-modal').style.display = 'none'; }
 
-        async function startRecording() {
+        async function startRec() {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             mediaRecorder = new MediaRecorder(stream);
             audioChunks = [];
@@ -177,7 +171,7 @@
             mediaRecorder.onstop = () => {
                 audioUrl = URL.createObjectURL(new Blob(audioChunks, { type: 'audio/wav' }));
                 document.getElementById('rec-btn').classList.add('hidden');
-                document.getElementById('after-rec').classList.remove('hidden');
+                document.getElementById('rec-done').classList.remove('hidden');
             };
             let c = 5;
             mediaRecorder.start();
@@ -186,12 +180,12 @@
                 if(c <= 0) { clearInterval(int); mediaRecorder.stop(); document.getElementById('timer').innerText = "DONE"; }
             }, 1000);
         }
-        function previewAudio() { new Audio(audioUrl).play(); }
-        function confirmClone() { alert("הקול שובט וחובר למערכת!"); closeVoice(); }
+        function playRec() { new Audio(audioUrl).play(); }
+        function confirmClone() { alert("הקול שובט וחובר!"); closeVoice(); }
 
-        // AI
-        async function runGemini() {
-            const key = document.getElementById('apiKey').value;
+        // חיבור ל-AI
+        async function runText() {
+            const key = document.getElementById('apiKey').value.trim();
             const p = document.getElementById('prompt').value.trim();
             if(!key || !p) return alert("הזן מפתח ופרומפט");
             
@@ -203,12 +197,14 @@
                     body: JSON.stringify({ contents: [{ parts: [{ text: p }] }] })
                 });
                 const d = await r.json();
+                if(d.error) throw new Error(d.error.message);
+                
                 vTxt.innerText = d.candidates[0].content.parts[0].text;
                 stopLoader();
                 vTxt.classList.remove('hidden'); vImg.classList.add('hidden'); vVid.classList.add('hidden');
                 document.getElementById('placeholder').classList.add('hidden');
             } catch(e) { 
-                alert("שגיאה! וודא שהמפתח תקין.");
+                alert("שגיאה במפתח API! וודא שהוא מתחיל ב-AIzaSy");
                 stopLoader();
             }
         }
@@ -217,14 +213,11 @@
             const p = document.getElementById('prompt').value.trim();
             if(!p) return alert("תאר מה ליצור");
             runLoader();
-            const seed = Math.floor(Math.random()*99999);
-            const url = `https://pollinations.ai/p/${encodeURIComponent(p)}?width=1080&height=1920&seed=${seed}&model=flux&nologo=true`;
-            
+            const url = `https://pollinations.ai/p/${encodeURIComponent(p)}?width=1080&height=1920&seed=${Math.floor(Math.random()*999)}&model=flux&nologo=true`;
             const test = new Image();
             test.src = url;
             test.onload = () => {
-                vImg.src = url;
-                stopLoader();
+                vImg.src = url; stopLoader();
                 vImg.classList.remove('hidden'); vVid.classList.add('hidden'); vTxt.classList.add('hidden');
                 document.getElementById('placeholder').classList.add('hidden');
             };
