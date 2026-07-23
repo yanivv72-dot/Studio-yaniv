@@ -3,153 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Yaniv AI Ultra Studio</title>
+    <title>Grok 4 AI Studio</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        :root { --accent: #7C3AED; --bg: #0A0A0B; }
-        body { background-color: var(--bg); color: white; font-family: system-ui, sans-serif; margin: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+        :root { --accent: #7C3AED; --bg: #000; --card: #0A0A0A; }
+        body { background-color: var(--bg); color: white; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
         
         /* נגן 30% קבוע */
-        .viewport { height: 30dvh; background: #000; position: relative; border-bottom: 2px solid #1A1A1D; flex-shrink: 0; }
+        .viewport { height: 32dvh; background: #000; position: relative; border-bottom: 1px solid #1A1A1A; flex-shrink: 0; }
         
-        /* פס תחבורה 10% */
-        .transport { height: 70px; background: #111; display: flex; align-items: center; justify-content: space-around; border-bottom: 1px solid #222; flex-shrink: 0; }
-        
-        /* אזור עבודה נגלל 60% */
-        .main-work-area { flex: 1; overflow-y: auto; padding: 15px; padding-bottom: 40px; }
+        /* אזור עבודה נגלל */
+        .main-content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 50px; }
 
-        .btn-circle { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #1A1A1D; border: 1px solid #333; transition: 0.2s; }
-        .btn-circle:active { background: var(--accent); transform: scale(0.9); }
-        .render-count { font-size: 5rem; font-weight: 900; color: var(--accent); text-shadow: 0 0 30px rgba(124,58,237,0.5); }
+        .grok-input { background: #000; border: 1px solid #222; border-radius: 16px; padding: 12px; font-size: 14px; outline: none; transition: 0.3s; }
+        .grok-input:focus { border-color: var(--accent); box-shadow: 0 0 15px rgba(124, 58, 237, 0.2); }
         
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 200; align-items: center; justify-content: center; }
+        .btn-grok { background: var(--accent); color: white; font-weight: 700; border-radius: 16px; padding: 16px; transition: 0.2s; border: none; }
+        .btn-grok:active { transform: scale(0.96); opacity: 0.9; }
+        
+        .tool-btn { background: #0A0A0A; border: 1px solid #1A1A1A; border-radius: 16px; padding: 15px; display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 10px; font-weight: 600; }
+        
+        .render-text { font-size: 5rem; font-weight: 900; color: var(--accent); text-shadow: 0 0 30px rgba(124,58,237,0.5); }
     </style>
 </head>
 <body>
 
     <!-- אזור 1: הנגן המרכזי -->
     <div class="viewport flex items-center justify-center relative">
-        <div id="placeholder" class="opacity-30 flex flex-col items-center">
-            <i data-lucide="brain-circuit" class="w-12 h-12 mb-1 text-purple-500"></i>
-            <span class="text-[10px] font-bold tracking-widest">GOOGLE GEMINI ENGINE</span>
+        <img id="resImg" class="hidden w-full h-full object-contain">
+        <div id="resText" class="p-6 text-sm text-center hidden overflow-y-auto max-h-full leading-relaxed"></div>
+        <div id="placeholder" class="opacity-20 flex flex-col items-center">
+            <i data-lucide="sparkles" class="w-12 h-12 mb-2 text-purple-500"></i>
+            <span class="text-[10px] font-bold tracking-[0.5em]">GROK 4 ENGINE</span>
         </div>
-        <img id="resImg" class="hidden w-full h-full object-contain shadow-2xl">
-        <video id="resVid" class="hidden w-full h-full object-contain" playsinline loop></video>
-        <div id="resText" class="p-6 text-sm text-center hidden overflow-y-auto max-h-full"></div>
 
         <!-- מנדול 1-100% -->
         <div id="loader" class="hidden absolute inset-0 bg-black flex flex-col items-center justify-center z-[110]">
-            <div id="p-label" class="render-count">0%</div>
-            <div class="text-[10px] text-zinc-500 mt-2 font-bold uppercase tracking-widest">Processing Stems...</div>
+            <div id="p-label" class="render-text">0%</div>
         </div>
-        
-        <div class="absolute bottom-0 w-full h-1 bg-zinc-800"><div id="t-fill" class="h-full bg-purple-500 w-0"></div></div>
     </div>
 
-    <!-- אזור 2: פס תחבורה עם כפתורים מעוצבים -->
-    <div class="transport px-4">
-        <button onclick="ctrl('start')" class="btn-circle"><i data-lucide="skip-back" class="w-5 h-5"></i></button>
-        <button onclick="ctrl('back')" class="btn-circle"><i data-lucide="rewind" class="w-5 h-5"></i></button>
-        <button onclick="ctrl('play')" class="btn-circle bg-purple-600 border-none scale-110 shadow-lg shadow-purple-900/50"><i data-lucide="play" id="playIcon" class="w-6 h-6 fill-current"></i></button>
-        <button onclick="ctrl('forward')" class="btn-circle"><i data-lucide="fast-forward" class="w-5 h-5"></i></button>
-        <button onclick="ctrl('stop')" class="btn-circle border-red-900/40 text-red-500"><i data-lucide="square" class="w-4 h-4 fill-current"></i></button>
-    </div>
-
-    <!-- אזור 3: ממשק נגלל -->
-    <div class="main-work-area space-y-4" dir="rtl">
+    <!-- אזור 2: ממשק עבודה (Grok Look) -->
+    <div class="main-content space-y-5" dir="rtl">
         
-        <!-- מפתח API גוגל -->
-        <div class="bg-zinc-900/80 p-3 rounded-2xl border border-zinc-800">
-            <input type="password" id="geminiKey" placeholder="הדבק כאן את מפתח ה-API של גוגל" class="w-full bg-black border border-zinc-800 rounded-xl p-3 text-xs text-left outline-none focus:border-purple-500">
+        <!-- הגדרת מפתח API (נשמר אוטומטית) -->
+        <div id="keyBox" class="space-y-2">
+            <div class="text-[10px] text-zinc-500 font-bold px-2 tracking-widest uppercase">API CONFIGURATION</div>
+            <input type="password" id="geminiKey" placeholder="הדבק כאן את המפתח (AIzaSy...)" 
+                oninput="saveKey()" class="w-full grok-input text-left font-mono">
         </div>
 
-        <!-- תיבת יצירה -->
-        <div class="bg-[#161618] p-4 rounded-3xl border border-zinc-800 shadow-xl">
-            <textarea id="prompt" placeholder="מה ה-AI יצור עבורך היום?" class="w-full bg-black border border-zinc-800 rounded-2xl p-4 text-sm h-24 mb-3 outline-none focus:border-purple-500 text-right"></textarea>
-            <div class="grid grid-cols-2 gap-2">
-                <button onclick="askAI()" class="bg-purple-600 py-4 rounded-2xl font-bold active:scale-95 transition-all shadow-lg">שלח ל-Gemini</button>
-                <button onclick="generateMedia()" class="bg-zinc-800 py-4 rounded-2xl font-bold active:scale-95 border border-zinc-700">צור מדיה (4K)</button>
+        <!-- תיבת פרומפט -->
+        <div class="space-y-2">
+            <textarea id="prompt" placeholder="מה תרצה לשאול או ליצור היום?" 
+                class="w-full grok-input h-32 text-right resize-none placeholder-zinc-700"></textarea>
+            
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="askAI()" class="btn-grok shadow-lg shadow-purple-900/20">שאל את ה-AI</button>
+                <button onclick="generateMedia()" class="bg-zinc-900 border border-zinc-800 font-bold rounded-16 rounded-[16px] py-4 text-sm active:scale-95 transition-all">צור תמונה 4K</button>
             </div>
         </div>
 
-        <!-- העלאה בשורה אחת (תמונות | סרטון | מצלמה) -->
+        <!-- העלאה (שורה אחת) -->
         <div class="grid grid-cols-3 gap-2">
-            <button onclick="pick('img')" class="bg-[#161618] py-5 rounded-2xl border border-zinc-800 flex flex-col items-center gap-2 active:scale-95 transition-all">
+            <button onclick="pick('img')" class="tool-btn active:bg-zinc-900">
                 <i data-lucide="image" class="text-blue-500"></i>
-                <span class="text-[10px] font-bold">תמונות</span>
+                <span>גלריה</span>
             </button>
-            <button onclick="pick('vid')" class="bg-[#161618] py-5 rounded-2xl border border-zinc-800 flex flex-col items-center gap-2 active:scale-95 transition-all">
+            <button onclick="pick('vid')" class="tool-btn active:bg-zinc-900">
                 <i data-lucide="film" class="text-red-500"></i>
-                <span class="text-[10px] font-bold">סרטונים</span>
+                <span>סרטון</span>
             </button>
-            <button onclick="pick('cam')" class="bg-[#161618] py-5 rounded-2xl border border-purple-900/30 flex flex-col items-center gap-2 active:scale-95 transition-all">
+            <button onclick="pick('cam')" class="tool-btn border-purple-900/30">
                 <i data-lucide="camera" class="text-green-500"></i>
-                <span class="text-[10px] font-bold">מצלמה</span>
+                <span>מצלמה</span>
             </button>
         </div>
 
-        <!-- פונקציות נוספות -->
-        <div class="space-y-2">
-            <button onclick="openModal('voice-modal')" class="w-full bg-[#161618] p-4 rounded-2xl border border-zinc-800 flex justify-between items-center active:scale-95">
-                <span class="text-xs font-bold flex items-center gap-2"><i data-lucide="mic" class="text-purple-500"></i> שיבוט קולי (הקלט 5 שניות)</span>
-                <i data-lucide="plus" class="w-4 h-4 opacity-30"></i>
-            </button>
-            <button onclick="alert('Filter Menu')" class="w-full bg-[#161618] p-4 rounded-2xl border border-zinc-800 flex justify-between items-center active:scale-95">
-                <span class="text-xs font-bold flex items-center gap-2"><i data-lucide="palette" class="text-purple-500"></i> פילטרים ומניפת צבעים</span>
-                <i data-lucide="chevron-left" class="w-4 h-4 opacity-30"></i>
-            </button>
+        <!-- פונקציות מתקדמות -->
+        <div class="grid grid-cols-2 gap-2">
+            <button onclick="alert('Voice Clone: הקלט 5 שניות')" class="tool-btn flex-row h-12 py-0"><i data-lucide="mic" class="w-4 h-4 text-purple-500"></i><span>שיבוט קולי</span></button>
+            <button onclick="alert('Filter Active')" class="tool-btn flex-row h-12 py-0"><i data-lucide="palette" class="w-4 h-4 text-purple-500"></i><span>פילטרים</span></button>
         </div>
 
-        <button onclick="save()" class="w-full bg-white text-black py-5 rounded-3xl font-black text-sm uppercase tracking-widest active:scale-95 transition-all shadow-2xl">
-            Download 4K Result
+        <!-- ייצוא -->
+        <button onclick="save()" class="w-full bg-white text-black py-5 rounded-2xl font-black text-xs uppercase tracking-widest active:scale-95 transition-all">
+            Download 4K Content
         </button>
     </div>
 
-    <!-- מודל שיבוט קולי -->
-    <div id="voice-modal" class="modal">
-        <div class="bg-zinc-900 p-10 rounded-3xl border border-zinc-800 w-80 text-center">
-            <h2 class="font-bold mb-4">שיבוט קולי AI</h2>
-            <div id="rec-timer" class="text-5xl font-black text-red-500 mb-6 tracking-tighter">05:00</div>
-            <button id="rec-btn" onclick="startRec()" class="w-full bg-red-600 py-4 rounded-xl font-bold mb-4 shadow-lg shadow-red-900/30">הקלט קול</button>
-            <button onclick="closeModals()" class="text-xs opacity-40">ביטול</button>
-        </div>
-    </div>
-
+    <!-- קלטים מוסתרים -->
     <input type="file" id="f-inp" class="hidden" onchange="processFile(event)">
     <input type="file" id="c-inp" class="hidden" capture="environment" onchange="processFile(event)">
 
     <script>
         lucide.createIcons();
         const vImg = document.getElementById('resImg');
-        const vVid = document.getElementById('resVid');
         const vTxt = document.getElementById('resText');
         const ldr = document.getElementById('loader');
         const plbl = document.getElementById('p-label');
 
-        function pick(type) {
-            if(type === 'img') { document.getElementById('f-inp').accept = "image/*"; document.getElementById('f-inp').click(); }
-            else if(type === 'vid') { document.getElementById('f-inp').accept = "video/*"; document.getElementById('f-inp').click(); }
-            else { document.getElementById('c-inp').click(); }
-        }
-
-        function processFile(e) {
-            const f = e.target.files[0];
-            if(!f) return;
-            const u = URL.createObjectURL(f);
-            document.getElementById('placeholder').classList.add('hidden');
-            if(f.type.startsWith('image/')) {
-                vImg.src = u; vImg.classList.remove('hidden'); vVid.classList.add('hidden'); vTxt.classList.add('hidden');
-            } else {
-                vVid.src = u; vVid.classList.remove('hidden'); vImg.classList.add('hidden'); vTxt.classList.add('hidden');
+        // טעינת המפתח מהזיכרון של הטלפון מיד עם הפתיחה
+        window.onload = () => {
+            const savedKey = localStorage.getItem('gemini_api_key');
+            if (savedKey) {
+                document.getElementById('geminiKey').value = savedKey;
+                // אפשר להחביא את תיבת המפתח אם הוא קיים (אופציונלי)
+                // document.getElementById('keyBox').classList.add('opacity-40');
             }
+        };
+
+        function saveKey() {
+            const key = document.getElementById('geminiKey').value;
+            localStorage.setItem('gemini_api_key', key);
         }
 
-        // חיבור ל-Gemini של גוגל
         async function askAI() {
             const key = document.getElementById('geminiKey').value;
             const prompt = document.getElementById('prompt').value.trim();
-            if(!key || !prompt) return alert("אנא הזן מפתח API ותיאור");
+            if(!key || !prompt) return alert("הזן מפתח API ותיאור");
 
             runLoader();
             try {
@@ -165,10 +138,9 @@
                 vTxt.innerText = text;
                 vTxt.classList.remove('hidden');
                 vImg.classList.add('hidden');
-                vVid.classList.add('hidden');
                 document.getElementById('placeholder').classList.add('hidden');
             } catch (err) {
-                alert("שגיאת API: וודא שהמפתח תקין");
+                alert("שגיאת API: וודא שהמפתח תקין ומתחיל ב-AIzaSy");
                 stopLoader();
             }
         }
@@ -183,7 +155,6 @@
             test.onload = () => {
                 vImg.src = url;
                 vImg.classList.remove('hidden');
-                vVid.classList.add('hidden');
                 vTxt.classList.add('hidden');
                 document.getElementById('placeholder').classList.add('hidden');
                 stopLoader();
@@ -194,47 +165,33 @@
             ldr.classList.remove('hidden');
             let p = 0;
             const t = setInterval(() => {
-                p += Math.floor(Math.random()*15)+1;
+                p += Math.floor(Math.random()*15)+2;
                 if(p >= 100) { p = 100; clearInterval(t); plbl.innerText = "100%"; }
                 else { plbl.innerText = p + "%"; }
-            }, 250);
+            }, 200);
             window.activeLdr = t;
         }
+
         function stopLoader() { clearInterval(window.activeLdr); ldr.classList.add('hidden'); plbl.innerText = "0%"; }
 
-        function startRec() {
-            let c = 5;
-            const btn = document.getElementById('rec-btn');
-            const lbl = document.getElementById('rec-timer');
-            btn.disabled = true;
-            btn.innerText = "מקליט קול...";
-            const t = setInterval(() => {
-                c--;
-                lbl.innerText = "0" + c + ":00";
-                if(c <= 0) {
-                    clearInterval(t);
-                    lbl.innerText = "הושלם ✅";
-                    btn.innerText = "קול שובט למערכת!";
-                    setTimeout(() => closeModals(), 1500);
-                }
-            }, 1000);
+        function pick(type) {
+            if(type === 'cam') { document.getElementById('c-inp').click(); }
+            else { 
+                const inp = document.getElementById('f-inp');
+                inp.accept = type === 'img' ? "image/*" : "video/*";
+                inp.click(); 
+            }
         }
 
-        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-        function closeModals() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); }
-        function ctrl(cmd) {
-            if(cmd === 'play') vVid.paused ? vVid.play() : vVid.pause();
-            if(cmd === 'stop') { vVid.pause(); vVid.currentTime = 0; }
-            if(cmd === 'forward') vVid.currentTime += 2;
-            if(cmd === 'back') vVid.currentTime -= 2;
-            if(cmd === 'start') vVid.currentTime = 0;
+        function processFile(e) {
+            const f = e.target.files[0];
+            if(!f) return;
+            const u = URL.createObjectURL(f);
+            document.getElementById('placeholder').classList.add('hidden');
+            vImg.src = u; vImg.classList.remove('hidden'); vTxt.classList.add('hidden');
         }
+
         function save() { if(vImg.src) window.open(vImg.src, '_blank'); }
-
-        vVid.ontimeupdate = () => {
-            const progress = (vVid.currentTime / vVid.duration) * 100;
-            document.getElementById('t-fill').style.width = progress + "%";
-        };
     </script>
 </body>
-</html>
+</
