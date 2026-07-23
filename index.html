@@ -458,7 +458,7 @@
       color: #000;
     }
 
-    /* Image AI Modal Options */
+    /* Create Options Modal */
     .create-options-modal {
       display: none;
       position: absolute;
@@ -782,15 +782,21 @@
       <button class="surprise-btn" id="surprise-btn">הפתע אותי 🪄</button>
     </div>
 
-    <!-- Create & Extend Buttons -->
+    <!-- Create & Extend Buttons (כפתור צור מוחזר במלואו) -->
     <div class="action-create-row">
-      <button class="btn-create-edit" id="btn-create-edit">✨ החל עריכת AI על המדיה</button>
-      <button class="btn-extend-video" id="btn-extend-video">➕ שפר איכות/שכפל</button>
+      <button class="btn-create-edit" id="btn-create-edit">✨ צור וידאו / תמונה מתוך המדיה</button>
+      <button class="btn-extend-video" id="btn-extend-video">➕ שפר איכות</button>
 
-      <!-- Image Options Modal -->
+      <!-- Options Modal -->
       <div class="create-options-modal" id="create-options-modal">
-        <button class="create-option-btn" id="opt-enhance-media">✨ שפר איכות המדיה המקורית</button>
-        <button class="create-option-btn" id="opt-apply-ai-filter">🎨 הוסף אפקט מתקדם למדיה</button>
+        <label class="create-option-btn">
+          🖼️ צור מתמונה קיימת
+          <input type="file" accept="image/*" id="input-create-from-image" style="display:none;">
+        </label>
+        <label class="create-option-btn">
+          🎥 צור מסרטון קיים
+          <input type="file" accept="video/*" id="input-create-from-video" style="display:none;">
+        </label>
       </div>
     </div>
 
@@ -825,7 +831,7 @@
       </label>
     </div>
 
-    <!-- Filters Section with True Reflection & Skin Tone Preserve -->
+    <!-- Filters Section -->
     <div class="filters-container">
       <div class="section-title">🎨 פילטרים ואפקטים:</div>
       <div class="filters-grid" id="filters-grid">
@@ -876,8 +882,6 @@
     const settingsBtn = document.getElementById('settings-btn');
     const apiKeyContainer = document.getElementById('api-key-container');
     const apiKeyInput = document.getElementById('api-key');
-    const apiProviderSelect = document.getElementById('ai-model-provider');
-    const previewCard = document.getElementById('preview-card');
     const previewScreen = document.getElementById('preview-screen');
     const samsungPlayIcon = document.getElementById('samsung-play-icon');
     const placeholderText = document.getElementById('placeholder-text');
@@ -899,8 +903,6 @@
     const btnCreateEdit = document.getElementById('btn-create-edit');
     const btnExtendVideo = document.getElementById('btn-extend-video');
     const createOptionsModal = document.getElementById('create-options-modal');
-    const optEnhanceMedia = document.getElementById('opt-enhance-media');
-    const optApplyAiFilter = document.getElementById('opt-apply-ai-filter');
     
     const editStatusMsg = document.getElementById('edit-status-msg');
     const galleryGrid = document.getElementById('gallery-grid');
@@ -957,7 +959,8 @@
       }
     }
 
-    ['input-video', 'input-image', 'input-camera-photo', 'input-camera-video'].forEach(id => {
+    // טיפול בהעלאת קבצים ראשית ותפריט "צור"
+    ['input-video', 'input-image', 'input-camera-photo', 'input-camera-video', 'input-create-from-image', 'input-create-from-video'].forEach(id => {
       const el = document.getElementById(id);
       if (!el) return;
       el.addEventListener('change', async (e) => {
@@ -965,10 +968,11 @@
         if (!file) return;
 
         cameraOptionsMenu.classList.remove('active');
+        createOptionsModal.classList.remove('active');
         rawFile = file;
         originalMediaUrl = URL.createObjectURL(file);
 
-        await simulateScreenRender(0, 100, 800, "טוען קובץ מדיה מקורי למערכת...");
+        await simulateScreenRender(0, 100, 800, "מעבד קובץ מדיה מקורי במערכת...");
 
         if (file.type.startsWith('image/')) {
           setMediaImage(originalMediaUrl);
@@ -1189,18 +1193,9 @@
       }
     }
 
+    // הפעלת כפתור "צור" להצגת אפשרויות בחירה לקובץ
     btnCreateEdit.addEventListener('click', () => {
       createOptionsModal.classList.toggle('active');
-    });
-
-    optEnhanceMedia.addEventListener('click', () => {
-      createOptionsModal.classList.remove('active');
-      runAIGeneration('enhance');
-    });
-
-    optApplyAiFilter.addEventListener('click', () => {
-      createOptionsModal.classList.remove('active');
-      runAIGeneration('filter');
     });
 
     btnExtendVideo.addEventListener('click', async () => {
@@ -1208,45 +1203,10 @@
         alert('אנא העלה קובץ מדיה תחילה.');
         return;
       }
-      await simulateScreenRender(0, 100, 1200, "מבצע אופטימיזציה ושכפול שכבות למדיה...");
+      await simulateScreenRender(0, 100, 1200, "מבצע אופטימיזציה ושדרוג למדיה המקורית...");
       editStatusMsg.style.display = 'block';
       editStatusMsg.textContent = `הקובץ עבר אופטימיזציה מלאה תוך שמירה על המקור! ✅`;
     });
-
-    async function runAIGeneration(mode) {
-      if (!currentMedia || !originalMediaUrl) {
-        alert('אנא העלה תמונה או סרטון תחילה.');
-        return;
-      }
-
-      const promptText = aiPrompt.value.trim();
-      await simulateScreenRender(0, 100, 1800, mode === 'enhance' ? "משפר את חדות ואיכות המדיה המקורית שלך..." : "מחיל את פקודת ה-AI על הקובץ שלך...");
-
-      // שמירה על הקובץ המקורי בדיוק מבלי להחליפו בתמונה זרה
-      if (mediaType === 'image') {
-        setMediaImage(originalMediaUrl);
-      } else {
-        setMediaVideo(originalMediaUrl);
-      }
-
-      // החלת שיפור ויזואלי קל דרך פילטרים בהתאם לבקשת המשתמש
-      if (promptText.includes('שחור') || promptText.includes('דרמטי')) {
-        selectedFilter = 'bw-dramatic';
-      } else if (promptText.includes('זוהר') || promptText.includes('אור')) {
-        selectedFilter = 'glow';
-      } else if (promptText.includes('סייבר')) {
-        selectedFilter = 'cyberpunk';
-      } else {
-        selectedFilter = 'high-contrast';
-      }
-      filterIntensity = 80;
-      intensitySlider.value = 80;
-      intensityValue.textContent = '80%';
-      applyFilter();
-
-      editStatusMsg.style.display = 'block';
-      editStatusMsg.textContent = `השינויים הוחלו בהצלחה ישירות על הקובץ שהעלית! ✅`;
-    }
 
     async function getExportableFile() {
       if (!currentMedia) return null;
