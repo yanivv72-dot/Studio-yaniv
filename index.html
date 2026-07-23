@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>עורך מדיה AI</title>
+  <title>מחולל וידאו AI</title>
   <style>
     * {
       box-sizing: border-box;
@@ -13,7 +13,7 @@
     }
 
     body {
-      background-color: #0f172a;
+      background-color: #0b0f19;
       color: #f8fafc;
       min-height: 100vh;
       display: flex;
@@ -22,53 +22,67 @@
       padding: 20px;
     }
 
+    .app-container {
+      width: 100%;
+      max-width: 420px;
+      background-color: #121824;
+      border: 1px solid #1e293b;
+      border-radius: 28px;
+      padding: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Header Design */
     header {
-      text-align: center;
-      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4px;
+    }
+
+    .user-profile {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #334155;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
     }
 
     header h1 {
-      font-size: 2rem;
-      color: #38bdf8;
-      margin-bottom: 8px;
+      font-size: 1.25rem;
+      color: #f8fafc;
+      font-weight: 600;
     }
 
-    .container {
-      width: 100%;
-      max-width: 900px;
-      background-color: #1e293b;
+    .settings-btn {
+      color: #64748b;
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+
+    /* Video / Preview Container */
+    .preview-card {
+      background: #090d16;
+      border: 1.5px solid #22d3ee;
       border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+      padding: 12px;
+      box-shadow: 0 0 15px rgba(34, 211, 238, 0.15);
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 8px;
     }
 
-    .upload-section {
-      border: 2px dashed #475569;
-      border-radius: 12px;
-      padding: 30px;
-      text-align: center;
-      cursor: pointer;
-      transition: border-color 0.2s, background-color 0.2s;
-    }
-
-    .upload-section:hover {
-      border-color: #38bdf8;
-      background-color: #334155;
-    }
-
-    .upload-section input {
-      display: none;
-    }
-
-    .preview-container {
+    .preview-screen {
       width: 100%;
-      min-height: 350px;
-      max-height: 550px;
-      background-color: #020617;
-      border-radius: 12px;
+      height: 180px;
+      background-color: #000000;
+      border-radius: 10px;
       overflow: hidden;
       display: flex;
       align-items: center;
@@ -76,223 +90,341 @@
       position: relative;
     }
 
-    .preview-container img,
-    .preview-container video {
-      max-width: 100%;
-      max-height: 550px;
-      object-fit: contain;
-      transition: filter 0.1s ease;
+    .preview-screen img,
+    .preview-screen video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
     .placeholder-text {
-      color: #64748b;
+      color: #475569;
+      font-size: 0.9rem;
     }
 
-    .controls {
+    /* Video Player Controls */
+    .player-controls {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 8px;
     }
 
-    /* פילטרים נגללים שלא מסתירים את התצוגה המקדימה */
-    .filters-grid {
+    .progress-bar {
+      width: 100%;
+      height: 4px;
+      background: #1e293b;
+      border-radius: 2px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      width: 35%;
+      height: 100%;
+      background: #22d3ee;
+    }
+
+    .control-buttons {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding-top: 4px;
+    }
+
+    .ctrl-btn {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      cursor: pointer;
+    }
+
+    .ctrl-btn span.icon {
+      font-size: 1.1rem;
+    }
+
+    /* AI Prompt Input Section */
+    .prompt-box {
+      background: #0d131f;
+      border: 1.5px solid #06b6d4;
+      border-radius: 16px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+    }
+
+    .prompt-box textarea {
+      width: 100%;
+      height: 55px;
+      background: transparent;
+      border: none;
+      color: #f8fafc;
+      resize: none;
+      outline: none;
+      font-size: 0.85rem;
+    }
+
+    .surprise-btn {
+      align-self: flex-end;
+      background: #22d3ee;
+      color: #0f172a;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Media Type Selection Buttons */
+    .media-type-selector {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .media-type-btn {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 10px;
+      color: #cbd5e1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+
+    .media-type-btn input {
+      display: none;
+    }
+
+    /* Filter Controls Section (Scrollable & Adjustable) */
+    .filters-container {
+      display: flex;
+      flex-direction: column;
       gap: 10px;
-      max-height: 140px;
-      overflow-y: auto;
-      padding-left: 5px;
+      background: #0d131f;
+      padding: 12px;
+      border-radius: 16px;
+      border: 1px solid #1e293b;
+    }
+
+    .filters-grid {
+      display: flex;
+      overflow-x: auto;
+      gap: 8px;
+      padding-bottom: 6px;
     }
 
     .filter-btn {
-      background-color: #334155;
+      background-color: #1e293b;
       color: #f1f5f9;
-      border: 2px solid transparent;
-      padding: 10px;
-      border-radius: 8px;
+      border: 1px solid #334155;
+      padding: 8px 14px;
+      border-radius: 20px;
       cursor: pointer;
-      font-size: 0.85rem;
-      transition: all 0.2s;
-      text-align: center;
-    }
-
-    .filter-btn:hover {
-      background-color: #475569;
+      font-size: 0.75rem;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .filter-btn.active {
-      border-color: #38bdf8;
+      border-color: #22d3ee;
       background-color: #0284c7;
     }
 
     .intensity-container {
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      background-color: #0f172a;
-      padding: 12px 16px;
-      border-radius: 8px;
+      gap: 4px;
     }
 
     .intensity-header {
       display: flex;
       justify-content: space-between;
-      font-size: 0.9rem;
-      color: #cbd5e1;
+      font-size: 0.75rem;
+      color: #94a3b8;
     }
 
     .intensity-slider {
       width: 100%;
-      accent-color: #38bdf8;
+      accent-color: #22d3ee;
       cursor: pointer;
     }
 
-    .actions {
-      display: flex;
-      gap: 12px;
-      justify-content: flex-end;
-      margin-top: 10px;
+    /* Main Action Buttons (Download & Share) */
+    .action-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
     }
 
-    .btn {
-      padding: 12px 24px;
-      border-radius: 8px;
+    .btn-main {
+      padding: 12px;
+      border-radius: 12px;
       border: none;
-      font-weight: 600;
+      font-weight: 700;
+      font-size: 0.9rem;
       cursor: pointer;
-      transition: opacity 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
     }
 
-    .btn:hover {
-      opacity: 0.9;
-    }
-
-    .btn-download {
-      background-color: #10b981;
+    .btn-download-main {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
       color: #ffffff;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
     }
 
-    .btn-share {
-      background-color: #0284c7;
+    .btn-share-main {
+      background: linear-gradient(135deg, #10b981, #059669);
       color: #ffffff;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }
 
-    /* תיקיית מדיה ערוכה בתחתית */
+    /* Gallery Section at Bottom */
     .gallery-section {
-      margin-top: 20px;
-      border-top: 2px solid #334155;
-      padding-top: 20px;
+      margin-top: 10px;
+      border-top: 1px solid #1e293b;
+      padding-top: 12px;
     }
 
     .gallery-section h3 {
-      font-size: 1.2rem;
-      color: #38bdf8;
-      margin-bottom: 16px;
+      font-size: 0.9rem;
+      color: #22d3ee;
+      margin-bottom: 10px;
     }
 
     .gallery-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
     }
 
     .gallery-item {
-      background-color: #0f172a;
+      background-color: #0d131f;
       border-radius: 10px;
-      padding: 10px;
+      padding: 8px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      align-items: center;
+      gap: 6px;
+      border: 1px solid #1e293b;
     }
 
     .gallery-item img,
     .gallery-item video {
       width: 100%;
-      height: 130px;
+      height: 80px;
       object-fit: cover;
-      border-radius: 8px;
+      border-radius: 6px;
     }
 
     .gallery-actions {
       display: flex;
-      gap: 8px;
-      width: 100%;
+      gap: 4px;
     }
 
     .btn-action {
       flex: 1;
-      padding: 8px;
-      font-size: 0.85rem;
-      border-radius: 6px;
+      padding: 4px;
+      font-size: 0.7rem;
+      border-radius: 4px;
       border: none;
       cursor: pointer;
       font-weight: 600;
-      text-align: center;
     }
 
-    .btn-action-download {
-      background-color: #10b981;
-      color: #ffffff;
-    }
+    .btn-action-download { background-color: #10b981; color: #fff; }
+    .btn-action-delete { background-color: #ef4444; color: #fff; }
 
-    .btn-action-delete {
-      background-color: #ef4444;
-      color: #ffffff;
-    }
-
-    /* custom scrollbar */
-    .filters-grid::-webkit-scrollbar {
-      width: 6px;
-    }
-    .filters-grid::-webkit-scrollbar-thumb {
-      background: #475569;
-      border-radius: 3px;
-    }
+    /* Scrollbar */
+    .filters-grid::-webkit-scrollbar { height: 4px; }
+    .filters-grid::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>עורך מדיה AI</h1>
-    <p>העלאת כל סוגי התמונות והסרטונים והחלת פילטרים בזמן אמת</p>
-  </header>
+  <div class="app-container">
+    <!-- Header -->
+    <header>
+      <div class="user-profile">👤</div>
+      <h1>מחולל וידאו AI</h1>
+      <div class="settings-btn">⚙️</div>
+    </header>
 
-  <div class="container">
-    <label class="upload-section" for="file-input">
-      <span>לחץ כאן להעלאת תמונה או סרטון (כל הפורמטים נתמכים)</span>
-      <input type="file" id="file-input" accept="image/*, video/*">
-    </label>
-
-    <div class="preview-container" id="preview-container">
-      <span class="placeholder-text">אין מדיה מוצגת</span>
+    <!-- Preview Container -->
+    <div class="preview-card">
+      <div class="preview-screen" id="preview-screen">
+        <span class="placeholder-text">אין מדיה מוצגת</span>
+      </div>
+      
+      <!-- Video Controls -->
+      <div class="player-controls">
+        <div class="progress-bar"><div class="progress-fill"></div></div>
+        <div class="control-buttons">
+          <button class="ctrl-btn" id="btn-play"><span class="icon">▶</span>התחל</button>
+          <button class="ctrl-btn" id="btn-pause"><span class="icon">❚❚</span>השהה</button>
+          <button class="ctrl-btn" id="btn-stop"><span class="icon">◼</span>עצור</button>
+          <button class="ctrl-btn"><span class="icon">►►</span>קדימה</button>
+          <button class="ctrl-btn"><span class="icon">◄◄</span>אחורה</button>
+        </div>
+      </div>
     </div>
 
-    <div class="controls">
-      <h3>בחר פילטר (20 סוגים):</h3>
+    <!-- AI Prompt Box -->
+    <div class="prompt-box">
+      <textarea id="ai-prompt" placeholder="תאר את הסרטון שלך כאן... (למשל, אריה רץ בסוואנה בשעת השקיעה)"></textarea>
+      <button class="surprise-btn" id="surprise-btn">הפתע אותי 🪄</button>
+    </div>
+
+    <!-- Media Source Selector -->
+    <div class="media-type-selector">
+      <label class="media-type-btn">
+        📷 מצלמה
+        <input type="file" accept="image/*" capture="environment" id="input-camera">
+      </label>
+      <label class="media-type-btn">
+        🎥 סרטון
+        <input type="file" accept="video/*" id="input-video">
+      </label>
+      <label class="media-type-btn">
+        🖼️ תמונה
+        <input type="file" accept="image/*" id="input-image">
+      </label>
+    </div>
+
+    <!-- Filters and Adjustments -->
+    <div class="filters-container">
       <div class="filters-grid" id="filters-grid">
-        <!-- 20 פילטרים -->
         <button class="filter-btn active" data-filter="none">ללא פילטר</button>
         <button class="filter-btn" data-filter="vintage">וינטג'</button>
-        <button class="filter-btn" data-filter="sepia">ספיה קלאסי</button>
-        <button class="filter-btn" data-filter="bw">שחור-לבן דרמטי</button>
+        <button class="filter-btn" data-filter="sepia">ספיה</button>
+        <button class="filter-btn" data-filter="bw">שחור-לבן</button>
         <button class="filter-btn" data-filter="cyberpunk">סייברפאנק</button>
         <button class="filter-btn" data-filter="warm">חם</button>
         <button class="filter-btn" data-filter="cool">קר</button>
-        <button class="filter-btn" data-filter="invert">אינוורס (נגטיב)</button>
-        <button class="filter-btn" data-filter="hue-shift">שינוי גוון</button>
-        <button class="filter-btn" data-filter="blur">טשטוש עמוק</button>
-        <button class="filter-btn" data-filter="high-contrast">קונטרסט גבוה</button>
-        <button class="filter-btn" data-filter="pastel">פסטל רך</button>
-        <button class="filter-btn" data-filter="neon">ניאון זוהר</button>
+        <button class="filter-btn" data-filter="invert">נגטיב</button>
+        <button class="filter-btn" data-filter="blur">טשטוש</button>
+        <button class="filter-btn" data-filter="high-contrast">קונטרסט</button>
+        <button class="filter-btn" data-filter="pastel">פסטל</button>
+        <button class="filter-btn" data-filter="neon">ניאון</button>
         <button class="filter-btn" data-filter="cinema">קולנועי</button>
-        <button class="filter-btn" data-filter="sunset">שקיעה רומנטית</button>
-        <button class="filter-btn" data-filter="noir">פילם נואר</button>
-        <button class="filter-btn" data-filter="retro-green">רפאים ירוק</button>
-        <button class="filter-btn" data-filter="golden-hour">שעת הזהב</button>
-        <button class="filter-btn" data-filter="hdr">אפקט HDR</button>
-        <button class="filter-btn" data-filter="pop-art">פופ ארט</button>
-        <button class="filter-btn" data-filter="faded">דהוי וינטג'</button>
+        <button class="filter-btn" data-filter="sunset">שקיעה</button>
+        <button class="filter-btn" data-filter="noir">נואר</button>
       </div>
 
       <div class="intensity-container">
@@ -304,67 +436,89 @@
       </div>
     </div>
 
-    <div class="actions">
-      <button class="btn btn-share" id="share-btn">שתף מדיה</button>
-      <button class="btn btn-download" id="download-btn">הורד מדיה</button>
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button class="btn-main btn-download-main" id="download-btn">⬇ הורדה</button>
+      <button class="btn-main btn-share-main" id="share-btn">🔗 שיתוף</button>
     </div>
 
-    <!-- תיקיית מדיה ערוכה -->
+    <!-- Processed Media Folder (Gallery) -->
     <div class="gallery-section">
       <h3>תיקיית מדיה ערוכה</h3>
-      <div class="gallery-grid" id="gallery-grid">
-        <!-- קבצים שנשמרו יופיעו כאן -->
-      </div>
+      <div class="gallery-grid" id="gallery-grid"></div>
     </div>
   </div>
 
   <script>
-    const fileInput = document.getElementById('file-input');
-    const previewContainer = document.getElementById('preview-container');
+    const previewScreen = document.getElementById('preview-screen');
     const filterButtons = document.querySelectorAll('.filter-btn');
     const intensitySlider = document.getElementById('intensity-slider');
     const intensityValue = document.getElementById('intensity-value');
     const downloadBtn = document.getElementById('download-btn');
     const shareBtn = document.getElementById('share-btn');
     const galleryGrid = document.getElementById('gallery-grid');
+    const surpriseBtn = document.getElementById('surprise-btn');
+    const aiPrompt = document.getElementById('ai-prompt');
 
-    let currentMedia = null; // אלמנט Image או Video
-    let mediaType = null;   // 'image' או 'video'
-    let fileUrl = null;
-    let fileName = 'download';
+    let currentMedia = null;
+    let mediaType = null;
+    let fileName = 'edited_media';
     let selectedFilter = 'none';
-    let filterIntensity = 100; // 1-100
+    let filterIntensity = 100;
 
-    // טיפול בהעלאת קובץ
-    fileInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
+    // AI Surprise Prompts
+    const prompts = [
+      "אריה רץ בסוואנה בשעת השקיעה בטכנולוגיית HDR",
+      "עיר עתידנית בלילה עם אורות ניאון וגשם",
+      "חללית חוצה גלקסיה צבעונית בסגנון קולנועי",
+      "נוף מושלג באלפים עם זריחה מרהיבה"
+    ];
 
-      fileName = file.name;
-      fileUrl = URL.createObjectURL(file);
-      previewContainer.innerHTML = '';
-
-      if (file.type.startsWith('image/')) {
-        mediaType = 'image';
-        currentMedia = document.createElement('img');
-        currentMedia.src = fileUrl;
-      } else if (file.type.startsWith('video/')) {
-        mediaType = 'video';
-        currentMedia = document.createElement('video');
-        currentMedia.src = fileUrl;
-        currentMedia.controls = true;
-        currentMedia.autoplay = true;
-        currentMedia.loop = true;
-        currentMedia.playsInline = true;
-      }
-
-      if (currentMedia) {
-        previewContainer.appendChild(currentMedia);
-        applyFilter();
-      }
+    surpriseBtn.addEventListener('click', () => {
+      const randomPrompt = prompts[Math.floor(Math.random() * prompts.length)];
+      aiPrompt.value = randomPrompt;
     });
 
-    // בחירת פילטר
+    // File Upload Handling
+    ['input-camera', 'input-video', 'input-image'].forEach(id => {
+      document.getElementById(id).addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        fileName = file.name;
+        const fileUrl = URL.createObjectURL(file);
+        previewScreen.innerHTML = '';
+
+        if (file.type.startsWith('image/')) {
+          mediaType = 'image';
+          currentMedia = document.createElement('img');
+          currentMedia.src = fileUrl;
+        } else if (file.type.startsWith('video/')) {
+          mediaType = 'video';
+          currentMedia = document.createElement('video');
+          currentMedia.src = fileUrl;
+          currentMedia.controls = false;
+          currentMedia.autoplay = true;
+          currentMedia.loop = true;
+          currentMedia.playsInline = true;
+        }
+
+        previewScreen.appendChild(currentMedia);
+        applyFilter();
+      });
+    });
+
+    // Video Control Buttons
+    document.getElementById('btn-play').onclick = () => currentMedia && currentMedia.play && currentMedia.play();
+    document.getElementById('btn-pause').onclick = () => currentMedia && currentMedia.pause && currentMedia.pause();
+    document.getElementById('btn-stop').onclick = () => {
+      if (currentMedia && currentMedia.pause) {
+        currentMedia.pause();
+        currentMedia.currentTime = 0;
+      }
+    };
+
+    // Filter Logic
     filterButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         filterButtons.forEach(b => b.classList.remove('active'));
@@ -374,71 +528,42 @@
       });
     });
 
-    // שינוי עוצמת הפילטר (1 - 100)
     intensitySlider.addEventListener('input', (e) => {
       filterIntensity = e.target.value;
       intensityValue.textContent = `${filterIntensity}%`;
       applyFilter();
     });
 
-    // חישוב הפילטר בצורה מדויקת - משנה אך ורק את חוזק האפקט/צבע ללא החשכה
     function getCSSFilterString() {
       if (selectedFilter === 'none') return 'none';
-
-      const f = filterIntensity / 100; // יחס 0 עד 1
+      const f = filterIntensity / 100;
 
       switch (selectedFilter) {
-        case 'vintage':
-          return `sepia(${0.5 * f}) contrast(${1 + 0.2 * f}) brightness(${1 - 0.1 * f})`;
-        case 'sepia':
-          return `sepia(${f})`;
-        case 'bw':
-          return `grayscale(${f}) contrast(${1 + 0.5 * f})`;
-        case 'cyberpunk':
-          return `hue-rotate(${180 * f}deg) contrast(${1 + 0.4 * f}) saturate(${1 + f})`;
-        case 'warm':
-          return `sepia(${0.3 * f}) saturate(${1 + 0.4 * f}) hue-rotate(${-10 * f}deg)`;
-        case 'cool':
-          return `hue-rotate(${30 * f}deg) saturate(${1 + 0.2 * f}) brightness(${1 + 0.1 * f})`;
-        case 'invert':
-          return `invert(${f})`;
-        case 'hue-shift':
-          return `hue-rotate(${90 * f}deg)`;
-        case 'blur':
-          return `blur(${5 * f}px)`;
-        case 'high-contrast':
-          return `contrast(${1 + f})`;
-        case 'pastel':
-          return `saturate(${1 - 0.5 * f}) brightness(${1 + 0.3 * f}) contrast(${1 - 0.2 * f})`;
-        case 'neon':
-          return `saturate(${1 + 2 * f}) contrast(${1 + 0.5 * f}) brightness(${1 + 0.2 * f})`;
-        case 'cinema':
-          return `contrast(${1 + 0.3 * f}) saturate(${1 - 0.2 * f}) brightness(${1 - 0.1 * f})`;
-        case 'sunset':
-          return `sepia(${0.4 * f}) saturate(${1 + f}) hue-rotate(${-20 * f}deg)`;
-        case 'noir':
-          return `grayscale(${f}) contrast(${1 + f}) brightness(${1 - 0.2 * f})`;
-        case 'retro-green':
-          return `grayscale(${0.5 * f}) hue-rotate(${80 * f}deg) saturate(${1 + f})`;
-        case 'golden-hour':
-          return `sepia(${0.3 * f}) saturate(${1 + 0.8 * f}) brightness(${1 + 0.1 * f})`;
-        case 'hdr':
-          return `contrast(${1 + 0.6 * f}) saturate(${1 + 0.4 * f}) brightness(${1 + 0.05 * f})`;
-        case 'pop-art':
-          return `saturate(${1 + 4 * f}) hue-rotate(${45 * f}deg)`;
-        case 'faded':
-          return `contrast(${1 - 0.2 * f}) brightness(${1 + 0.2 * f}) sepia(${0.2 * f})`;
-        default:
-          return 'none';
+        case 'vintage': return `sepia(${0.5 * f}) contrast(${1 + 0.2 * f})`;
+        case 'sepia': return `sepia(${f})`;
+        case 'bw': return `grayscale(${f}) contrast(${1 + 0.5 * f})`;
+        case 'cyberpunk': return `hue-rotate(${180 * f}deg) saturate(${1 + f})`;
+        case 'warm': return `sepia(${0.3 * f}) saturate(${1 + 0.4 * f})`;
+        case 'cool': return `hue-rotate(${30 * f}deg) saturate(${1 + 0.2 * f})`;
+        case 'invert': return `invert(${f})`;
+        case 'blur': return `blur(${5 * f}px)`;
+        case 'high-contrast': return `contrast(${1 + f})`;
+        case 'pastel': return `saturate(${1 - 0.5 * f}) brightness(${1 + 0.2 * f})`;
+        case 'neon': return `saturate(${1 + 2 * f}) contrast(${1 + 0.5 * f})`;
+        case 'cinema': return `contrast(${1 + 0.3 * f}) saturate(${1 - 0.2 * f})`;
+        case 'sunset': return `sepia(${0.4 * f}) saturate(${1 + f})`;
+        case 'noir': return `grayscale(${f}) contrast(${1 + f})`;
+        default: return 'none';
       }
     }
 
     function applyFilter() {
-      if (!currentMedia) return;
-      currentMedia.style.filter = getCSSFilterString();
+      if (currentMedia) {
+        currentMedia.style.filter = getCSSFilterString();
+      }
     }
 
-    // מעבד ומייצר קובץ פיזי אמיתי (Blob)
+    // Process & Export Media (Physical File Generation)
     async function createProcessedBlob() {
       if (!currentMedia) return null;
 
@@ -446,16 +571,13 @@
       const ctx = canvas.getContext('2d');
 
       if (mediaType === 'image') {
-        canvas.width = currentMedia.naturalWidth || currentMedia.width || 800;
-        canvas.height = currentMedia.naturalHeight || currentMedia.height || 600;
-
+        canvas.width = currentMedia.naturalWidth || 800;
+        canvas.height = currentMedia.naturalHeight || 600;
         ctx.filter = getCSSFilterString();
         ctx.drawImage(currentMedia, 0, 0, canvas.width, canvas.height);
 
         return new Promise(resolve => {
-          canvas.toBlob(blob => {
-            resolve({ blob, type: 'image', extension: 'png', mime: 'image/png' });
-          }, 'image/png');
+          canvas.toBlob(blob => resolve({ blob, type: 'image', extension: 'png', mime: 'image/png' }), 'image/png');
         });
       } else if (mediaType === 'video') {
         canvas.width = currentMedia.videoWidth || 640;
@@ -487,27 +609,28 @@
             requestAnimationFrame(renderFrame);
           };
           renderFrame();
-
-          currentMedia.onended = () => recorder.stop();
         });
       }
     }
 
-    // הוספת קובץ לתיקייה בתחתית העמוד
+    function saveFileToDevice(blob, filename) {
+      const a = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
     function addItemToFolder(blobData) {
       const url = URL.createObjectURL(blobData.blob);
       const item = document.createElement('div');
       item.className = 'gallery-item';
 
-      let mediaEl;
-      if (blobData.type === 'image') {
-        mediaEl = document.createElement('img');
-        mediaEl.src = url;
-      } else {
-        mediaEl = document.createElement('video');
-        mediaEl.src = url;
-        mediaEl.controls = true;
-      }
+      const mediaEl = blobData.type === 'image' ? document.createElement('img') : document.createElement('video');
+      mediaEl.src = url;
+      if (blobData.type === 'video') mediaEl.controls = true;
 
       const actions = document.createElement('div');
       actions.className = 'gallery-actions';
@@ -520,75 +643,34 @@
       const deleteBtnSmall = document.createElement('button');
       deleteBtnSmall.className = 'btn-action btn-action-delete';
       deleteBtnSmall.textContent = 'מחק';
-      deleteBtnSmall.onclick = () => {
-        item.remove();
-        URL.revokeObjectURL(url);
-      };
+      deleteBtnSmall.onclick = () => item.remove();
 
       actions.appendChild(downloadBtnSmall);
       actions.appendChild(deleteBtnSmall);
-
       item.appendChild(mediaEl);
       item.appendChild(actions);
       galleryGrid.prepend(item);
     }
 
-    // שמירת הקובץ הפיזי למכשיר
-    function saveFileToDevice(blob, filename) {
-      const a = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
-    }
-
-    // הורדת מדיה (גם שומר למכשיר וגם מוסיף לתיקייה בתחתית)
     downloadBtn.addEventListener('click', async () => {
-      if (!currentMedia) {
-        alert('אנא העלה תמונה או סרטון תחילה.');
-        return;
-      }
-
-      downloadBtn.disabled = true;
-      downloadBtn.textContent = 'מעבד...';
-
+      if (!currentMedia) return alert('אנא העלה תמונה או סרטון תחילה.');
       const processed = await createProcessedBlob();
       if (processed) {
-        const outputName = `edited_${fileName.split('.')[0]}.${processed.extension}`;
-        saveFileToDevice(processed.blob, outputName);
+        saveFileToDevice(processed.blob, `edited_${fileName.split('.')[0]}.${processed.extension}`);
         addItemToFolder(processed);
       }
-
-      downloadBtn.disabled = false;
-      downloadBtn.textContent = 'הורד מדיה';
     });
 
-    // שיתוף הקובץ עצמו (מדיה ולא קישור) למכשירים ניידים
     shareBtn.addEventListener('click', async () => {
-      if (!currentMedia) {
-        alert('אנא העלה תמונה או סרטון תחילה.');
-        return;
-      }
-
+      if (!currentMedia) return alert('אנא העלה תמונה או סרטון תחילה.');
       const processed = await createProcessedBlob();
       if (!processed) return;
 
       const file = new File([processed.blob], `edited_${fileName.split('.')[0]}.${processed.extension}`, { type: processed.mime });
 
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-          await navigator.share({
-            title: 'מדיה ערוכה',
-            files: [file]
-          });
-        } catch (err) {
-          if (err.name !== 'AbortError') console.error(err);
-        }
+        await navigator.share({ title: 'מדיה ערוכה', files: [file] });
       } else {
-        alert('שיתוף קבצים אינו נתמך בדפדפן זה. הקובץ יורד למכשיר.');
         saveFileToDevice(processed.blob, file.name);
       }
     });
