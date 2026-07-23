@@ -96,3 +96,110 @@
     <div id="modal-voice" class="modal">
         <div class="bg-zinc-900 p-8 rounded-3xl border border-zinc-800 w-full max-w-sm text-center">
             <h2 class="font-bold mb-4">שיבוט קולי AI</h2>
+            <div id="rec-timer" class="text-4xl font-black text-red-500 mb-4">05:00</div>
+            <button id="rec-btn" onclick="startRecording()" class="w-full bg-red-600 py-4 rounded-xl font-bold mb-4">הקלט קול (5 שניות)</button>
+            <button onclick="closeModals()" class="text-xs opacity-50">ביטול</button>
+        </div>
+    </div>
+
+    <!-- מודל פילטרים -->
+    <div id="modal-filters" class="modal">
+        <div class="bg-zinc-900 p-6 rounded-3xl border border-zinc-800 w-full grid grid-cols-2 gap-4">
+            <button class="btn-tool p-4 text-xs" onclick="alert('Filter Applied: B&W')">שחור לבן</button>
+            <button class="btn-tool p-4 text-xs" onclick="alert('Filter Applied: Green Screen')">מסך ירוק</button>
+            <button class="btn-tool p-4 text-xs" onclick="alert('Filter Applied: Cinematic')">סינמטי</button>
+            <button onclick="closeModals()" class="col-span-2 text-xs opacity-50 mt-4">סגור</button>
+        </div>
+    </div>
+
+    <input type="file" id="f-inp" class="hidden" onchange="processFile(event)">
+    <input type="file" id="c-inp" class="hidden" capture="environment" onchange="processFile(event)">
+
+    <script>
+        lucide.createIcons();
+        const vImg = document.getElementById('v-img');
+        const vVid = document.getElementById('v-vid');
+        const ldr = document.getElementById('loader');
+        const plbl = document.getElementById('p-label');
+
+        function openNativeCam() { document.getElementById('c-inp').click(); }
+        function pickFile(type) { 
+            const inp = document.getElementById('f-inp');
+            inp.accept = type;
+            inp.click(); 
+        }
+
+        function processFile(e) {
+            const f = e.target.files[0];
+            if(!f) return;
+            const u = URL.createObjectURL(f);
+            document.getElementById('placeholder').classList.add('hidden');
+            if(f.type.startsWith('image/')) {
+                vImg.src = u; vImg.classList.remove('hidden'); vVid.classList.add('hidden');
+            } else {
+                vVid.src = u; vVid.classList.remove('hidden'); vImg.classList.add('hidden');
+            }
+        }
+
+        async function generateAI() {
+            const p = document.getElementById('prompt').value.trim();
+            if(!p) return alert("אנא הזן תיאור");
+            ldr.classList.remove('hidden');
+            let pct = 0;
+            const timer = setInterval(() => {
+                pct += Math.floor(Math.random() * 20) + 1;
+                if(pct >= 100) {
+                    pct = 100;
+                    clearInterval(timer);
+                    plbl.innerText = "100%";
+                    const url = `https://pollinations.ai/p/${encodeURIComponent(p)}?width=1080&height=1920&seed=${Math.floor(Math.random()*9999)}&model=flux&nologo=true`;
+                    const test = new Image();
+                    test.src = url;
+                    test.onload = () => {
+                        vImg.src = url; vImg.classList.remove('hidden'); vVid.classList.add('hidden');
+                        document.getElementById('placeholder').classList.add('hidden');
+                        ldr.classList.add('hidden');
+                        plbl.innerText = "0%";
+                    };
+                } else { plbl.innerText = pct + "%"; }
+            }, 300);
+        }
+
+        function startRecording() {
+            let count = 5;
+            const btn = document.getElementById('rec-btn');
+            const timerLabel = document.getElementById('rec-timer');
+            btn.disabled = true;
+            btn.innerText = "מקליט...";
+            const int = setInterval(() => {
+                count--;
+                timerLabel.innerText = "0" + count + ":00";
+                if(count <= 0) {
+                    clearInterval(int);
+                    btn.innerText = "שיבוט הושלם!";
+                    timerLabel.innerText = "הושלם ✅";
+                    setTimeout(() => closeModals(), 1500);
+                }
+            }, 1000);
+        }
+
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModals() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); }
+        
+        function control(cmd) {
+            if(cmd === 'play') vVid.paused ? vVid.play() : vVid.pause();
+            if(cmd === 'stop') { vVid.pause(); vVid.currentTime = 0; }
+            if(cmd === 'forward') vVid.currentTime += 2;
+            if(cmd === 'back') vVid.currentTime -= 2;
+            if(cmd === 'start') vVid.currentTime = 0;
+        }
+
+        function save() { if(vImg.src) window.open(vImg.src, '_blank'); }
+
+        vVid.ontimeupdate = () => {
+            const progress = (vVid.currentTime / vVid.duration) * 100;
+            document.getElementById('t-bar').style.width = progress + "%";
+        };
+    </script>
+</body>
+</html>
