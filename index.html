@@ -159,7 +159,7 @@
       justify-content: center;
       position: relative;
       cursor: pointer;
-      transition: aspect-ratio 0.3s, height 0.3s;
+      transition: height 0.3s;
     }
 
     .preview-screen img,
@@ -278,7 +278,7 @@
       font-weight: 600;
     }
 
-    /* Aspect Ratio Selector (גודל התמונה/סרטון) */
+    /* Aspect Ratio Selector */
     .size-selector-container {
       background: #0d131f;
       border: 1px solid #1e293b;
@@ -309,7 +309,7 @@
       color: #fff;
     }
 
-    /* Movie Styles / Genres (סוגי סרטים) */
+    /* Movie Styles / Genres */
     .genre-selector-container {
       background: #0d131f;
       border: 1px solid #1e293b;
@@ -456,7 +456,13 @@
       cursor: pointer;
     }
 
-    /* Create Edit Button */
+    /* Create Edit Button Container & Status Message */
+    .create-edit-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
     .btn-create-edit {
       background: linear-gradient(135deg, #a855f7, #06b6d4);
       color: #ffffff;
@@ -476,6 +482,18 @@
 
     .btn-create-edit:active {
       transform: scale(0.98);
+    }
+
+    .edit-status-msg {
+      display: none;
+      font-size: 0.8rem;
+      color: #4ade80;
+      background: rgba(74, 222, 128, 0.1);
+      border: 1px solid #22c55e;
+      padding: 8px 12px;
+      border-radius: 10px;
+      text-align: center;
+      font-weight: 600;
     }
 
     /* Action Buttons */
@@ -619,10 +637,10 @@
     <div class="size-selector-container">
       <div class="section-title">📐 גודל פריים / יחס גובה-רוחב:</div>
       <div class="size-buttons-grid">
-        <button class="size-btn active" data-ratio="16/9" data-height="180px">16:9 🖥️</button>
-        <button class="size-btn" data-ratio="9/16" data-height="260px">9:16 📱</button>
-        <button class="size-btn" data-ratio="1/1" data-height="220px">1:1 ⏹️</button>
-        <button class="size-btn" data-ratio="4/3" data-height="200px">4:3 📺</button>
+        <button class="size-btn active" data-height="180px">16:9 🖥️</button>
+        <button class="size-btn" data-height="260px">9:16 📱</button>
+        <button class="size-btn" data-height="220px">1:1 ⏹️</button>
+        <button class="size-btn" data-height="200px">4:3 📺</button>
       </div>
     </div>
 
@@ -630,13 +648,12 @@
     <div class="genre-selector-container">
       <div class="section-title">🎬 סוג הסרט / סגנון קולנועי:</div>
       <div class="genre-grid">
-        <button class="genre-btn active" data-genre="action">💥 אקשן דרמטי</button>
-        <button class="genre-btn" data-genre="scifi">🚀 מדע בדיוני (Sci-Fi)</button>
-
-        <button class="genre-btn" data-genre="3d-anim">🎨 אנימציה 3D</button>
-        <button class="genre-btn" data-genre="documentary">🎙️ דוקומנטרי</button>
-        <button class="genre-btn" data-genre="fantasy">🧙‍♂️ פנטזיה קסומה</button>
-        <button class="genre-btn" data-genre="cartoon">✏️ סרט מצויר</button>
+        <button class="genre-btn active">💥 אקשן דרמטי</button>
+        <button class="genre-btn">🚀 מדע בדיוני (Sci-Fi)</button>
+        <button class="genre-btn">🎨 אנימציה 3D</button>
+        <button class="genre-btn">🎙️ דוקומנטרי</button>
+        <button class="genre-btn">🧙‍♂️ פנטזיה קסומה</button>
+        <button class="genre-btn">✏️ סרט מצויר</button>
       </div>
     </div>
 
@@ -656,16 +673,18 @@
         🎥 סרטון
         <input type="file" accept="video/*" id="input-video">
       </label>
+      <!-- מצלמה בלבד - פותחת צילום ישיר ללא גלריה -->
       <label class="media-type-btn">
         📷 מצלמה
-        <input type="file" accept="image/*,video/*" capture="environment" id="input-camera">
+        <input type="file" accept="image/*,video/*" capture="user" id="input-camera">
       </label>
     </div>
 
-    <!-- Filters and Adjustments (35 Filters) -->
+    <!-- Filters Section (65 פילטרים בסך הכל!) -->
     <div class="filters-container">
-      <div class="section-title">🎨 אפקטים ופילטרים:</div>
+      <div class="section-title">🎨 אפקטים ופילטרים (65 סוגים):</div>
       <div class="filters-grid" id="filters-grid">
+        <!-- 35 פילטרים מקוריים -->
         <button class="filter-btn active" data-filter="none">ללא פילטר</button>
         <button class="filter-btn" data-filter="hollywood">הוליווד מוזהב</button>
         <button class="filter-btn" data-filter="cinema">קולנועי</button>
@@ -701,6 +720,42 @@
         <button class="filter-btn" data-filter="acid">אסיד צבעוני</button>
         <button class="filter-btn" data-filter="ocean">עמוקי האוקיינוס</button>
         <button class="filter-btn" data-filter="dramatics">דרמטי חזק</button>
+
+        <!-- 30 פילטרים חדשים נוספים -->
+        <button class="filter-btn" data-filter="anime">אנימה יפנית</button>
+        <button class="filter-btn" data-filter="tokyo-night">טוקיו בלילה</button>
+        <button class="filter-btn" data-filter="gold-dust">אבק זהב</button>
+        <button class="filter-btn" data-filter="ultraviolet">אולטרה-סגול</button>
+        <button class="filter-btn" data-filter="pink-neon">ניאון ורוד</button>
+
+        <button class="filter-btn" data-filter="vintage-1890">ספיה קלאסית 1890</button>
+        <button class="filter-btn" data-filter="super-8">פילם Super 8</button>
+        <button class="filter-btn" data-filter="film-16mm">פילם 16mm</button>
+        <button class="filter-btn" data-filter="silent-movie">סרט אילם 1920</button>
+        <button class="filter-btn" data-filter="grainy-film">גרעיניות פילם</button>
+        <button class="filter-btn" data-filter="cyber-pop">פופ סייבר</button>
+
+        <button class="filter-btn" data-filter="spectrum">ספקטרום אור</button>
+        <button class="filter-btn" data-filter="infrared">אינפרא-אדום</button>
+        <button class="filter-btn" data-filter="space-odyssey">אפוליס חלל</button>
+        <button class="filter-btn" data-filter="gothic">גותי כהה</button>
+        <button class="filter-btn" data-filter="desert-sun">שמש מדברית</button>
+        <button class="filter-btn" data-filter="nordic-cool">קור נורדי</button>
+        <button class="filter-btn" data-filter="tropical">סערה טרופית</button>
+
+        <button class="filter-btn" data-filter="pastel-dream">חלום פסטל</button>
+        <button class="filter-btn" data-filter="roman-gold">זהב רומי</button>
+        <button class="filter-btn" data-filter="cyber-green">ירוק עתידני</button>
+        <button class="filter-btn" data-filter="deep-blue">כחול עמוק</button>
+        <button class="filter-btn" data-filter="magma">לבה רותחת</button>
+        <button class="filter-btn" data-filter="xray">צילום רנטגן</button>
+        <button class="filter-btn" data-filter="sketch">סקיצה עיפרון</button>
+        <button class="filter-btn" data-filter="glitch-red">גליץ' אדום</button>
+
+        <button class="filter-btn" data-filter="hologram">הולוגרמה</button>
+        <button class="filter-btn" data-filter="vampire">וומפיר נואר</button>
+        <button class="filter-btn" data-filter="sunburn">צריבת שמש</button>
+        <button class="filter-btn" data-filter="cyber-yellow">צהוב זהיר</button>
       </div>
 
       <div class="intensity-container">
@@ -712,8 +767,13 @@
       </div>
     </div>
 
-    <!-- Create Edit Button -->
-    <button class="btn-create-edit" id="btn-create-edit">✨ צור עריכה</button>
+    <!-- Create Edit Button & Status Message -->
+    <div class="create-edit-wrapper">
+      <button class="btn-create-edit" id="btn-create-edit">✨ צור עריכה</button>
+      <div class="edit-status-msg" id="edit-status-msg">
+        העריכה נוצרה בהצלחה ונשמרה בתיקיית המדיה הערוכה בתחתית העמוד! ✅
+      </div>
+    </div>
 
     <!-- Action Buttons -->
     <div class="action-buttons">
@@ -748,6 +808,7 @@
     const downloadBtn = document.getElementById('download-btn');
     const shareBtn = document.getElementById('share-btn');
     const btnCreateEdit = document.getElementById('btn-create-edit');
+    const editStatusMsg = document.getElementById('edit-status-msg');
     const galleryGrid = document.getElementById('gallery-grid');
     const surpriseBtn = document.getElementById('surprise-btn');
     const aiPrompt = document.getElementById('ai-prompt');
@@ -853,6 +914,7 @@
       previewCard.classList.remove('is-playing');
       previewScreen.classList.remove('playing');
       samsungPlayIcon.textContent = '▶';
+      editStatusMsg.style.display = 'none';
     }
 
     deleteTopBtn.addEventListener('click', clearPreview);
@@ -927,11 +989,13 @@
       applyFilter();
     });
 
+    // 65 CSS Filters Logic
     function getCSSFilterString() {
       if (selectedFilter === 'none') return 'none';
       const f = filterIntensity / 100;
 
       switch (selectedFilter) {
+        // Original 35 Filters
         case 'vintage': return `sepia(${0.5 * f}) contrast(${1 + 0.2 * f})`;
         case 'sepia': return `sepia(${f})`;
         case 'bw': return `grayscale(${f}) contrast(${1 + 0.5 * f})`;
@@ -966,6 +1030,38 @@
         case 'acid': return `hue-rotate(${270 * f}deg) saturate(${1 + 3 * f})`;
         case 'ocean': return `hue-rotate(${140 * f}deg) contrast(${1 + 0.2 * f})`;
         case 'dramatics': return `contrast(${1 + 1.5 * f}) grayscale(${0.4 * f})`;
+
+        // New 30 Filters
+        case 'anime': return `saturate(${1 + 1.8 * f}) contrast(${1 + 0.3 * f}) brightness(${1 + 0.1 * f})`;
+        case 'tokyo-night': return `hue-rotate(${200 * f}deg) saturate(${1 + 1.5 * f}) brightness(${1 - 0.15 * f})`;
+        case 'gold-dust': return `sepia(${0.7 * f}) brightness(${1 + 0.2 * f}) contrast(${1 + 0.3 * f})`;
+        case 'ultraviolet': return `hue-rotate(${250 * f}deg) saturate(${1 + 2 * f}) invert(${0.1 * f})`;
+        case 'pink-neon': return `hue-rotate(${300 * f}deg) saturate(${1 + 2.5 * f})`;
+        case 'vintage-1890': return `sepia(${0.9 * f}) contrast(${1 + 0.6 * f}) brightness(${1 - 0.1 * f})`;
+        case 'super-8': return `sepia(${0.4 * f}) contrast(${1 + 0.2 * f}) saturate(${1 + 0.5 * f})`;
+        case 'film-16mm': return `grayscale(${0.3 * f}) sepia(${0.25 * f}) contrast(${1 + 0.35 * f})`;
+        case 'silent-movie': return `grayscale(${f}) contrast(${1 + 0.8 * f}) brightness(${1 - 0.05 * f})`;
+        case 'grainy-film': return `contrast(${1 + 0.5 * f}) brightness(${1 + 0.05 * f}) saturate(${1 - 0.2 * f})`;
+        case 'cyber-pop': return `hue-rotate(${150 * f}deg) saturate(${1 + 3 * f}) contrast(${1 + 0.4 * f})`;
+        case 'spectrum': return `hue-rotate(${120 * f}deg) saturate(${1 + 1.8 * f})`;
+        case 'infrared': return `invert(${f}) hue-rotate(${180 * f}deg) saturate(${1 + 1.5 * f})`;
+        case 'space-odyssey': return `brightness(${1 - 0.2 * f}) contrast(${1 + 0.7 * f}) hue-rotate(${210 * f}deg)`;
+        case 'gothic': return `grayscale(${0.7 * f}) contrast(${1 + 1.1 * f}) brightness(${1 - 0.25 * f})`;
+        case 'desert-sun': return `sepia(${0.6 * f}) hue-rotate(${-20 * f}deg) saturate(${1 + 1.2 * f})`;
+        case 'nordic-cool': return `hue-rotate(${80 * f}deg) saturate(${1 - 0.3 * f}) brightness(${1 + 0.1 * f})`;
+        case 'tropical': return `saturate(${1 + 2.2 * f}) hue-rotate(${-10 * f}deg)`;
+        case 'pastel-dream': return `brightness(${1 + 0.3 * f}) saturate(${1 - 0.4 * f}) contrast(${1 - 0.1 * f})`;
+        case 'roman-gold': return `sepia(${0.5 * f}) saturate(${1 + 0.8 * f}) contrast(${1 + 0.2 * f})`;
+        case 'cyber-green': return `hue-rotate(${100 * f}deg) saturate(${1 + 2 * f}) brightness(${1 - 0.1 * f})`;
+        case 'deep-blue': return `hue-rotate(${190 * f}deg) saturate(${1 + 1.1 * f}) brightness(${1 - 0.2 * f})`;
+        case 'magma': return `hue-rotate(${-50 * f}deg) saturate(${1 + 3 * f}) contrast(${1 + 0.5 * f})`;
+        case 'xray': return `invert(${f}) grayscale(${f})`;
+        case 'sketch': return `grayscale(${f}) contrast(${1 + 2 * f}) brightness(${1 + 0.2 * f})`;
+        case 'glitch-red': return `hue-rotate(${-40 * f}deg) saturate(${1 + 2 * f}) contrast(${1 + 0.8 * f})`;
+        case 'hologram': return `hue-rotate(${170 * f}deg) opacity(${1 - 0.2 * f}) brightness(${1 + 0.3 * f})`;
+        case 'vampire': return `grayscale(${0.8 * f}) contrast(${1 + 1.4 * f}) hue-rotate(${-30 * f}deg)`;
+        case 'sunburn': return `saturate(${1 + 2.5 * f}) brightness(${1 + 0.25 * f}) contrast(${1 + 0.3 * f})`;
+        case 'cyber-yellow': return `hue-rotate(${40 * f}deg) saturate(${1 + 2.5 * f})`;
         default: return 'none';
       }
     }
@@ -1065,17 +1161,30 @@
       galleryGrid.prepend(item);
     }
 
-    // Action: Create Edit
+    // Action: Create Edit (ללא alert, הודעה מוצגת בגוף העמוד)
     btnCreateEdit.addEventListener('click', async () => {
-      if (!currentMedia) return alert('אנא העלה תמונה או סרטון כדי ליצור עריכה.');
+      if (!currentMedia) {
+        editStatusMsg.style.display = 'block';
+        editStatusMsg.style.color = '#ef4444';
+        editStatusMsg.style.borderColor = '#ef4444';
+        editStatusMsg.style.background = 'rgba(239, 68, 68, 0.1)';
+        editStatusMsg.textContent = 'אנא העלה תמונה או סרטון כדי ליצור עריכה.';
+        return;
+      }
+
       const origText = btnCreateEdit.textContent;
       btnCreateEdit.textContent = 'מעבד ועורך... ⏳';
       btnCreateEdit.disabled = true;
+      editStatusMsg.style.display = 'none';
 
       const processed = await createProcessedBlob();
       if (processed) {
         addItemToFolder(processed);
-        alert('העריכה נוצרה בהצלחה ונשמרה בתיקיית המדיה בתחתית העמוד!');
+        editStatusMsg.style.display = 'block';
+        editStatusMsg.style.color = '#4ade80';
+        editStatusMsg.style.borderColor = '#22c55e';
+        editStatusMsg.style.background = 'rgba(74, 222, 128, 0.1)';
+        editStatusMsg.textContent = 'העריכה נוצרה בהצלחה ונשמרה בתיקיית המדיה הערוכה בתחתית העמוד! ✅';
       }
 
       btnCreateEdit.textContent = origText;
@@ -1083,7 +1192,7 @@
     });
 
     downloadBtn.addEventListener('click', async () => {
-      if (!currentMedia) return alert('אנא העלה תמונה או סרטון תחילה.');
+      if (!currentMedia) return;
       downloadBtn.textContent = 'מעבד...';
       const processed = await createProcessedBlob();
       if (processed) {
@@ -1094,7 +1203,7 @@
     });
 
     shareBtn.addEventListener('click', async () => {
-      if (!currentMedia) return alert('אנא העלה תמונה או סרטון תחילה.');
+      if (!currentMedia) return;
       shareBtn.textContent = 'מעבד...';
       const processed = await createProcessedBlob();
       shareBtn.textContent = '🔗 שיתוף';
