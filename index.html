@@ -19,36 +19,36 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20px;
+      padding: 16px;
     }
 
     header {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 16px;
     }
 
     header h1 {
-      font-size: 2rem;
+      font-size: 1.8rem;
       color: #38bdf8;
-      margin-bottom: 8px;
+      margin-bottom: 4px;
     }
 
     .container {
       width: 100%;
-      max-width: 900px;
+      max-width: 800px;
       background-color: #1e293b;
       border-radius: 16px;
-      padding: 24px;
+      padding: 20px;
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 16px;
     }
 
     .upload-section {
       border: 2px dashed #475569;
       border-radius: 12px;
-      padding: 30px;
+      padding: 20px;
       text-align: center;
       cursor: pointer;
       transition: border-color 0.2s, background-color 0.2s;
@@ -65,8 +65,7 @@
 
     .preview-container {
       width: 100%;
-      min-height: 350px;
-      max-height: 550px;
+      height: 300px;
       background-color: #020617;
       border-radius: 12px;
       overflow: hidden;
@@ -79,7 +78,7 @@
     .preview-container img,
     .preview-container video {
       max-width: 100%;
-      max-height: 550px;
+      max-height: 100%;
       object-fit: contain;
       transition: filter 0.1s ease;
     }
@@ -91,32 +90,29 @@
     .controls {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 12px;
     }
 
-    /* תיקון גלילת הפילטרים - נגלל פנימית ללא הסתרת המסך */
+    /* תיבת פילטרים נגללת בגובה מוגבל שלא מסתירה את המסך */
     .filters-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-      gap: 10px;
-      max-height: 180px;
-      overflow-y: auto;
-      padding-left: 5px;
-      background: #0f172a;
-      padding: 10px;
-      border-radius: 8px;
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      scroll-behavior: smooth;
     }
 
     .filter-btn {
       background-color: #334155;
       color: #f1f5f9;
       border: 2px solid transparent;
-      padding: 10px;
+      padding: 8px 14px;
       border-radius: 8px;
       cursor: pointer;
       font-size: 0.85rem;
+      white-space: nowrap;
       transition: all 0.2s;
-      text-align: center;
+      flex-shrink: 0;
     }
 
     .filter-btn:hover {
@@ -131,16 +127,16 @@
     .intensity-container {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
       background-color: #0f172a;
-      padding: 12px 16px;
+      padding: 10px 14px;
       border-radius: 8px;
     }
 
     .intensity-header {
       display: flex;
       justify-content: space-between;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       color: #cbd5e1;
     }
 
@@ -152,14 +148,12 @@
 
     .actions {
       display: flex;
-      gap: 12px;
+      gap: 10px;
       justify-content: flex-end;
-      margin-top: 10px;
-      flex-wrap: wrap;
     }
 
     .btn {
-      padding: 12px 24px;
+      padding: 10px 20px;
       border-radius: 8px;
       border: none;
       font-weight: 600;
@@ -167,7 +161,7 @@
       transition: opacity 0.2s;
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
 
     .btn:hover {
@@ -180,86 +174,77 @@
     }
 
     .btn-share {
-      background-color: #25d366;
+      background-color: #0284c7;
       color: #ffffff;
     }
 
-    .btn-danger {
-      background-color: #ef4444;
-      color: #ffffff;
-      padding: 6px 12px;
-      font-size: 0.8rem;
+    /* גלריית קבצים מעובדים בתחתית העמוד */
+    .gallery-section {
+      margin-top: 10px;
+      border-top: 1px solid #334155;
+      padding-top: 16px;
     }
 
-    .btn-small {
-      padding: 6px 12px;
-      font-size: 0.8rem;
-      background-color: #38bdf8;
-      color: #0f172a;
-      text-decoration: none;
-      border-radius: 6px;
-    }
-
-    /* תיקיית מדיה מעובדת בתחתית */
-    .folder-container {
-      width: 100%;
-      max-width: 900px;
-      background-color: #1e293b;
-      border-radius: 16px;
-      padding: 24px;
-      margin-top: 24px;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-    }
-
-    .folder-container h2 {
-      font-size: 1.2rem;
+    .gallery-section h3 {
+      font-size: 1.1rem;
+      margin-bottom: 12px;
       color: #38bdf8;
-      margin-bottom: 16px;
-      border-bottom: 1px solid #334155;
-      padding-bottom: 8px;
     }
 
-    .folder-grid {
+    .gallery-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
     }
 
-    .folder-card {
+    .gallery-item {
       background-color: #0f172a;
-      border: 1px solid #334155;
-      border-radius: 10px;
+      border-radius: 8px;
       padding: 10px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 8px;
       align-items: center;
     }
 
-    .folder-card-media {
+    .gallery-item img,
+    .gallery-item video {
       width: 100%;
       height: 120px;
-      object-fit: contain;
-      background-color: #020617;
+      object-fit: cover;
       border-radius: 6px;
     }
 
-    .folder-card-actions {
+    .gallery-actions {
       display: flex;
-      justify-content: space-between;
+      gap: 6px;
       width: 100%;
-      gap: 8px;
     }
 
-    .status-msg {
-      color: #38bdf8;
-      font-size: 0.9rem;
+    .btn-small {
+      flex: 1;
+      padding: 6px;
+      font-size: 0.8rem;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
       text-align: center;
+    }
+
+    .btn-small-download {
+      background-color: #10b981;
+      color: #fff;
+    }
+
+    .btn-small-delete {
+      background-color: #ef4444;
+      color: #fff;
     }
 
     /* custom scrollbar */
     .filters-grid::-webkit-scrollbar {
-      width: 6px;
+      height: 6px;
     }
     .filters-grid::-webkit-scrollbar-thumb {
       background: #475569;
@@ -271,12 +256,12 @@
 
   <header>
     <h1>עורך מדיה AI</h1>
-    <p>העלאת כל סוגי התמונות והסרטונים והחלת פילטרים בזמן אמת</p>
+    <p>העלאת תמונות וסרטונים והחלת פילטרים בזמן אמת</p>
   </header>
 
   <div class="container">
     <label class="upload-section" for="file-input">
-      <span>לחץ כאן להעלאת תמונה או סרטון (כל הפורמטים נתמכים)</span>
+      <span>לחץ כאן להעלאת תמונה או סרטון</span>
       <input type="file" id="file-input" accept="image/*, video/*">
     </label>
 
@@ -285,29 +270,29 @@
     </div>
 
     <div class="controls">
-      <h3>בחר פילטר (20 סוגים):</h3>
+      <h3>בחר פילטר:</h3>
       <div class="filters-grid" id="filters-grid">
         <button class="filter-btn active" data-filter="none">ללא פילטר</button>
         <button class="filter-btn" data-filter="vintage">וינטג'</button>
         <button class="filter-btn" data-filter="sepia">ספיה קלאסי</button>
-        <button class="filter-btn" data-filter="bw">שחור-לבן דרמטי</button>
+        <button class="filter-btn" data-filter="bw">שחור-לבן</button>
         <button class="filter-btn" data-filter="cyberpunk">סייברפאנק</button>
         <button class="filter-btn" data-filter="warm">חם</button>
         <button class="filter-btn" data-filter="cool">קר</button>
-        <button class="filter-btn" data-filter="invert">אינוורס (נגטיב)</button>
+        <button class="filter-btn" data-filter="invert">אינוורס</button>
         <button class="filter-btn" data-filter="hue-shift">שינוי גוון</button>
-        <button class="filter-btn" data-filter="blur">טשטוש עמוק</button>
-        <button class="filter-btn" data-filter="high-contrast">קונטרסט גבוה</button>
-        <button class="filter-btn" data-filter="pastel">פסטל רך</button>
-        <button class="filter-btn" data-filter="neon">ניאון זוהר</button>
+        <button class="filter-btn" data-filter="blur">טשטוש</button>
+        <button class="filter-btn" data-filter="high-contrast">קונטרסט</button>
+        <button class="filter-btn" data-filter="pastel">פסטל</button>
+        <button class="filter-btn" data-filter="neon">ניאון</button>
         <button class="filter-btn" data-filter="cinema">קולנועי</button>
-        <button class="filter-btn" data-filter="sunset">שקיעה רומנטית</button>
+        <button class="filter-btn" data-filter="sunset">שקיעה</button>
         <button class="filter-btn" data-filter="noir">פילם נואר</button>
-        <button class="filter-btn" data-filter="retro-green">רפאים ירוק</button>
+        <button class="filter-btn" data-filter="retro-green">ירוק רפאים</button>
         <button class="filter-btn" data-filter="golden-hour">שעת הזהב</button>
-        <button class="filter-btn" data-filter="hdr">אפקט HDR</button>
+        <button class="filter-btn" data-filter="hdr">HDR</button>
         <button class="filter-btn" data-filter="pop-art">פופ ארט</button>
-        <button class="filter-btn" data-filter="faded">דהוי וינטג'</button>
+        <button class="filter-btn" data-filter="faded">דהוי</button>
       </div>
 
       <div class="intensity-container">
@@ -319,19 +304,17 @@
       </div>
     </div>
 
-    <div id="status-msg" class="status-msg"></div>
-
     <div class="actions">
-      <button class="btn btn-share" id="share-btn">שתף ל-WhatsApp / נייד</button>
-      <button class="btn btn-download" id="download-btn">עבד ושמור לתיקייה</button>
+      <button class="btn btn-share" id="share-btn">שתף תמונה</button>
+      <button class="btn btn-download" id="download-btn">שמור / הורד</button>
     </div>
-  </div>
 
-  <!-- תיקיית מדיה מעובדת בתחתית -->
-  <div class="folder-container">
-    <h2>תיקיית קבצים מעובדים (להורדה ומחיקה)</h2>
-    <div class="folder-grid" id="folder-grid">
-      <p class="placeholder-text" id="empty-folder-text">אין עדיין קבצים מעובדים בתיקייה.</p>
+    <!-- גלריית מדיה ערוכה -->
+    <div class="gallery-section">
+      <h3>תיקיית מדיה ערוכה</h3>
+      <div class="gallery-grid" id="gallery-grid">
+        <!-- פריטים שמורים יופיעו כאן -->
+      </div>
     </div>
   </div>
 
@@ -343,23 +326,44 @@
     const intensityValue = document.getElementById('intensity-value');
     const downloadBtn = document.getElementById('download-btn');
     const shareBtn = document.getElementById('share-btn');
-    const folderGrid = document.getElementById('folder-grid');
-    const emptyFolderText = document.getElementById('empty-folder-text');
-    const statusMsg = document.getElementById('status-msg');
+    const galleryGrid = document.getElementById('gallery-grid');
 
     let currentMedia = null;
     let mediaType = null;
     let fileUrl = null;
-    let fileName = 'media';
+    let fileName = 'edited_media';
     let selectedFilter = 'none';
     let filterIntensity = 100;
 
-    // העלאת קובץ
+    const filterDefinitions = {
+      'none': '',
+      'vintage': 'sepia(0.5) contrast(1.2) brightness(0.9)',
+      'sepia': 'sepia(1)',
+      'bw': 'grayscale(1) contrast(1.5)',
+      'cyberpunk': 'hue-rotate(180deg) contrast(1.4) saturate(2)',
+      'warm': 'sepia(0.3) saturate(1.4) hue-rotate(-10deg)',
+      'cool': 'hue-rotate(30deg) saturate(1.2) brightness(1.1)',
+      'invert': 'invert(1)',
+      'hue-shift': 'hue-rotate(90deg)',
+      'blur': 'blur(5px)',
+      'high-contrast': 'contrast(2)',
+      'pastel': 'saturate(0.5) brightness(1.3) contrast(0.8)',
+      'neon': 'saturate(3) contrast(1.5) brightness(1.2)',
+      'cinema': 'contrast(1.3) saturate(0.8) brightness(0.9)',
+      'sunset': 'sepia(0.4) saturate(2) hue-rotate(-20deg)',
+      'noir': 'grayscale(1) contrast(2) brightness(0.8)',
+      'retro-green': 'grayscale(0.5) hue-rotate(80deg) saturate(2)',
+      'golden-hour': 'sepia(0.3) saturate(1.8) brightness(1.1)',
+      'hdr': 'contrast(1.6) saturate(1.4) brightness(1.05)',
+      'pop-art': 'saturate(5) hue-rotate(45deg)',
+      'faded': 'contrast(0.8) brightness(1.2) sepia(0.2)'
+    };
+
     fileInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
 
-      fileName = file.name.split('.')[0];
+      fileName = file.name;
       fileUrl = URL.createObjectURL(file);
       previewContainer.innerHTML = '';
 
@@ -374,7 +378,6 @@
         currentMedia.controls = true;
         currentMedia.autoplay = true;
         currentMedia.loop = true;
-        currentMedia.muted = true;
         currentMedia.playsInline = true;
       }
 
@@ -384,7 +387,6 @@
       }
     });
 
-    // בחירת פילטר
     filterButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         filterButtons.forEach(b => b.classList.remove('active'));
@@ -394,126 +396,164 @@
       });
     });
 
-    // שינוי עוצמה - משנה צבע ואפקט בלבד ללא החשכה
     intensitySlider.addEventListener('input', (e) => {
       filterIntensity = e.target.value;
       intensityValue.textContent = `${filterIntensity}%`;
       applyFilter();
     });
 
-    // חישוב CSS Filter מדויק
-    function getFilterCSS(filter, intensity) {
-      if (filter === 'none') return 'none';
-      const f = intensity / 100;
+    function applyFilter() {
+      if (!currentMedia) return;
 
-      switch (filter) {
-        case 'vintage': return `sepia(${0.5 * f}) contrast(${1 + 0.2 * f}) brightness(${1 - 0.1 * f})`;
-        case 'sepia': return `sepia(${f})`;
-        case 'bw': return `grayscale(${f}) contrast(${1 + 0.5 * f})`;
-        case 'cyberpunk': return `hue-rotate(${180 * f}deg) contrast(${1 + 0.4 * f}) saturate(${1 + 1 * f})`;
-        case 'warm': return `sepia(${0.3 * f}) saturate(${1 + 0.4 * f}) hue-rotate(${-10 * f}deg)`;
-        case 'cool': return `hue-rotate(${30 * f}deg) saturate(${1 + 0.2 * f})`;
-        case 'invert': return `invert(${f})`;
-        case 'hue-shift': return `hue-rotate(${90 * f}deg)`;
-        case 'blur': return `blur(${5 * f}px)`;
-        case 'high-contrast': return `contrast(${1 + 1 * f})`;
-        case 'pastel': return `saturate(${1 - 0.5 * f}) brightness(${1 + 0.3 * f})`;
-        case 'neon': return `saturate(${1 + 2 * f}) contrast(${1 + 0.5 * f})`;
-        case 'cinema': return `contrast(${1 + 0.3 * f}) saturate(${1 - 0.2 * f})`;
-        case 'sunset': return `sepia(${0.4 * f}) saturate(${1 + 1 * f}) hue-rotate(${-20 * f}deg)`;
-        case 'noir': return `grayscale(${f}) contrast(${1 + 1 * f})`;
-        case 'retro-green': return `grayscale(${0.5 * f}) hue-rotate(${80 * f}deg) saturate(${1 + 1 * f})`;
-        case 'golden-hour': return `sepia(${0.3 * f}) saturate(${1 + 0.8 * f})`;
-        case 'hdr': return `contrast(${1 + 0.6 * f}) saturate(${1 + 0.4 * f})`;
-        case 'pop-art': return `saturate(${1 + 4 * f}) hue-rotate(${45 * f}deg)`;
-        case 'faded': return `contrast(${1 - 0.2 * f}) sepia(${0.2 * f})`;
-        default: return 'none';
+      if (selectedFilter === 'none') {
+        currentMedia.style.filter = 'none';
+        return;
+      }
+
+      const factor = filterIntensity / 100;
+
+      if (selectedFilter === 'blur') {
+        currentMedia.style.filter = `blur(${5 * factor}px)`;
+      } else if (selectedFilter === 'sepia') {
+        currentMedia.style.filter = `sepia(${factor})`;
+      } else if (selectedFilter === 'bw') {
+        currentMedia.style.filter = `grayscale(${factor}) contrast(${1 + 0.5 * factor})`;
+      } else if (selectedFilter === 'invert') {
+        currentMedia.style.filter = `invert(${factor})`;
+      } else {
+        currentMedia.style.filter = `${filterDefinitions[selectedFilter]} opacity(${0.3 + 0.7 * factor})`;
       }
     }
 
-    function applyFilter() {
-      if (!currentMedia) return;
-      currentMedia.style.filter = getFilterCSS(selectedFilter, filterIntensity);
-    }
-
-    // מעבד קובץ (קנבס לתמונה / הקלטת פריים לווידאו)
+    // יצירת קובץ Blob אמיתי מהמדיה עם הפילטר המוחל
     async function processMediaBlob() {
       if (!currentMedia) return null;
 
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      const filterCSS = getFilterCSS(selectedFilter, filterIntensity);
 
       if (mediaType === 'image') {
-        const width = currentMedia.naturalWidth || currentMedia.width;
-        const height = currentMedia.naturalHeight || currentMedia.height;
-        canvas.width = width;
-        canvas.height = height;
+        canvas.width = currentMedia.naturalWidth || currentMedia.width || 800;
+        canvas.height = currentMedia.naturalHeight || currentMedia.height || 600;
 
-        ctx.filter = filterCSS;
-        ctx.drawImage(currentMedia, 0, 0, width, height);
+        ctx.filter = getComputedStyle(currentMedia).filter;
+        ctx.drawImage(currentMedia, 0, 0, canvas.width, canvas.height);
 
-        return new Promise((resolve) => {
-          canvas.toBlob((blob) => resolve({ blob, type: 'image/png', ext: 'png' }), 'image/png');
+        return new Promise(resolve => {
+          canvas.toBlob(blob => {
+            resolve({ blob, type: 'image', mime: 'image/png', ext: 'png' });
+          }, 'image/png');
         });
       } else if (mediaType === 'video') {
-        statusMsg.textContent = 'מייצר סרטון מעובד... אנא המתן מספר שניות';
-        
-        const width = currentMedia.videoWidth || 640;
-        const height = currentMedia.videoHeight || 360;
-        canvas.width = width;
-        canvas.height = height;
+        canvas.width = currentMedia.videoWidth || 640;
+        canvas.height = currentMedia.videoHeight || 360;
 
         const stream = canvas.captureStream(30);
         const recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
         const chunks = [];
 
-        recorder.ondataavailable = (e) => chunks.push(e.data);
-
-        return new Promise((resolve) => {
+        recorder.ondataavailable = e => chunks.push(e.data);
+        
+        return new Promise(resolve => {
           recorder.onstop = () => {
             const blob = new Blob(chunks, { type: 'video/webm' });
-            statusMsg.textContent = '';
-            resolve({ blob, type: 'video/webm', ext: 'webm' });
+            resolve({ blob, type: 'video', mime: 'video/webm', ext: 'webm' });
           };
 
-          recorder.start();
           currentMedia.currentTime = 0;
           currentMedia.play();
+          recorder.start();
 
-          const renderFrame = () => {
+          const drawFrame = () => {
             if (currentMedia.ended || currentMedia.paused) {
-              if (recorder.state === 'recording') recorder.stop();
+              recorder.stop();
               return;
             }
-            ctx.filter = filterCSS;
-            ctx.drawImage(currentMedia, 0, 0, width, height);
-            requestAnimationFrame(renderFrame);
+            ctx.filter = getComputedStyle(currentMedia).filter;
+            ctx.drawImage(currentMedia, 0, 0, canvas.width, canvas.height);
+            requestAnimationFrame(drawFrame);
           };
-          renderFrame();
+          drawFrame();
 
-          currentMedia.onended = () => {
-            if (recorder.state === 'recording') recorder.stop();
-          };
+          // עצירת ההקלטה בסוף הסרטון
+          currentMedia.onended = () => recorder.stop();
         });
       }
     }
 
-    // עיבוד ושמירה לתיקייה
+    // הוספה לגלריית המדיה בתחתית
+    function addToGallery(blobData) {
+      const blobUrl = URL.createObjectURL(blobData.blob);
+      const item = document.createElement('div');
+      item.className = 'gallery-item';
+
+      let mediaEl;
+      if (blobData.type === 'image') {
+        mediaEl = document.createElement('img');
+        mediaEl.src = blobUrl;
+      } else {
+        mediaEl = document.createElement('video');
+        mediaEl.src = blobUrl;
+        mediaEl.controls = true;
+      }
+
+      const actions = document.createElement('div');
+      actions.className = 'gallery-actions';
+
+      const downloadBtnSmall = document.createElement('button');
+      downloadBtnSmall.className = 'btn-small btn-small-download';
+      downloadBtnSmall.textContent = 'הורד';
+      downloadBtnSmall.onclick = () => triggerDownload(blobData.blob, `edited_${Date.now()}.${blobData.ext}`);
+
+      const deleteBtnSmall = document.createElement('button');
+      deleteBtnSmall.className = 'btn-small btn-small-delete';
+      deleteBtnSmall.textContent = 'מחק';
+      deleteBtnSmall.onclick = () => {
+        item.remove();
+        URL.revokeObjectURL(blobUrl);
+      };
+
+      actions.appendChild(downloadBtnSmall);
+      actions.appendChild(deleteBtnSmall);
+
+      item.appendChild(mediaEl);
+      item.appendChild(actions);
+      galleryGrid.prepend(item);
+    }
+
+    function triggerDownload(blob, filename) {
+      const a = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    // לחצן שמירה/הורדה
     downloadBtn.addEventListener('click', async () => {
       if (!currentMedia) {
         alert('אנא העלה תמונה או סרטון תחילה.');
         return;
       }
 
-      const processed = await processMediaBlob();
-      if (!processed) return;
+      downloadBtn.disabled = true;
+      downloadBtn.textContent = 'מעבד...';
 
-      const blobUrl = URL.createObjectURL(processed.blob);
-      addMediaToFolder(blobUrl, processed.type, `edited_${fileName}.${processed.ext}`);
+      const processed = await processMediaBlob();
+      if (processed) {
+        const name = `edited_${Date.now()}.${processed.ext}`;
+        triggerDownload(processed.blob, name);
+        addToGallery(processed);
+      }
+
+      downloadBtn.disabled = false;
+      downloadBtn.textContent = 'שמור / הורד';
     });
 
-    // שיתוף ישיר לנייד ול-WhatsApp
+    // לחצן שיתוף קובץ (Web Share API)
     shareBtn.addEventListener('click', async () => {
       if (!currentMedia) {
         alert('אנא העלה תמונה או סרטון תחילה.');
@@ -523,73 +563,22 @@
       const processed = await processMediaBlob();
       if (!processed) return;
 
-      const file = new File([processed.blob], `edited_${fileName}.${processed.ext}`, { type: processed.type });
+      const file = new File([processed.blob], `edited_media.${processed.ext}`, { type: processed.mime });
 
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
           await navigator.share({
-            files: [file],
-            title: 'מדיה מעובדת AI',
-            text: 'מדיה מעובדת מעורך AI'
+            title: 'מדיה ערוכה',
+            files: [file]
           });
         } catch (err) {
-          console.log('השיתוף בוטל');
+          if (err.name !== 'AbortError') console.error('שגיאה בשיתוף:', err);
         }
       } else {
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(processed.blob);
-        a.download = `edited_${fileName}.${processed.ext}`;
-        a.click();
-        alert('הקובץ הורד למכשיר! בדפדפנים תומכים בנייד פונקציית השיתוף שולחת ישירות ל-WhatsApp.');
+        alert('שיתוף קבצים אינו נתמך בדפדפן זה. הקובץ יורד במקום.');
+        triggerDownload(processed.blob, file.name);
       }
     });
-
-    // ניהול התיקייה בתחתית
-    function addMediaToFolder(url, type, fullFileName) {
-      if (emptyFolderText) emptyFolderText.style.display = 'none';
-
-      const card = document.createElement('div');
-      card.className = 'folder-card';
-
-      let mediaElem;
-      if (type.startsWith('image/')) {
-        mediaElem = document.createElement('img');
-        mediaElem.src = url;
-        mediaElem.className = 'folder-card-media';
-      } else {
-        mediaElem = document.createElement('video');
-        mediaElem.src = url;
-        mediaElem.controls = true;
-        mediaElem.className = 'folder-card-media';
-      }
-
-      const actions = document.createElement('div');
-      actions.className = 'folder-card-actions';
-
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.href = url;
-      downloadAnchor.download = fullFileName;
-      downloadAnchor.className = 'btn-small';
-      downloadAnchor.textContent = 'הורד';
-
-      const deleteBtn = document.createElement('button');
-      deleteBtn.className = 'btn btn-danger';
-      deleteBtn.textContent = 'מחק';
-      deleteBtn.onclick = () => {
-        card.remove();
-        if (folderGrid.children.length === 1 && emptyFolderText) {
-          emptyFolderText.style.display = 'block';
-        }
-      };
-
-      actions.appendChild(downloadAnchor);
-      actions.appendChild(deleteBtn);
-
-      card.appendChild(mediaElem);
-      card.appendChild(actions);
-
-      folderGrid.appendChild(card);
-    }
   </script>
 </body>
 </html>
