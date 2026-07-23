@@ -159,7 +159,7 @@
       justify-content: center;
       position: relative;
       cursor: pointer;
-      transition: height 0.3s;
+      transition: height 0.3s, filter 0.3s;
     }
 
     /* התאמה מלאה של המדיה למסך ללא מתיחות או עיוותים */
@@ -168,6 +168,45 @@
       width: 100%;
       height: 100%;
       object-fit: contain;
+      transition: filter 0.3s;
+    }
+
+    /* AI Loading Overlay with Gray Tint, Blur & Sparkles */
+    .ai-loading-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(30, 41, 59, 0.75);
+      backdrop-filter: blur(8px) grayscale(100%);
+      -webkit-backdrop-filter: blur(8px) grayscale(100%);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      z-index: 20;
+      border-radius: 10px;
+    }
+
+    .ai-loading-overlay.active {
+      display: flex;
+    }
+
+    .sparkles-container {
+      font-size: 2.2rem;
+      animation: sparkleAnim 1.2s infinite alternate ease-in-out;
+    }
+
+    @keyframes sparkleAnim {
+      0% { transform: scale(0.8) rotate(-10deg); opacity: 0.6; }
+      100% { transform: scale(1.2) rotate(15deg); opacity: 1; filter: drop-shadow(0 0 10px #22d3ee); }
+    }
+
+    .ai-loading-text {
+      color: #ffffff;
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+      text-align: center;
     }
 
     /* Samsung Style Play/Pause Overlay Button */
@@ -642,6 +681,12 @@
       </div>
 
       <div class="preview-screen" id="preview-screen">
+        <!-- AI Processing Overlay -->
+        <div class="ai-loading-overlay" id="ai-loading-overlay">
+          <div class="sparkles-container">✨✨⭐</div>
+          <div class="ai-loading-text">מעבד עריכת AI...</div>
+        </div>
+
         <div class="samsung-play-btn" id="samsung-play-icon">▶</div>
         <span class="placeholder-text" id="placeholder-text">אין מדיה מוצגת</span>
       </div>
@@ -704,7 +749,6 @@
         🎥 סרטון
         <input type="file" accept="video/*" id="input-video">
       </label>
-      <!-- כפתור מצלמה שפותח תפריט צילום -->
       <button class="media-type-btn" id="cam-toggle-btn" type="button">
         📷 מצלמה
       </button>
@@ -727,8 +771,7 @@
       <div class="section-title">🎨 אפקטים ופילטרים מתקדמים:</div>
       <div class="filters-grid" id="filters-grid">
         <button class="filter-btn active" data-filter="none">ללא פילטר</button>
-        
-        <!-- 20 פילטרים חדשים -->
+
         <button class="filter-btn" data-filter="sepia-glow">✨ ספיה זוהרת</button>
         <button class="filter-btn" data-filter="emerald-night">🌃 ליל אזמרגד</button>
         <button class="filter-btn" data-filter="copper-tint">🥉 נחושת חמה</button>
@@ -751,7 +794,6 @@
         <button class="filter-btn" data-filter="crt-display">📺 מסך CRT עתיק</button>
         <button class="filter-btn" data-filter="fog-mist">🌫️ ערפל עמוק</button>
 
-        <!-- פילטרים נוספים -->
         <button class="filter-btn" data-filter="cyber-pink">💗 סייבר ורוד</button>
         <button class="filter-btn" data-filter="emerald-glow">💚 אזמרגד זוהר</button>
         <button class="filter-btn" data-filter="neon-orange">🟧 ניאון כתום</button>
@@ -807,7 +849,7 @@
     <div class="create-edit-wrapper">
       <button class="btn-create-edit" id="btn-create-edit">✨ צור עריכה</button>
       <div class="edit-status-msg" id="edit-status-msg">
-        העריכה נוצרה בהצלחה ונשמרה בתיקיית המדיה הערוכה בתחתית העמוד! ✅
+        העריכה מוכנה! לחץ על "הורדה" כדי לשמור בטלפון ולראות בתיקייה בתחתית. ✅
       </div>
     </div>
 
@@ -832,6 +874,7 @@
     const samsungPlayIcon = document.getElementById('samsung-play-icon');
     const placeholderText = document.getElementById('placeholder-text');
     const deleteTopBtn = document.getElementById('delete-top-btn');
+    const aiLoadingOverlay = document.getElementById('ai-loading-overlay');
     
     const progressContainer = document.getElementById('progress-container');
     const progressFill = document.getElementById('progress-fill');
@@ -858,6 +901,7 @@
     let selectedFilter = 'none';
     let filterIntensity = 100;
     let isDraggingProgress = false;
+    let lastProcessedBlob = null; // שומר את העריכה המוכנה
 
     // Toggle Camera Menu
     camToggleBtn.addEventListener('click', () => {
@@ -954,6 +998,7 @@
         currentMedia = null;
       }
       previewScreen.innerHTML = '';
+      previewScreen.appendChild(aiLoadingOverlay);
       previewScreen.appendChild(samsungPlayIcon);
       previewScreen.appendChild(placeholderText);
       placeholderText.style.display = 'block';
@@ -962,6 +1007,7 @@
       previewScreen.classList.remove('playing');
       samsungPlayIcon.textContent = '▶';
       editStatusMsg.style.display = 'none';
+      lastProcessedBlob = null;
     }
 
     deleteTopBtn.addEventListener('click', clearPreview);
@@ -1042,7 +1088,6 @@
       const f = filterIntensity / 100;
 
       switch (selectedFilter) {
-        // 20 הפילטרים החדשים
         case 'sepia-glow': return `sepia(${0.8 * f}) brightness(${1 + 0.25 * f}) contrast(${1 + 0.2 * f})`;
         case 'emerald-night': return `hue-rotate(${110 * f}deg) saturate(${1 + 1.2 * f}) brightness(${1 - 0.2 * f})`;
         case 'copper-tint': return `sepia(${0.6 * f}) hue-rotate(${-20 * f}deg) saturate(${1 + 0.8 * f})`;
@@ -1056,7 +1101,6 @@
         case 'electric-cyan': return `hue-rotate(${150 * f}deg) saturate(${1 + 2 * f}) brightness(${1 + 0.1 * f})`;
         case 'vintage-plum': return `hue-rotate(${280 * f}deg) saturate(${1 + 0.6 * f}) contrast(${1 + 0.2 * f})`;
 
-        // שחור לבן ואפור
         case 'bw-dramatic': return `grayscale(${f}) contrast(${1 + 1.8 * f}) brightness(${1 - 0.1 * f})`;
         case 'gray-neutral': return `grayscale(${f}) brightness(${1 + 0.05 * f})`;
         case 'bw-high-contrast': return `grayscale(${f}) contrast(${1 + 2.5 * f})`;
@@ -1066,7 +1110,6 @@
         case 'crt-display': return `contrast(${1 + 0.6 * f}) brightness(${1 + 0.2 * f}) saturate(${1 - 0.1 * f})`;
         case 'fog-mist': return `blur(${3 * f}px) brightness(${1 + 0.3 * f}) opacity(${1 - 0.2 * f})`;
 
-        // פילטרים קודמים
         case 'cyber-pink': return `hue-rotate(${310 * f}deg) saturate(${1 + 2 * f})`;
         case 'emerald-glow': return `hue-rotate(${110 * f}deg) saturate(${1 + 1.8 * f}) brightness(${1 + 0.15 * f})`;
         case 'neon-orange': return `hue-rotate(${25 * f}deg) saturate(${1 + 2.5 * f})`;
@@ -1207,7 +1250,7 @@
       galleryGrid.prepend(item);
     }
 
-    // Action: Create Edit
+    // Action: Create Edit - מתחיל עריכת AI ומציג אפור מטושטש עם נצנוצים
     btnCreateEdit.addEventListener('click', async () => {
       if (!currentMedia) {
         editStatusMsg.style.display = 'block';
@@ -1218,29 +1261,44 @@
         return;
       }
 
+      // 1. הפעלת שכבת הטשטוש, האפור והנצנוצים על המסך
+      aiLoadingOverlay.classList.add('active');
       const origText = btnCreateEdit.textContent;
-      btnCreateEdit.textContent = 'מעבד ועורך... ⏳';
+      btnCreateEdit.textContent = 'מעבד עריכה... ⏳';
       btnCreateEdit.disabled = true;
       editStatusMsg.style.display = 'none';
 
-      const processed = await createProcessedBlob();
-      if (processed) {
-        addItemToFolder(processed);
+      // 2. עיבוד העריכה בציפייה (עיכוב קטן להמחשה ויזואלית מלאה)
+      await new Promise(r => setTimeout(r, 1200));
+      lastProcessedBlob = await createProcessedBlob();
+
+      // 3. הסרת האפקט ועדכון הודעה (ללא הורדה וללא הוספה לתיקייה עדיין)
+      aiLoadingOverlay.classList.remove('active');
+      btnCreateEdit.textContent = origText;
+      btnCreateEdit.disabled = false;
+
+      if (lastProcessedBlob) {
         editStatusMsg.style.display = 'block';
         editStatusMsg.style.color = '#4ade80';
         editStatusMsg.style.borderColor = '#22c55e';
         editStatusMsg.style.background = 'rgba(74, 222, 128, 0.1)';
-        editStatusMsg.textContent = 'העריכה נוצרה בהצלחה ונשמרה בתיקיית המדיה הערוכה בתחתית העמוד! ✅';
+        editStatusMsg.textContent = 'העריכה מוכנה! לחץ על "הורדה" כדי לשמור בטלפון ולראות בתיקייה בתחתית. ✅';
       }
-
-      btnCreateEdit.textContent = origText;
-      btnCreateEdit.disabled = false;
     });
 
+    // Action: Download - רק בלחיצה כאן הקובץ יורד לטלפון ונוצר בתיקייה למטה
     downloadBtn.addEventListener('click', async () => {
       if (!currentMedia) return;
-      downloadBtn.textContent = 'מעבד...';
-      const processed = await createProcessedBlob();
+      downloadBtn.textContent = 'מוריד...';
+      
+      // אם עדיין לא נלחץ "צור עריכה", נעבד עכשיו
+      let processed = lastProcessedBlob;
+      if (!processed) {
+        aiLoadingOverlay.classList.add('active');
+        processed = await createProcessedBlob();
+        aiLoadingOverlay.classList.remove('active');
+      }
+
       if (processed) {
         saveFileToDevice(processed.blob, `edited_${fileName.split('.')[0]}.${processed.extension}`);
         addItemToFolder(processed);
@@ -1251,7 +1309,7 @@
     shareBtn.addEventListener('click', async () => {
       if (!currentMedia) return;
       shareBtn.textContent = 'מעבד...';
-      const processed = await createProcessedBlob();
+      let processed = lastProcessedBlob || await createProcessedBlob();
       shareBtn.textContent = '🔗 שיתוף';
       if (!processed) return;
 
