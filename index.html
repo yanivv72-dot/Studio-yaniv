@@ -3,129 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Yaniv AI Master</title>
+    <title>Yaniv AI Studio | Architect Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        body { background-color: #000; color: white; font-family: sans-serif; margin: 0; overflow: hidden; height: 100vh; }
-        .player-box { height: 30vh; background: #000; border-bottom: 2px solid #7C3AED; position: relative; }
-        .transport-bar { height: 60px; background: #111; display: flex; justify-content: space-around; align-items: center; border-bottom: 1px solid #222; }
-        .scroll-content { height: calc(70vh - 60px); overflow-y: auto; padding: 15px; padding-bottom: 100px; }
-        .ai-btn { background: linear-gradient(to right, #7C3AED, #4C1D95); transition: 0.2s; }
-        .ai-btn:active { transform: scale(0.95); }
-        .loader-overlay { background: rgba(0,0,0,0.9); display: none; position: absolute; inset: 0; z-index: 100; flex-direction: column; align-items: center; justify-content: center; }
-        .percent { font-size: 5rem; font-weight: 900; color: #7C3AED; }
+        :root { --accent: #7C3AED; --bg: #0A0A0B; --panel: #161618; }
+        body { background-color: var(--bg); color: white; font-family: system-ui, -apple-system, sans-serif; margin: 0; overflow: hidden; height: 100vh; }
+        
+        /* אזור 1: נגן קבוע (30% גובה) */
+        .viewport-top { height: 30vh; background: #000; position: fixed; top: 0; width: 100%; z-index: 100; border-bottom: 2px solid #1A1A1D; }
+        
+        /* אזור 2: פס תחבורה (10% גובה) */
+        .transport-fixed { height: 70px; background: #111113; position: fixed; top: 30vh; width: 100%; z-index: 90; display: flex; align-items: center; justify-content: space-around; border-bottom: 1px solid #1A1A1D; }
+        
+        /* אזור 3: תוכן נגלל (60% גובה) */
+        .scroll-panel { margin-top: calc(30vh + 70px); height: calc(70vh - 70px); overflow-y: auto; padding: 15px; padding-bottom: 150px; -webkit-overflow-scrolling: touch; }
+
+        .render-text { font-size: 5rem; font-weight: 900; color: var(--accent); text-shadow: 0 0 40px rgba(124,58,237,0.4); }
+        .card-ui { background: var(--panel); border: 1px solid #27272A; border-radius: 24px; }
+        .btn-action:active { transform: scale(0.95); opacity: 0.8; }
+        
+        /* Scrollbar נקי */
+        .scroll-panel::-webkit-scrollbar { width: 4px; }
+        .scroll-panel::-webkit-scrollbar-thumb { background: #27272A; border-radius: 10px; }
     </style>
 </head>
 <body>
 
-    <!-- אזור 1: הנגן (30%) -->
-    <div class="player-box">
-        <div id="loader" class="loader-overlay">
-            <div id="p-label" class="percent">0%</div>
-            <div class="text-xs tracking-widest text-purple-400">AI RENDERING...</div>
+    <!-- אזור 1: הנגן המרכזי -->
+    <div class="viewport-top flex items-center justify-center relative">
+        <div id="mediaPlaceholder" class="flex flex-col items-center opacity-20">
+            <i data-lucide="aperture" class="w-12 h-12 mb-2 text-purple-500"></i>
+            <span class="text-[9px] tracking-[0.4em] font-bold">4K AI ENGINE</span>
         </div>
-        <div id="empty-msg" class="absolute inset-0 flex flex-col items-center justify-center opacity-20">
-            <i data-lucide="sparkles" class="w-12 h-12 mb-2"></i>
-            <span class="text-xs uppercase">Yaniv AI Engine</span>
-        </div>
-        <img id="res-img" class="hidden w-full h-full object-contain">
-        <video id="res-vid" class="hidden w-full h-full object-contain" controls playsinline></video>
-    </div>
-
-    <!-- אזור 2: פס תחבורה (קבוע) -->
-    <div class="transport-bar">
-        <button onclick="vidAction('start')"><i data-lucide="skip-back" class="w-6 h-6"></i></button>
-        <button onclick="vidAction('rewind')"><i data-lucide="rewind" class="w-6 h-6"></i></button>
-        <button onclick="vidAction('play')" class="text-purple-500"><i data-lucide="play-circle" class="w-10 h-10"></i></button>
-        <button onclick="vidAction('forward')"><i data-lucide="fast-forward" class="w-6 h-6"></i></button>
-        <button onclick="vidAction('stop')" class="text-red-500"><i data-lucide="square" class="w-6 h-6"></i></button>
-    </div>
-
-    <!-- אזור 3: הכפתורים (נגלל) -->
-    <div class="scroll-content space-y-4">
         
-        <!-- כלי יצירה AI -->
-        <div class="bg-zinc-900/50 p-4 rounded-3xl border border-zinc-800 shadow-xl">
-            <textarea id="prompt-box" placeholder="מה ה-AI יצור עבורך היום?" class="w-full bg-black border border-zinc-800 rounded-2xl p-4 text-sm h-24 mb-3 outline-none focus:border-purple-500 text-right"></textarea>
-            <div class="flex gap-2">
-                <button onclick="startAI()" class="ai-btn flex-1 py-4 rounded-2xl font-bold text-lg">צור יצירה</button>
-                <button onclick="document.getElementById('prompt-box').value='Space warrior on Mars 4k cinematic'" class="bg-zinc-800 px-4 rounded-2xl">🎲</button>
-            </div>
+        <img id="displayImg" class="hidden w-full h-full object-contain">
+        <video id="displayVid" class="hidden w-full h-full object-contain" playsinline loop></video>
+
+        <!-- מנדול אחוזים מרכזי -->
+        <div id="renderOverlay" class="hidden absolute inset-0 bg-black flex flex-col items-center justify-center z-[110]">
+            <div id="percent" class="render-text">0%</div>
+            <div class="text-[10px] tracking-widest text-zinc-500 mt-2 uppercase">Rendering Cloud Stems</div>
         </div>
 
-        <!-- העלאת קבצים בשורה -->
-        <div class="grid grid-cols-3 gap-2">
-            <button onclick="openFile('image/*')" class="bg-zinc-900 py-4 rounded-2xl border border-zinc-800 flex flex-col items-center gap-1 active:bg-zinc-800">
-                <i data-lucide="image" class="text-blue-500 w-6 h-6"></i>
-                <span class="text-[10px] font-bold">גלריה</span>
-            </button>
-            <button onclick="openFile('video/*')" class="bg-zinc-900 py-4 rounded-2xl border border-zinc-800 flex flex-col items-center gap-1 active:bg-zinc-800">
-                <i data-lucide="film" class="text-red-500 w-6 h-6"></i>
-                <span class="text-[10px] font-bold">סרטון</span>
-            </button>
-            <button onclick="openCamera()" class="bg-zinc-900 py-4 rounded-2xl border border-zinc-800 flex flex-col items-center gap-1 active:bg-zinc-800">
-                <i data-lucide="camera" class="text-green-500 w-6 h-6"></i>
-                <span class="text-[10px] font-bold">מצלמה</span>
-            </button>
-        </div>
-
-        <!-- פונקציות מתקדמות -->
-        <div class="space-y-2">
-            <div onclick="alert('Voice Clone: הקלט קול עכשיו')" class="bg-zinc-900 p-4 rounded-2xl flex justify-between items-center opacity-70">
-                <span class="text-xs font-bold">🎙️ שיבוט קולי</span>
-                <i data-lucide="plus" class="w-4 h-4"></i>
-            </div>
-            <div onclick="alert('Filters Enabled')" class="bg-zinc-900 p-4 rounded-2xl flex justify-between items-center opacity-70">
-                <span class="text-xs font-bold">🎨 פילטרים ומניפת צבעים</span>
-                <i data-lucide="chevron-left" class="w-4 h-4"></i>
+        <!-- פקדים פנימיים וסרגל זמן -->
+        <div class="absolute bottom-0 w-full px-2 py-1 bg-black/40 backdrop-blur-sm flex justify-between items-center">
+            <span id="timecode" class="text-[9px] font-mono">00:00:00</span>
+            <div class="flex gap-3">
+                <i data-lucide="repeat" class="w-3 h-3 opacity-50"></i>
+                <i data-lucide="layers" class="w-3 h-3 opacity-50"></i>
             </div>
         </div>
-
-        <!-- כפתור שמירה -->
-        <button onclick="save()" class="w-full bg-white text-black py-5 rounded-3xl font-black uppercase tracking-widest text-sm shadow-xl active:scale-95 transition-all">
-            Download Result
-        </button>
     </div>
 
-    <!-- קלט מוסתר -->
-    <input type="file" id="hiddenInp" class="hidden" onchange="handleFile(this)">
-    <input type="file" id="camInp" class="hidden" capture="environment" onchange="handleFile(this)">
+    <!-- אזור 2: פס תחבורה (Transport) -->
+    <div class="transport-fixed px-6">
+        <button onclick="control('start')" class="btn-action flex flex-col items-center"><i data-lucide="chevrons-right" class="w-5 h-5 text-zinc-500"></i><span class="text-[8px] mt-1">התחל</span></button>
+        <button onclick="control('back')" class="btn-action flex flex-col items-center"><i data-lucide="rotate-ccw" class="w-5 h-5 text-zinc-500"></i><span class="text-[8px] mt-1">-2ש'</span></button>
+        <button onclick="control('play')" class="btn-action flex flex-col items-center text-[#7C3AED]"><i data-lucide="play" class="w-8 h-8 fill-current"></i><span class="text-[8px] mt-1 font-bold">נגן/השהה</span></button>
+        <button onclick="control('forward')" class="btn-action flex flex-col items-center"><i data-lucide="rotate-cw" class="w-5 h-5 text-zinc-500"></i><span class="text-[8px] mt-1">+2ש'</span></button>
+        <button onclick="control('stop')" class="btn-action flex flex-col items-center text-red-500"><i data-lucide="square" class="w-5 h-5 fill-current"></i><span class="text-[8px] mt-1 uppercase font-bold">עצור</span></button>
+    </div>
 
-    <script>
-        lucide.createIcons();
-        const resImg = document.getElementById('res-img');
-        const resVid = document.getElementById('res-vid');
-        const ldr = document.getElementById('loader');
-        const pLabel = document.getElementById('p-label');
+    <!-- אזור 3: ממשק עבודה נגלל -->
+    <div class="scroll-panel space-y-6" dir="rtl">
+        
+        <!-- כרטיס יצירה -->
+        <div class="card-ui p-5">
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-[10px] font-bold text-purple-400 tracking-tighter uppercase">AI Master Generator</span>
+                <button onclick="randomPrompt()" class="bg-zinc-900 px-3 py-1 rounded-full text-zinc-500 text-[10px]">הפתע אותי 🎲</button>
+            </div>
+            <textarea id="prompt" placeholder="תאר את הויז'ן שלך (באנגלית)..." 
+                class="w-full bg-black border border-zinc-800 rounded-2xl p-4 text-sm h-28 mb-4 outline-none focus:border-[#7C3AED] text-right"></textarea>
+            
+            <div class="grid grid-cols-4 gap-2">
+                <button onclick="generate('image')" class="col-span-3 bg-[#7C3AED] py-4 rounded-2xl font-bold text-sm btn-action shadow-lg shadow-purple-900/40">צור יצירה</button>
+                <button onclick="alert('Extend +10s Mode Active')" class="bg-zinc-900 rounded-2xl border border-zinc-800 flex items-center justify-center text-[10px] font-bold">הארכה</button>
+            </div>
+        </div>
 
-        function openFile(type) {
-            const inp = document.getElementById('hiddenInp');
-            inp.accept = type;
-            inp.click();
-        }
+        <!-- העלאת מדיה Native (Galaxy Optimized) -->
+        <div class="grid grid-cols-3 gap-2">
+            <button onclick="triggerInput('image/*')" class="card-ui p-4 flex flex-col items-center gap-2 btn-action">
+                <i data-lucide="image" class="text-blue-500"></i>
+                <span class="text-[9px] font-bold">תמונות</span>
+            </button>
+            <button onclick="triggerInput('video/*')" class="card-ui p-4 flex flex-col items-center gap-2 btn-action">
+                <i data-lucide="film" class="text-red-500"></i>
+                <span class="text-[9px] font-bold">סרטונים</span>
+            </button>
+            <button onclick="triggerInput('camera')" class="card-ui p-4 flex flex-col items-center gap-2 btn-action border-[#7C3AED]/30">
+                <i data-lucide="camera" class="text-green-500"></i>
+                <span class="text-[9px] font-bold">מצלמה</span>
+            </button>
+        </div>
 
-        function openCamera() {
-            document.getElementById('camInp').click();
-        }
-
-        function handleFile(input) {
-            const file = input.files[0];
-            if (!file) return;
-            const url = URL.createObjectURL(file);
-            document.getElementById('empty-msg').classList.add('hidden');
-            if (file.type.startsWith('image/')) {
-                resImg.src = url; resImg.classList.remove('hidden'); resVid.classList.add('hidden');
-            } else {
-                resVid.src = url; resVid.classList.remove('hidden'); resImg.classList.add('hidden');
-            }
-        }
-
-        async function startAI() {
-            const prompt = document.getElementById('prompt-box').value;
-            if (!prompt) return alert("רשום תיאור");
-
-            ldr.style.display = 'flex';
-            let p = 0;
-            const timer = setInterval(() => {
-                p += Math.floor(Math.random() * 15) + 2;
+        <!-- כפתורי פונקציות נוספות מהאפיון -->
+        <div class="space-y-2">
+            <div onclick="alert('Voice Cloning...')" class="card-ui p-4 flex justify-between items-center cursor-pointer opacity-70">
+                <span class="text-xs font-bold">🎙️ שיבוט קולי (5 שניות הקלטה)</span>
+                <i data-lucide="plus" class="w-4 h-4 opacity-30"></i>
+            </div>
+            <div onclick="alert('Lip Sync Mode')" class="card-ui p-4 flex justify-between items-center c
