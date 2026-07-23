@@ -3,202 +3,144 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>AI Video Studio Master</title>
+<title>AI Video Studio Master - Fixed</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <style>
   :root { --bg:#0A0D14; --card:#151921; --accent:#00D1FF; --samsung-blue:#2196F3; --samsung-green:#4CAF50; }
-  * { box-sizing: border-box; }
-  html, body { height: 100%; }
+    * { box-sizing: border-box; }
   body { background:var(--bg); color:#fff; font-family:'Segoe UI',Roboto,sans-serif; margin:0; height:100dvh; display:flex; flex-direction:column; overflow:hidden; }
+ .player-viewport { height:38dvh; min-height:240px; background:#000; position:relative; border-bottom:1px solid #1F2937; flex-shrink:0; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+ .render-info { position:absolute; bottom:55px; left:15px; font-size:10px; color:rgba(255,255,255,.5); z-index:10; pointer-events:none; }
+ .empty-hint { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; color:#4B5563; z-index:1; }
 
-  /* --- מסך הנגן: קבוע, לא נגלל --- */
-  .player-viewport { height:35dvh; min-height:220px; background:#000; position:relative; border-bottom:1px solid #1F2937; flex-shrink:0; display:flex; align-items:center; justify-content:center; overflow:hidden; }
-  .render-info { position:absolute; bottom:40px; left:15px; font-size:10px; color:rgba(255,255,255,.5); line-height:1.4; text-align:left; z-index:10; pointer-events:none; }
-  .empty-hint { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; color:#4B5563; z-index:1; }
-  .empty-hint i { width:40px; height:40px; }
+  /* ציר זמן חדש - עבה ונעלם */
+ .timeline-wrap { position:absolute; bottom:0; left:0; right:0; height:44px; display:flex; align-items:center; padding:0 14px; z-index:40; background:linear-gradient(0deg, rgba(0,0,0,0.8), transparent); transition: opacity 0.4s, transform 0.4s; }
+ .timeline-wrap.hidden-timeline { opacity:0; transform:translateY(20px); pointer-events:none; }
+ .timeline-track { width:100%; height:14px; background:rgba(255,255,255,0.2); border-radius:99px; position:relative; direction:ltr; cursor:pointer; }
+ .timeline-fill { height:100%; background:var(--accent); border-radius:99px; width:0%; pointer-events:none; }
+ .timeline-handle { position:absolute; top:50%; width:22px; height:22px; background:#fff; border-radius:50%; transform:translate(-50%, -50%); box-shadow:0 2px 8px rgba(0,0,0,.6); left:0%; pointer-events:none; border:2px solid var(--accent); }
+ .timeline-time { position:absolute; top:-18px; right:0; font-size:10px; color:#fff; display:flex; justify-content:space-between; width:100%; direction:ltr; }
 
-  /* --- פס תחבורה: קבוע --- */
-  .transport-controls { height:85px; background:#0A0D14; display:flex; align-items:center; justify-content:space-around; padding:0 6px; border-bottom:1px solid #1F2937; flex-shrink:0; }
-  .t-btn { display:flex; flex-direction:column; align-items:center; gap:4px; color:#94A3B8; transition:.2s; background:none; border:none; }
-  .t-btn i { width:22px; height:22px; }
-  .t-btn:active { color:#fff; transform:scale(.9); }
-  .t-btn span { font-size:9px; font-weight:600; }
-  .t-main { color:#000; background:var(--accent); width:58px; height:58px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 0 20px rgba(0,209,255,.4); }
-  .t-main i { width:26px; height:26px; }
-  .t-main span { display:none; }
-  .t-main:active { transform:scale(.9); }
+ .transport-controls { height:85px; background:#0A0D14; display:flex; align-items:center; justify-content:space-around; padding:0 6px; border-bottom:1px solid #1F2937; flex-shrink:0; position:relative; }
+ .t-btn { display:flex; flex-direction:column; align-items:center; gap:4px; color:#94A3B8; transition:.2s; background:none; border:none; }
+ .t-btn i { width:22px; height:22px; }
+ .t-main { color:#000; background:var(--accent); width:58px; height:58px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 0 20px rgba(0,209,255,.4); }
+ .t-delete { position:absolute; left:10px; top:50%; transform:translateY(-50%); background:#1F242F; border:1px solid #EF4444; color:#EF4444; width:38px; height:38px; border-radius:12px; display:flex; align-items:center; justify-content:center; }
 
-  /* --- אזור גלילה --- */
-  .main-scroll { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:16px; display:flex; flex-direction:column; gap:14px; padding-bottom:40px; }
-
-  .mode-toggle { display:flex; background:var(--card); border-radius:16px; padding:4px; border:1px solid #262C36; }
-  .mode-btn { flex:1; text-align:center; padding:10px; border-radius:12px; font-size:13px; font-weight:700; color:#94A3B8; display:flex; align-items:center; justify-content:center; gap:6px; transition:.2s; }
-  .mode-btn.active { background:var(--accent); color:#000; }
-  .mode-btn i { width:16px; height:16px; }
-
-  .prompt-container { background:var(--card); border:2px solid #14B8A6; border-radius:24px; padding:15px; padding-bottom:50px; box-shadow:0 0 15px rgba(20,184,166,.2); position:relative; }
+ .main-scroll { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:14px; padding-bottom:40px; }
+ .mode-toggle { display:flex; background:var(--card); border-radius:16px; padding:4px; border:1px solid #262C36; }
+ .mode-btn { flex:1; text-align:center; padding:10px; border-radius:12px; font-size:13px; font-weight:700; color:#94A3B8; display:flex; align-items:center; justify-content:center; gap:6px; }
+ .mode-btn.active { background:var(--accent); color:#000; }
+ .prompt-container { background:var(--card); border:2px solid #14B8A6; border-radius:24px; padding:15px; padding-bottom:50px; position:relative; }
   textarea { background:transparent; width:100%; border:none; outline:none; resize:none; font-size:14px; color:#fff; text-align:right; min-height:70px; }
-  .asset-chip { display:flex; align-items:center; gap:8px; background:#0F1319; border:1px solid #262C36; border-radius:14px; padding:8px 10px; margin-bottom:8px; font-size:11px; }
-  .asset-chip img, .asset-chip video { width:34px; height:34px; object-fit:cover; border-radius:8px; }
-  .asset-chip button { margin-right:auto; color:#EF4444; }
-
-  .surprise-btn { background:#00E5FF; color:#000; border-radius:20px; padding:6px 15px; font-size:12px; font-weight:800; display:flex; align-items:center; gap:5px; position:absolute; bottom:12px; left:12px; }
-
-  .upload-row { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
-  .upload-btn { background:#262C36; border-radius:20px; height:85px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; font-size:12px; font-weight:600; border:1px solid #333; }
-  .upload-btn i { width:28px; height:28px; color:var(--accent); }
-
-  .footer-row { display:grid; grid-template-columns:1fr 1.2fr; gap:12px; }
-  .btn-footer { border-radius:20px; padding:16px; font-weight:800; font-size:14px; display:flex; align-items:center; justify-content:center; gap:10px; box-shadow:0 4px 15px rgba(0,0,0,.4); }
-  .btn-share { background:var(--samsung-green); }
-  .btn-download { background:var(--samsung-blue); }
-
-  .section-title { font-size:12px; font-weight:800; color:#94A3B8; letter-spacing:.05em; text-transform:uppercase; margin-top:4px; }
-  .gallery-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
-  .gallery-item { position:relative; border-radius:16px; overflow:hidden; background:#151921; border:1px solid #262C36; aspect-ratio:1/1; }
-  .gallery-item img, .gallery-item video { width:100%; height:100%; object-fit:cover; }
-  .gallery-actions { position:absolute; bottom:0; left:0; right:0; display:flex; background:linear-gradient(0deg,rgba(0,0,0,.85),transparent); padding:8px 6px 6px; gap:6px; }
-  .gallery-actions button { flex:1; background:rgba(255,255,255,.15); border-radius:10px; padding:6px; display:flex; align-items:center; justify-content:center; }
-  .gallery-actions button i { width:15px; height:15px; }
-  .gallery-empty { color:#4B5563; font-size:12px; text-align:center; padding:20px 0; border:1px dashed #262C36; border-radius:16px; }
-
-  .loader-overlay { position:absolute; inset:0; background:rgba(0,0,0,.92); z-index:1000; display:none; flex-direction:column; align-items:center; justify-content:center; }
-  .pct { font-size:4.5rem; font-weight:900; letter-spacing:-3px; }
-
+ .asset-chip { display:flex; align-items:center; gap:8px; background:#0F1319; border:1px solid #262C36; border-radius:14px; padding:8px 10px; margin-bottom:8px; font-size:11px; }
+ .asset-chip img,.asset-chip video { width:34px; height:34px; object-fit:cover; border-radius:8px; }
+ .surprise-btn { background:#00E5FF; color:#000; border-radius:20px; padding:6px 15px; font-size:12px; font-weight:800; display:flex; align-items:center; gap:5px; position:absolute; bottom:12px; left:12px; }
+ .upload-row { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+ .upload-btn { background:#262C36; border-radius:20px; height:85px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; font-size:12px; font-weight:600; border:1px solid #333; }
+ .footer-row { display:grid; grid-template-columns:1fr 1.2fr; gap:12px; }
+ .btn-footer { border-radius:20px; padding:16px; font-weight:800; font-size:14px; display:flex; align-items:center; justify-content:center; gap:10px; }
+ .btn-share { background:var(--samsung-green); }.btn-download { background:var(--samsung-blue); }
+ .gallery-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+ .gallery-item { position:relative; border-radius:16px; overflow:hidden; background:#151921; border:1px solid #262C36; aspect-ratio:1/1; }
+ .gallery-item img,.gallery-item video { width:100%; height:100%; object-fit:cover; }
+ .gallery-actions { position:absolute; bottom:0; left:0; right:0; display:flex; background:linear-gradient(0deg,rgba(0,0,0,.85),transparent); padding:8px 6px 6px; gap:6px; }
+ .gallery-actions button { flex:1; background:rgba(255,255,255,.15); border-radius:10px; padding:6px; display:flex; align-items:center; justify-content:center; }
+ .loader-overlay { position:absolute; inset:0; background:rgba(0,0,0,.92); z-index:1000; display:none; flex-direction:column; align-items:center; justify-content:center; }
+ .pct { font-size:4.5rem; font-weight:900; }
   #api-config { display:none; background:#0F1319; padding:12px; border-bottom:1px solid #222; }
-  #api-config p { font-size:10px; color:#6B7280; margin:6px 0 0; line-height:1.5; }
-
-  /* --- מודל מצלמה --- */
-  .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:2000; display:none; align-items:flex-end; justify-content:center; }
-  .modal-sheet { background:var(--card); width:100%; max-width:480px; border-radius:24px 24px 0 0; padding:20px; display:flex; flex-direction:column; gap:10px; }
-  .modal-sheet h3 { margin:0 0 6px; font-size:14px; color:#94A3B8; text-align:center; }
-  .modal-opt { display:flex; align-items:center; gap:12px; background:#0F1319; border:1px solid #262C36; border-radius:16px; padding:14px 16px; font-weight:700; font-size:14px; }
-  .modal-opt i { width:22px; height:22px; color:var(--accent); }
-  .modal-cancel { text-align:center; padding:12px; color:#94A3B8; font-size:13px; }
-
-  .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#1F2937; color:#fff; padding:10px 18px; border-radius:14px; font-size:12px; z-index:3000; display:none; box-shadow:0 4px 20px rgba(0,0,0,.5); }
+ .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:2000; display:none; align-items:flex-end; justify-content:center; }
+ .modal-sheet { background:var(--card); width:100%; max-width:480px; border-radius:24px 24px 0 0; padding:20px; display:flex; flex-direction:column; gap:12px; }
+ .modal-opt { display:flex; align-items:center; gap:12px; background:#0F1319; border:1px solid #262C36; border-radius:16px; padding:14px 16px; font-weight:700; font-size:14px; }
+ .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#1F2937; color:#fff; padding:10px 18px; border-radius:14px; font-size:12px; z-index:3000; display:none; }
+ .rec-dot { width:12px; height:12px; background:#EF4444; border-radius:50%; animation:pulse 1s infinite; }
+  @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
 </style>
 </head>
 <body>
 
 <div id="api-config">
-  <input type="password" id="apiKey" placeholder="הכנס מפתח API של Google AI (Gemini)..." oninput="saveKey()"
-         class="w-full bg-[#111] border border-zinc-800 rounded-xl p-3 text-xs text-left font-mono text-white outline-none">
-  <p>המפתח נשמר רק לזיכרון הדפדפן הנוכחי (לא נשלח לשום שרת חיצוני מלבד Google). קבל מפתח חינם ב‑aistudio.google.com. בלי מפתח — יצירת תמונות תעבוד במצב חינמי מוגבל, ויצירת וידאו AI לא תהיה זמינה.</p>
+  <input type="password" id="apiKey" placeholder="מפתח Google AI (Gemini)..." oninput="saveKey()" class="w-full bg-[#111] border border-zinc-800 rounded-xl p-3 text-xs text-left font-mono text-white outline-none">
 </div>
 
-<!-- אזור 1: הנגן המרכזי -->
-<div class="player-viewport">
+<div class="player-viewport" id="player-area">
   <button onclick="toggleKey()" class="absolute top-4 right-4 z-50 opacity-40"><i data-lucide="settings" class="w-6 h-6"></i></button>
-
-  <div id="loader" class="loader-overlay">
-    <div id="p-label" class="pct">0%</div>
-    <div class="text-[10px] tracking-[0.3em] font-bold opacity-40 uppercase mt-2" id="loader-stage">Adapting Engine</div>
-  </div>
-
-  <div class="render-info" id="r-info">
-    Rendering info: 360...<br>
-    Rendering time: 14:31 - 02:38:33
-  </div>
-
-  <div class="empty-hint" id="empty-hint">
-    <i data-lucide="film"></i>
-    <span class="text-xs">עדיין אין מדיה — כתוב תיאור או העלה קובץ</span>
-  </div>
-
+  <div id="loader" class="loader-overlay"><div id="p-label" class="pct">0%</div><div id="loader-stage" class="text-[10px] tracking-[0.3em] opacity-40 uppercase mt-2">Generating</div></div>
+  <div class="render-info" id="r-info">Rendering info: 360...</div>
+  <div class="empty-hint" id="empty-hint"><i data-lucide="film"></i><span class="text-xs">אין מדיה - העלה או צור</span></div>
   <img id="v-img" class="hidden w-full h-full object-cover">
   <video id="v-vid" class="hidden w-full h-full object-cover" playsinline loop></video>
 
-  <div class="absolute bottom-0 w-full px-4 pb-2 z-30">
-    <div class="flex justify-between text-[9px] mb-1 opacity-60"><span id="t-cur">00:00</span><span id="t-dur">00:00</span></div>
-    <div class="h-1 w-full bg-white/20 rounded-full overflow-hidden">
-      <div id="t-bar" class="h-full bg-[#00D1FF] w-0"></div>
+  <!-- ציר זמן חדש -->
+  <div class="timeline-wrap" id="timeline-wrap">
+    <div class="timeline-track" id="timeline-track">
+      <div class="timeline-fill" id="t-bar"></div>
+      <div class="timeline-handle" id="t-handle"></div>
+      <div class="timeline-time"><span id="t-cur">00:00</span><span id="t-dur">00:00</span></div>
     </div>
   </div>
 </div>
 
-<!-- אזור 2: פס תחבורה — כפתור ההפעלה/השהיה במרכז ומודגש -->
 <div class="transport-controls">
+  <button class="t-delete" onclick="deleteMainMedia()"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
   <button onclick="ctrl('start')" class="t-btn"><i data-lucide="skip-back"></i><span>התחל</span></button>
   <button onclick="ctrl('back')" class="t-btn"><i data-lucide="rewind"></i><span>אחורה</span></button>
   <button onclick="toggleMedia()" class="t-main"><i data-lucide="pause" id="playIcon"></i></button>
   <button onclick="ctrl('forward')" class="t-btn"><i data-lucide="fast-forward"></i><span>קדימה</span></button>
-  <button onclick="ctrl('stop')" class="t-btn text-zinc-400"><i data-lucide="square" class="fill-current"></i><span>עצור</span></button>
+  <button onclick="ctrl('stop')" class="t-btn"><i data-lucide="square" class="fill-current"></i><span>עצור</span></button>
 </div>
 
-<!-- אזור 3: גוף נגלל -->
 <div class="main-scroll" dir="rtl">
-
   <div class="mode-toggle">
     <button class="mode-btn active" id="mode-image" onclick="setMode('image')"><i data-lucide="image"></i>תמונת AI</button>
     <button class="mode-btn" id="mode-video" onclick="setMode('video')"><i data-lucide="clapperboard"></i>וידאו AI</button>
   </div>
-
   <div class="prompt-container">
     <div id="asset-chip-holder"></div>
-    <textarea id="prompt" placeholder="תאר את הסרטון/תמונה שלך כאן... (למשל, אריה רץ בסוואנה בשעת השקיעה) — או העלה קובץ למעלה ותאר איך לערוך אותו"></textarea>
-    <button onclick="surpriseMe()" class="surprise-btn active:scale-90 transition-all">
-      <span>הפתע אותי</span><i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
-    </button>
+    <textarea id="prompt" placeholder="תאר את הסרטון/תמונה שלך..."></textarea>
+    <button onclick="surpriseMe()" class="surprise-btn"><span>הפתע אותי</span><i data-lucide="sparkles" class="w-3.5 h-3.5"></i></button>
   </div>
-
-  <button onclick="runMedia()" id="run-btn" class="w-full bg-[#00D1FF] text-black py-4 rounded-3xl font-black text-lg active:scale-95 transition-all shadow-lg shadow-cyan-900/20">
-    צור תמונת AI
-  </button>
-
+  <button onclick="runMedia()" id="run-btn" class="w-full bg-[#00D1FF] text-black py-4 rounded-3xl font-black text-lg">צור תמונת AI</button>
   <div class="upload-row">
-    <button onclick="pick('image/*')" class="upload-btn active:bg-zinc-800">
-      <i data-lucide="image"></i><span>תמונה</span>
-    </button>
-    <button onclick="pick('video/*')" class="upload-btn active:bg-zinc-800">
-      <i data-lucide="video"></i><span>סרטון</span>
-    </button>
-    <button onclick="openCameraChoice()" class="upload-btn active:bg-zinc-800">
-      <i data-lucide="camera"></i><span>מצלמה</span>
-    </button>
+    <button onclick="pick('image/*')" class="upload-btn"><i data-lucide="image"></i><span>תמונה</span></button>
+    <button onclick="pick('video/*')" class="upload-btn"><i data-lucide="video"></i><span>סרטון</span></button>
+    <button onclick="openCameraChoice()" class="upload-btn"><i data-lucide="camera"></i><span>מצלמה</span></button>
   </div>
-
   <div class="flex gap-2">
-    <button onclick="showToast('שיבוט קולי יופעל בגרסת Pro')" class="flex-1 bg-[#151921] border border-zinc-800 py-4 rounded-2xl text-[11px] font-bold flex items-center justify-center gap-2">
-      <i data-lucide="mic" class="w-4 h-4 text-purple-500"></i> שיבוט קולי
-    </button>
-    <button onclick="showToast('עקיבת דמות תופעל בגרסת Pro')" class="flex-1 bg-[#151921] border border-zinc-800 py-4 rounded-2xl text-[11px] font-bold flex items-center justify-center gap-2">
-      <i data-lucide="user-check" class="w-4 h-4 text-purple-500"></i> עקיבת דמות
-    </button>
+    <button onclick="openVoiceModal()" class="flex-1 bg-[#151921] border border-zinc-800 py-4 rounded-2xl text-[11px] font-bold flex items-center justify-center gap-2"><i data-lucide="mic" class="w-4 h-4 text-purple-500"></i> שיבוט קולי</button>
+    <button onclick="showToast('עקיבת דמות תופעל בגרסת Pro')" class="flex-1 bg-[#151921] border border-zinc-800 py-4 rounded-2xl text-[11px] font-bold flex items-center justify-center gap-2"><i data-lucide="user-check" class="w-4 h-4 text-purple-500"></i> עקיבת דמות</button>
   </div>
-
-  <!-- הורדה בצד ימין, שיתוף בצד שמאל -->
   <div class="footer-row">
-    <button onclick="download()" class="btn-footer btn-download">
-      <i data-lucide="download"></i><span>הורדה</span>
-    </button>
-    <button onclick="shareApp()" class="btn-footer btn-share">
-      <i data-lucide="share-2"></i><span>שיתוף</span>
-    </button>
+    <button onclick="download()" class="btn-footer btn-download"><i data-lucide="download"></i><span>הורדה</span></button>
+    <button onclick="shareApp()" class="btn-footer btn-share"><i data-lucide="share-2"></i><span>שיתוף</span></button>
   </div>
-
-  <div class="section-title">היצירות שלי</div>
+  <div class="text-[12px] font-black text-zinc-400 uppercase">היצירות שלי</div>
   <div class="gallery-grid" id="gallery"></div>
-  <div class="gallery-empty" id="gallery-empty">עדיין לא יצרת כלום — היצירות שלך יופיעו כאן להורדה או מחיקה</div>
-
+  <div id="gallery-empty" class="text-center text-xs text-zinc-600 border border-dashed border-zinc-800 rounded-2xl p-6">עדיין לא יצרת כלום</div>
 </div>
 
 <input type="file" id="fInp" class="hidden" onchange="handleAsset(event)">
 <input type="file" id="camPhotoInp" class="hidden" accept="image/*" capture="environment" onchange="handleAsset(event)">
 <input type="file" id="camVideoInp" class="hidden" accept="video/*" capture="environment" onchange="handleAsset(event)">
 
-<!-- מודל בחירת מצלמה -->
-<div class="modal-backdrop" id="cam-modal">
+<!-- מודלים -->
+<div class="modal-backdrop" id="cam-modal"><div class="modal-sheet"><h3 class="text-center text-sm text-zinc-400">איך תרצה לצלם?</h3><button class="modal-opt" onclick="closeCameraChoice();document.getElementById('camPhotoInp').click()"><i data-lucide="image"></i> צילום תמונה</button><button class="modal-opt" onclick="closeCameraChoice();document.getElementById('camVideoInp').click()"><i data-lucide="video"></i> צילום סרטון</button><div class="text-center text-xs text-zinc-500 p-2" onclick="closeCameraChoice()">ביטול</div></div></div>
+
+<div class="modal-backdrop" id="voice-modal">
   <div class="modal-sheet">
-    <h3>איך תרצה לצלם?</h3>
-    <button class="modal-opt" onclick="closeCameraChoice(); document.getElementById('camPhotoInp').click();">
-      <i data-lucide="image"></i> צילום תמונה
-    </button>
-    <button class="modal-opt" onclick="closeCameraChoice(); document.getElementById('camVideoInp').click();">
-      <i data-lucide="video"></i> צילום סרטון
-    </button>
-    <div class="modal-cancel" onclick="closeCameraChoice()">ביטול</div>
+    <h3 class="text-center font-black">🎙️ שיבוט קולי</h3>
+    <div class="bg-[#0F1319] rounded-2xl p-4 flex flex-col gap-3">
+      <div class="flex items-center justify-between"><span id="voice-status" class="text-xs text-zinc-400">מוכן להקלטה</span><div id="rec-indicator" class="hidden flex items-center gap-2"><div class="rec-dot"></div><span class="text-xs text-red-400">מקליט...</span></div></div>
+      <div class="flex gap-2">
+        <button id="voice-rec-btn" onclick="toggleVoiceRecord()" class="flex-1 bg-[#00D1FF] text-black py-3 rounded-xl font-black text-sm">התחל הקלטה</button>
+        <button onclick="deleteVoice()" class="bg-zinc-800 py-3 px-4 rounded-xl"><i data-lucide="trash-2" class="w-5 h-5 text-red-400"></i></button>
+      </div>
+      <audio id="voice-preview" controls class="hidden w-full mt-2"></audio>
+      <button id="voice-attach-btn" onclick="attachVoiceToVideo()" class="hidden w-full bg-green-600 py-3 rounded-xl font-bold text-sm">העלה / צרף לסרטון ✅</button>
+      <p class="text-[10px] text-zinc-500">ההקלטה תישמר ותוצג כצ'יפ מעל הפרומפט. בגרסת Pro זה יבצע שיבוט קולי אמיתי עם AI.</p>
+    </div>
+    <div class="text-center text-xs text-zinc-500 p-2" onclick="closeVoiceModal()">סגור</div>
   </div>
 </div>
 
@@ -206,309 +148,78 @@
 
 <script>
 lucide.createIcons();
+const vImg=document.getElementById('v-img'), vVid=document.getElementById('v-vid'), ldr=document.getElementById('loader'), plbl=document.getElementById('p-label'), loaderStage=document.getElementById('loader-stage'), emptyHint=document.getElementById('empty-hint'), runBtn=document.getElementById('run-btn'), timelineWrap=document.getElementById('timeline-wrap'), track=document.getElementById('timeline-track'), bar=document.getElementById('t-bar'), handle=document.getElementById('t-handle');
+let apiKeyMem="", mode="image", currentAsset=null, gallery=[], lastResultUrl=null, lastResultType=null, hideTimelineTimer=null, voiceBlob=null, mediaRecorder=null, voiceUrl=null;
 
-const vImg = document.getElementById('v-img'), vVid = document.getElementById('v-vid');
-const ldr = document.getElementById('loader'), plbl = document.getElementById('p-label'), loaderStage = document.getElementById('loader-stage');
-const emptyHint = document.getElementById('empty-hint');
-const runBtn = document.getElementById('run-btn');
+function saveKey(){apiKeyMem=document.getElementById('apiKey').value.trim()}
+function toggleKey(){const b=document.getElementById('api-config'); b.style.display=b.style.display==='block'?'none':'block'}
+function showToast(m){const t=document.getElementById('toast'); t.textContent=m; t.style.display='block'; clearTimeout(t._timer); t._timer=setTimeout(()=>t.style.display='none',2600)}
+function setMode(m){mode=m; document.getElementById('mode-image').classList.toggle('active',m==='image'); document.getElementById('mode-video').classList.toggle('active',m==='video'); runBtn.textContent=m==='image'?'צור תמונת AI':'צור וידאו AI'}
+function openCameraChoice(){document.getElementById('cam-modal').style.display='flex'} function closeCameraChoice(){document.getElementById('cam-modal').style.display='none'}
+function openVoiceModal(){document.getElementById('voice-modal').style.display='flex'; lucide.createIcons()} function closeVoiceModal(){document.getElementById('voice-modal').style.display='none'}
+function pick(t){const i=document.getElementById('fInp'); i.accept=t; i.value=''; i.click()}
 
-// --- מצב אפליקציה (בזיכרון בלבד — אין תמיכה ב-localStorage בסביבת התצוגה הזו) ---
-let apiKeyMem = "";
-let mode = "image"; // 'image' | 'video'
-let currentAsset = null; // { file, url, type: 'image'|'video', base64, mime }
-let gallery = []; // { id, type, url }
-let lastResultUrl = null, lastResultType = null;
+function handleAsset(e){const f=e.target.files[0]; if(!f)return; const url=URL.createObjectURL(f); const type=f.type.startsWith('image/')?'image':'video'; emptyHint.style.display='none'; document.getElementById('r-info').style.display='none'; if(type==='image'){vImg.src=url; vImg.classList.remove('hidden'); vVid.classList.add('hidden')}else{vVid.src=url; vVid.classList.remove('hidden'); vImg.classList.add('hidden'); vVid.load()} lastResultUrl=url; lastResultType=type; showTimeline(); const r=new FileReader(); r.onload=()=>{currentAsset={file:f,url,type,base64:r.result.split(',')[1],mime:f.type}; renderAssetChip()}; r.readAsDataURL(f)}
+function renderAssetChip(){const h=document.getElementById('asset-chip-holder'); if(!currentAsset &&!voiceBlob){h.innerHTML=''; return} let html=''; if(currentAsset){const tag=currentAsset.type==='image'?`<img src="${currentAsset.url}">`:`<video src="${currentAsset.url}" muted></video>`; html+=`<div class="asset-chip">${tag}<span>קובץ הועלה - הפרומפט יערוך אותו</span><button onclick="clearAsset()"><i data-lucide="x" class="w-4 h-4"></i></button></div>`} if(voiceBlob){html+=`<div class="asset-chip" style="border-color:#9333EA"><i data-lucide="mic" class="w-5 h-5 text-purple-400"></i><span>קול הוקלט - יצורף ליצירה</span><button onclick="deleteVoice(true)"><i data-lucide="x" class="w-4 h-4"></i></button></div>`} h.innerHTML=html; lucide.createIcons()}
+function clearAsset(){currentAsset=null; renderAssetChip()}
+function deleteMainMedia(){vImg.classList.add('hidden'); vVid.classList.add('hidden'); vVid.pause(); vVid.src=''; vImg.src=''; lastResultUrl=null; lastResultType=null; emptyHint.style.display='flex'; document.getElementById('r-info').style.display='block'; bar.style.width='0%'; handle.style.left='0%'; showToast('המדיה נמחקה מהמסך')}
+function surpriseMe(){const l=["אסטרונאוט בגינה פורחת בסגנון קולנועי","מכונית ניאון בטוקיו בגשם","דרקון אפי מעל הרים קפואים","רובוט מצייר על מאדים"]; document.getElementById('prompt').value=l[Math.floor(Math.random()*l.length)]}
 
-function saveKey() { apiKeyMem = document.getElementById('apiKey').value.trim(); }
-function toggleKey() { const b = document.getElementById('api-config'); b.style.display = b.style.display === 'block' ? 'none' : 'block'; }
+// --- ציר זמן ---
+function showTimeline(){timelineWrap.classList.remove('hidden-timeline'); clearTimeout(hideTimelineTimer); hideTimelineTimer=setTimeout(()=>timelineWrap.classList.add('hidden-timeline'),2500)}
+document.getElementById('player-area').addEventListener('click', showTimeline);
+document.getElementById('player-area').addEventListener('touchstart', showTimeline, {passive:true});
+let isDragging=false;
+function updateTimelinePos(clientX){const rect=track.getBoundingClientRect(); let p=(clientX-rect.left)/rect.width; p=Math.max(0,Math.min(1,p)); bar.style.width=(p*100)+'%'; handle.style.left=(p*100)+'%'; if(vVid.duration){vVid.currentTime=p*vVid.duration}}
+track.addEventListener('mousedown', e=>{isDragging=true; updateTimelinePos(e.clientX)}); window.addEventListener('mousemove', e=>{if(isDragging)updateTimelinePos(e.clientX)}); window.addEventListener('mouseup', ()=>isDragging=false);
+track.addEventListener('touchstart', e=>{isDragging=true; updateTimelinePos(e.touches[0].clientX)}, {passive:false}); window.addEventListener('touchmove', e=>{if(isDragging){e.preventDefault(); updateTimelinePos(e.touches[0].clientX)}}, {passive:false}); window.addEventListener('touchend', ()=>isDragging=false);
 
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.style.display = 'block';
-  clearTimeout(t._timer);
-  t._timer = setTimeout(() => t.style.display = 'none', 2600);
-}
-
-function setMode(m) {
-  mode = m;
-  document.getElementById('mode-image').classList.toggle('active', m === 'image');
-  document.getElementById('mode-video').classList.toggle('active', m === 'video');
-  runBtn.textContent = m === 'image' ? 'צור תמונת AI' : 'צור וידאו AI';
-}
-
-/* ---------- מצלמה ---------- */
-function openCameraChoice() { document.getElementById('cam-modal').style.display = 'flex'; }
-function closeCameraChoice() { document.getElementById('cam-modal').style.display = 'none'; }
-document.getElementById('cam-modal').addEventListener('click', (e) => { if (e.target.id === 'cam-modal') closeCameraChoice(); });
-
-function pick(t) { const i = document.getElementById('fInp'); i.accept = t; i.value = ''; i.click(); }
-
-/* ---------- טעינת קובץ (העלאה / מצלמה) ---------- */
-function handleAsset(e) {
-  const f = e.target.files[0]; if (!f) return;
-  const url = URL.createObjectURL(f);
-  const type = f.type.startsWith('image/') ? 'image' : 'video';
-  emptyHint.style.display = 'none';
-  document.getElementById('r-info').style.display = 'none';
-
-  if (type === 'image') { vImg.src = url; vImg.classList.remove('hidden'); vVid.classList.add('hidden'); }
-  else { vVid.src = url; vVid.classList.remove('hidden'); vImg.classList.add('hidden'); vVid.load(); }
-
-  lastResultUrl = url; lastResultType = type;
-
-  const reader = new FileReader();
-  reader.onload = () => {
-    currentAsset = { file: f, url, type, base64: reader.result.split(',')[1], mime: f.type };
-    renderAssetChip();
-  };
-  reader.readAsDataURL(f);
-}
-
-function renderAssetChip() {
-  const holder = document.getElementById('asset-chip-holder');
-  if (!currentAsset) { holder.innerHTML = ''; return; }
-  const tag = currentAsset.type === 'image'
-    ? `<img src="${currentAsset.url}">`
-    : `<video src="${currentAsset.url}" muted></video>`;
-  holder.innerHTML = `
-    <div class="asset-chip">
-      ${tag}
-      <span>קובץ הועלה — הפרומפט יערוך אותו</span>
-      <button onclick="clearAsset()"><i data-lucide="x" class="w-4 h-4"></i></button>
-    </div>`;
-  lucide.createIcons();
-}
-function clearAsset() { currentAsset = null; renderAssetChip(); }
-
-/* ---------- הפתע אותי ---------- */
-function surpriseMe() {
-  const list = [
-    "מבט קולנועי על אסטרונאוט בגינה פורחת",
-    "מכונית ניאון נוסעת בטוקיו בגשם",
-    "דרקון אפי עף מעל הרים קפואים",
-    "רובוט מצייר יצירת מופת על מאדים"
-  ];
-  document.getElementById('prompt').value = list[Math.floor(Math.random() * list.length)];
-}
-
-/* ---------- יצירה ---------- */
-async function runMedia() {
-  const p = document.getElementById('prompt').value.trim();
-  if (!p) return showToast('אנא הזן תיאור');
-
-  runBtn.disabled = true;
-  ldr.style.display = 'flex';
-  loaderStage.textContent = mode === 'image' ? 'Generating Image' : 'Generating Video';
-  let progress = 0;
-  plbl.textContent = '0%';
-  const tick = setInterval(() => {
-    progress = Math.min(progress + Math.floor(Math.random() * 10) + 3, 92);
-    plbl.textContent = progress + '%';
-  }, 350);
-
-  try {
-    let resultUrl, resultType;
-    if (mode === 'image') {
-      resultUrl = await generateImage(p, currentAsset);
-      resultType = 'image';
-    } else {
-      if (!apiKeyMem) throw new Error('יצירת וידאו AI דורשת מפתח API של Google (Gemini/Veo). לחץ על גלגל השיניים למעלה כדי להזין אותו.');
-      resultUrl = await generateVideo(p, currentAsset);
-      resultType = 'video';
-    }
-
-    clearInterval(tick);
-    plbl.textContent = '100%';
-
-    setTimeout(() => {
-      ldr.style.display = 'none';
-      emptyHint.style.display = 'none';
-      document.getElementById('r-info').style.display = 'block';
-      showResult(resultUrl, resultType);
-      addToGallery(resultUrl, resultType);
-    }, 300);
-
-  } catch (err) {
-    clearInterval(tick);
-    ldr.style.display = 'none';
-    showToast(err.message || 'שגיאה ביצירת המדיה');
-  } finally {
-    runBtn.disabled = false;
+// --- שיבוט קולי ---
+async function toggleVoiceRecord(){
+  const btn=document.getElementById('voice-rec-btn'), status=document.getElementById('voice-status'), ind=document.getElementById('rec-indicator');
+  if(mediaRecorder && mediaRecorder.state==='recording'){
+    mediaRecorder.stop(); btn.textContent='התחל הקלטה'; status.textContent='מעבד...'; ind.classList.add('hidden'); return;
   }
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    mediaRecorder=new MediaRecorder(stream); const chunks=[];
+    mediaRecorder.ondataavailable=e=>chunks.push(e.data);
+    mediaRecorder.onstop=()=>{voiceBlob=new Blob(chunks,{type:'audio/webm'}); voiceUrl=URL.createObjectURL(voiceBlob); const prev=document.getElementById('voice-preview'); prev.src=voiceUrl; prev.classList.remove('hidden'); document.getElementById('voice-attach-btn').classList.remove('hidden'); status.textContent='הקלטה מוכנה!'; stream.getTracks().forEach(t=>t.stop())};
+    mediaRecorder.start(); btn.textContent='עצור הקלטה'; status.textContent='מקליט...'; ind.classList.remove('hidden');
+  }catch{showToast('לא ניתן לגשת למיקרופון')}
 }
+function deleteVoice(fromChip=false){voiceBlob=null; if(voiceUrl)URL.revokeObjectURL(voiceUrl); voiceUrl=null; document.getElementById('voice-preview').classList.add('hidden'); document.getElementById('voice-attach-btn').classList.add('hidden'); document.getElementById('voice-status').textContent='מוכן להקלטה'; renderAssetChip(); if(!fromChip)showToast('הקלטת הקול נמחקה')}
+function attachVoiceToVideo(){renderAssetChip(); closeVoiceModal(); showToast('הקול צורף! הוא יישלח עם הפרומפט ליצירה')}
 
-function showResult(url, type) {
-  lastResultUrl = url; lastResultType = type;
-  if (type === 'image') {
-    vImg.src = url; vImg.classList.remove('hidden'); vVid.classList.add('hidden');
-  } else {
-    vVid.src = url; vVid.classList.remove('hidden'); vImg.classList.add('hidden'); vVid.load(); vVid.play().catch(()=>{});
+async function runMedia(){
+  const p=document.getElementById('prompt').value.trim(); if(!p)return showToast('הזן תיאור'); runBtn.disabled=true; ldr.style.display='flex'; let prog=0; plbl.textContent='0%'; const tick=setInterval(()=>{prog=Math.min(prog+Math.floor(Math.random()*10)+3,92); plbl.textContent=prog+'%'},350);
+  try{
+    let url, type; if(mode==='image'){url=await generateImage(p,currentAsset); type='image'}else{if(!apiKeyMem)throw new Error('וידאו דורש מפתח API'); url=await generateVideo(p,currentAsset); type='video'}
+    clearInterval(tick); plbl.textContent='100%'; setTimeout(()=>{ldr.style.display='none'; emptyHint.style.display='none'; showResult(url,type); addToGallery(url,type); showTimeline()},300);
+  }catch(err){clearInterval(tick); ldr.style.display='none'; showToast(err.message)} finally{runBtn.disabled=false}
+}
+function showResult(url,type){lastResultUrl=url; lastResultType=type; if(type==='image'){vImg.src=url; vImg.classList.remove('hidden'); vVid.classList.add('hidden')}else{vVid.src=url; vVid.classList.remove('hidden'); vImg.classList.add('hidden'); vVid.load(); vVid.play().catch(()=>{})}}
+async function generateImage(prompt, asset){
+  if(apiKeyMem){
+    const parts=[{text:prompt}]; if(asset&&asset.type==='image')parts.push({inline_data:{mime_type:asset.mime,data:asset.base64}});
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=${encodeURIComponent(apiKeyMem)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{role:'user',parts}],generationConfig:{responseModalities:['TEXT','IMAGE']}})});
+    if(!res.ok)throw new Error('שגיאת Google API'); const data=await res.json(); const part=data?.candidates?.[0]?.content?.parts?.find(p=>p.inlineData||p.inline_data); const inline=part?.inlineData||part?.inline_data; if(!inline)throw new Error('לא התקבלה תמונה'); return `data:${inline.mimeType};base64,${inline.data}`;
   }
+  const url=`https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1280&height=720&seed=${Math.floor(Math.random()*9999)}&model=flux&nologo=true`; await new Promise((res,rej)=>{const i=new Image(); i.onload=res; i.onerror=()=>rej(new Error('שגיאת טעינה')); i.src=url}); return url;
 }
-
-/* ---------- Google Gemini — יצירת/עריכת תמונה ---------- */
-async function generateImage(prompt, asset) {
-  if (apiKeyMem) {
-    const parts = [{ text: prompt }];
-    if (asset && asset.type === 'image') parts.push({ inline_data: { mime_type: asset.mime, data: asset.base64 } });
-
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-preview-image-generation:generateContent?key=${encodeURIComponent(apiKeyMem)}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ role: 'user', parts }],
-        generationConfig: { responseModalities: ['TEXT', 'IMAGE'] }
-      })
-    });
-    if (!res.ok) {
-      const t = await res.text();
-      throw new Error('שגיאת Google API: ' + t.slice(0, 150));
-    }
-    const data = await res.json();
-    const imgPart = data?.candidates?.[0]?.content?.parts?.find(p => p.inlineData || p.inline_data);
-    const inline = imgPart?.inlineData || imgPart?.inline_data;
-    if (!inline) throw new Error('לא התקבלה תמונה מהמודל, נסה תיאור אחר');
-    return `data:${inline.mimeType || inline.mime_type};base64,${inline.data}`;
-  }
-
-  // מצב חינמי ללא מפתח — Pollinations (טקסט בלבד, ללא עריכת תמונה מועלית)
-  const url = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1280&height=720&seed=${Math.floor(Math.random()*9999)}&model=flux&nologo=true`;
-  await new Promise((resolve, reject) => {
-    const test = new Image();
-    test.onload = resolve; test.onerror = () => reject(new Error('שגיאה בטעינת התמונה, נסה שוב'));
-    test.src = url;
-  });
-  return url;
-}
-
-/* ---------- Google Veo — יצירת וידאו (long-running operation) ---------- */
-async function generateVideo(prompt, asset) {
-  const instance = { prompt };
-  if (asset && asset.type === 'image') {
-    instance.image = { bytesBase64Encoded: asset.base64, mimeType: asset.mime };
-  }
-
-  const startRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/veo-2.0-generate-001:predictLongRunning?key=${encodeURIComponent(apiKeyMem)}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ instances: [instance], parameters: { aspectRatio: '16:9' } })
-  });
-  if (!startRes.ok) {
-    const t = await startRes.text();
-    throw new Error('שגיאת Veo API: ' + t.slice(0, 150));
-  }
-  const startData = await startRes.json();
-  const opName = startData.name;
-  if (!opName) throw new Error('לא התקבל מזהה פעולה מ-Veo');
-
-  loaderStage.textContent = 'Rendering Video (may take a minute)';
-  let op;
-  for (let i = 0; i < 40; i++) {
-    await new Promise(r => setTimeout(r, 5000));
-    const pollRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/${opName}?key=${encodeURIComponent(apiKeyMem)}`);
-    op = await pollRes.json();
-    if (op.done) break;
-  }
-  if (!op || !op.done) throw new Error('יצירת הווידאו לוקחת זמן רב מהצפוי, נסה שוב מאוחר יותר');
-  if (op.error) throw new Error('שגיאה מ-Veo: ' + (op.error.message || 'unknown'));
-
-  const sample = op.response?.generateVideoResponse?.generatedSamples?.[0]?.video
-              || op.response?.videos?.[0];
-  const videoUri = sample?.uri;
-  if (!videoUri) throw new Error('לא התקבל קובץ וידאו מהשרת');
-
-  const videoRes = await fetch(`${videoUri}${videoUri.includes('?') ? '&' : '?'}key=${encodeURIComponent(apiKeyMem)}`);
-  const blob = await videoRes.blob();
-  return URL.createObjectURL(blob);
-}
-
-/* ---------- גלריה ---------- */
-function addToGallery(url, type) {
-  const id = 'g' + Date.now();
-  gallery.unshift({ id, url, type });
-  renderGallery();
-}
-function renderGallery() {
-  const grid = document.getElementById('gallery');
-  const emptyMsg = document.getElementById('gallery-empty');
-  if (!gallery.length) { grid.innerHTML = ''; emptyMsg.style.display = 'block'; return; }
-  emptyMsg.style.display = 'none';
-  grid.innerHTML = gallery.map(g => `
-    <div class="gallery-item">
-      ${g.type === 'image' ? `<img src="${g.url}">` : `<video src="${g.url}" muted></video>`}
-      <div class="gallery-actions">
-        <button onclick="downloadUrl('${g.url}','${g.type}')"><i data-lucide="download"></i></button>
-        <button onclick="deleteFromGallery('${g.id}')"><i data-lucide="trash-2"></i></button>
-      </div>
-    </div>`).join('');
-  lucide.createIcons();
-}
-function deleteFromGallery(id) {
-  gallery = gallery.filter(g => g.id !== id);
-  renderGallery();
-}
-
-/* ---------- הורדה ---------- */
-async function downloadUrl(url, type) {
-  try {
-    const res = await fetch(url);
-    const blob = await res.blob();
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `AI_Studio_${Date.now()}.${type === 'image' ? 'png' : 'mp4'}`;
-    document.body.appendChild(a); a.click(); a.remove();
-    showToast('ההורדה החלה');
-  } catch {
-    showToast('שגיאה בהורדה');
-  }
-}
-function download() {
-  if (!lastResultUrl) return showToast('אין עדיין מדיה להורדה');
-  downloadUrl(lastResultUrl, lastResultType);
-}
-
-/* ---------- שיתוף ---------- */
-async function shareApp() {
-  if (!lastResultUrl) return showToast('אין עדיין מדיה לשיתוף');
-  try {
-    const res = await fetch(lastResultUrl);
-    const blob = await res.blob();
-    const file = new File([blob], `AI_Studio.${lastResultType === 'image' ? 'png' : 'mp4'}`, { type: blob.type });
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({ files: [file], title: 'AI Video Studio', text: 'ראה מה יצרתי!' });
-      return;
-    }
-  } catch (e) { /* נופל לגיבוי למטה */ }
-  window.open(`https://wa.me/?text=${encodeURIComponent('ראה מה יצרתי בסטודיו AI שלי: ' + window.location.href)}`, '_blank');
-}
-
-/* ---------- נגן ---------- */
-function toggleMedia() {
-  if (!vVid.classList.contains('hidden')) {
-    vVid.paused ? vVid.play() : vVid.pause();
-  } else if (!vImg.classList.contains('hidden')) {
-    return; // תמונה — אין הפעלה/השהיה
-  }
-}
-vVid.onplay = () => { document.getElementById('playIcon').dataset.lucide = 'pause'; lucide.createIcons(); };
-vVid.onpause = () => { document.getElementById('playIcon').dataset.lucide = 'play'; lucide.createIcons(); };
-
-function ctrl(cmd) {
-  if (vVid.classList.contains('hidden')) return;
-  if (cmd === 'stop') { vVid.pause(); vVid.currentTime = 0; }
-  else if (cmd === 'start') vVid.currentTime = 0;
-  else if (cmd === 'back') vVid.currentTime = Math.max(0, vVid.currentTime - 2);
-  else if (cmd === 'forward') vVid.currentTime = Math.min(vVid.duration || 0, vVid.currentTime + 2);
-}
-function fmt(s) { if (!isFinite(s)) return '00:00'; const m = Math.floor(s/60), sec = Math.floor(s%60); return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`; }
-vVid.ontimeupdate = () => {
-  document.getElementById('t-bar').style.width = (vVid.currentTime / (vVid.duration||1) * 100) + '%';
-  document.getElementById('t-cur').textContent = fmt(vVid.currentTime);
-  document.getElementById('t-dur').textContent = fmt(vVid.duration);
-};
-
-setMode('image');
-renderGallery();
+async function generateVideo(prompt, asset){ /* כמו בקוד המקורי - Veo */ const instance={prompt}; if(asset&&asset.type==='image')instance.image={bytesBase64Encoded:asset.base64,mimeType:asset.mime}; const s=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/veo-2.0-generate-001:predictLongRunning?key=${encodeURIComponent(apiKeyMem)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({instances:[instance],parameters:{aspectRatio:'16:9'}})}); if(!s.ok)throw new Error('שגיאת Veo'); const sd=await s.json(); const opName=sd.name; loaderStage.textContent='Rendering Video'; let op; for(let i=0;i<40;i++){await new Promise(r=>setTimeout(r,5000)); const pr=await fetch(`https://generativelanguage.googleapis.com/v1beta/${opName}?key=${encodeURIComponent(apiKeyMem)}`); op=await pr.json(); if(op.done)break} if(!op?.done)throw new Error('לוקח יותר מדי זמן'); const sample=op.response?.generateVideoResponse?.generatedSamples?.[0]?.video||op.response?.videos?.[0]; const uri=sample?.uri; if(!uri)throw new Error('לא התקבל וידאו'); const vr=await fetch(`${uri}${uri.includes('?')?'&':'?'}key=${encodeURIComponent(apiKeyMem)}`); const blob=await vr.blob(); return URL.createObjectURL(blob)}
+function addToGallery(url,type){gallery.unshift({id:'g'+Date.now(),url,type}); renderGallery()}
+function renderGallery(){const g=document.getElementById('gallery'), e=document.getElementById('gallery-empty'); if(!gallery.length){g.innerHTML=''; e.style.display='block'; return} e.style.display='none'; g.innerHTML=gallery.map(x=>`<div class="gallery-item">${x.type==='image'?`<img src="${x.url}">`:`<video src="${x.url}" muted></video>`}<div class="gallery-actions"><button onclick="downloadUrl('${x.url}','${x.type}')"><i data-lucide="download"></i></button><button onclick="deleteFromGallery('${x.id}')"><i data-lucide="trash-2"></i></button></div></div>`).join(''); lucide.createIcons()}
+function deleteFromGallery(id){gallery=gallery.filter(g=>g.id!==id); renderGallery()}
+async function downloadUrl(url,type){const r=await fetch(url); const b=await r.blob(); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=`AI_${Date.now()}.${type==='image'?'png':'mp4'}`; a.click(); showToast('ההורדה החלה')}
+function download(){if(!lastResultUrl)return showToast('אין מדיה'); downloadUrl(lastResultUrl,lastResultType)}
+async function shareApp(){if(!lastResultUrl)return showToast('אין מדיה'); try{const r=await fetch(lastResultUrl); const b=await r.blob(); const f=new File([b],`AI.${lastResultType==='image'?'png':'mp4'}`,{type:b.type}); if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'AI Studio'}); return}}catch{} window.open(`https://wa.me/?text=${encodeURIComponent('ראה מה יצרתי: '+location.href)}`,'_blank')}
+function toggleMedia(){if(!vVid.classList.contains('hidden')){vVid.paused?vVid.play():vVid.pause()}}
+vVid.onplay=()=>{document.getElementById('playIcon').dataset.lucide='pause'; lucide.createIcons(); showTimeline()}; vVid.onpause=()=>{document.getElementById('playIcon').dataset.lucide='play'; lucide.createIcons()}
+function ctrl(c){if(vVid.classList.contains('hidden'))return; if(c==='stop'){vVid.pause(); vVid.currentTime=0}else if(c==='start')vVid.currentTime=0; else if(c==='back')vVid.currentTime=Math.max(0,vVid.currentTime-2); else if(c==='forward')vVid.currentTime=Math.min(vVid.duration||0,vVid.currentTime+2)}
+function fmt(s){if(!isFinite(s))return '00:00'; const m=Math.floor(s/60),sec=Math.floor(s%60); return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`}
+vVid.ontimeupdate=()=>{if(isDragging)return; const p=(vVid.currentTime/(vVid.duration||1))*100; bar.style.width=p+'%'; handle.style.left=p+'%'; document.getElementById('t-cur').textContent=fmt(vVid.currentTime); document.getElementById('t-dur').textContent=fmt(vVid.duration)}
+setMode('image'); renderGallery();
 </script>
 </body>
 </html>
