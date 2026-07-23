@@ -94,28 +94,26 @@
       gap: 16px;
     }
 
-    /* גלילה אופקית לפילטרים בשורה אחת/שתיים קומפקטיות כדי לא להסתיר את התצוגה המקדימה */
+    /* פילטרים נגללים שלא מסתירים את התצוגה המקדימה */
     .filters-grid {
-      display: flex;
-      flex-wrap: nowrap;
-      overflow-x: auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
       gap: 10px;
-      padding: 5px 0 10px 0;
-      scroll-behavior: smooth;
+      max-height: 140px;
+      overflow-y: auto;
+      padding-left: 5px;
     }
 
     .filter-btn {
       background-color: #334155;
       color: #f1f5f9;
       border: 2px solid transparent;
-      padding: 10px 16px;
+      padding: 10px;
       border-radius: 8px;
       cursor: pointer;
       font-size: 0.85rem;
       transition: all 0.2s;
       text-align: center;
-      white-space: nowrap;
-      flex-shrink: 0;
     }
 
     .filter-btn:hover {
@@ -245,7 +243,7 @@
 
     /* custom scrollbar */
     .filters-grid::-webkit-scrollbar {
-      height: 6px;
+      width: 6px;
     }
     .filters-grid::-webkit-scrollbar-thumb {
       background: #475569;
@@ -273,7 +271,7 @@
     <div class="controls">
       <h3>בחר פילטר (20 סוגים):</h3>
       <div class="filters-grid" id="filters-grid">
-        <!-- 20 פילטרים מקוריים -->
+        <!-- 20 פילטרים -->
         <button class="filter-btn active" data-filter="none">ללא פילטר</button>
         <button class="filter-btn" data-filter="vintage">וינטג'</button>
         <button class="filter-btn" data-filter="sepia">ספיה קלאסי</button>
@@ -337,31 +335,6 @@
     let selectedFilter = 'none';
     let filterIntensity = 100; // 1-100
 
-    // הגדרת מאפייני הפילטרים ב-CSS Filter (המקורי)
-    const filterDefinitions = {
-      'none': '',
-      'vintage': 'sepia(0.5) contrast(1.2) brightness(0.9)',
-      'sepia': 'sepia(1)',
-      'bw': 'grayscale(1) contrast(1.5)',
-      'cyberpunk': 'hue-rotate(180deg) contrast(1.4) saturate(2)',
-      'warm': 'sepia(0.3) saturate(1.4) hue-rotate(-10deg)',
-      'cool': 'hue-rotate(30deg) saturate(1.2) brightness(1.1)',
-      'invert': 'invert(1)',
-      'hue-shift': 'hue-rotate(90deg)',
-      'blur': 'blur(5px)',
-      'high-contrast': 'contrast(2)',
-      'pastel': 'saturate(0.5) brightness(1.3) contrast(0.8)',
-      'neon': 'saturate(3) contrast(1.5) brightness(1.2)',
-      'cinema': 'contrast(1.3) saturate(0.8) brightness(0.9)',
-      'sunset': 'sepia(0.4) saturate(2) hue-rotate(-20deg)',
-      'noir': 'grayscale(1) contrast(2) brightness(0.8)',
-      'retro-green': 'grayscale(0.5) hue-rotate(80deg) saturate(2)',
-      'golden-hour': 'sepia(0.3) saturate(1.8) brightness(1.1)',
-      'hdr': 'contrast(1.6) saturate(1.4) brightness(1.05)',
-      'pop-art': 'saturate(5) hue-rotate(45deg)',
-      'faded': 'contrast(0.8) brightness(1.2) sepia(0.2)'
-    };
-
     // טיפול בהעלאת קובץ
     fileInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
@@ -408,33 +381,64 @@
       applyFilter();
     });
 
-    // החלת הפילטר המשולב עם העוצמה (פועל גם על תמונה וגם על סרטון)
-    function applyFilter() {
-      if (!currentMedia) return;
+    // חישוב הפילטר בצורה מדויקת - משנה אך ורק את חוזק האפקט/צבע ללא החשכה
+    function getCSSFilterString() {
+      if (selectedFilter === 'none') return 'none';
 
-      if (selectedFilter === 'none') {
-        currentMedia.style.filter = 'none';
-        return;
-      }
+      const f = filterIntensity / 100; // יחס 0 עד 1
 
-      const factor = filterIntensity / 100;
-
-      // חישוב פילטר מורכב לפי עוצמה יחסית
-      if (selectedFilter === 'blur') {
-        currentMedia.style.filter = `blur(${5 * factor}px)`;
-      } else if (selectedFilter === 'sepia') {
-        currentMedia.style.filter = `sepia(${factor})`;
-      } else if (selectedFilter === 'bw') {
-        currentMedia.style.filter = `grayscale(${factor}) contrast(${1 + 0.5 * factor})`;
-      } else if (selectedFilter === 'invert') {
-        currentMedia.style.filter = `invert(${factor})`;
-      } else {
-        // ערבוב עוצמה עבור פילטרים כלליים באמצעות opacity/saturate/opacity
-        currentMedia.style.filter = `${filterDefinitions[selectedFilter]} opacity(${0.3 + 0.7 * factor})`;
+      switch (selectedFilter) {
+        case 'vintage':
+          return `sepia(${0.5 * f}) contrast(${1 + 0.2 * f}) brightness(${1 - 0.1 * f})`;
+        case 'sepia':
+          return `sepia(${f})`;
+        case 'bw':
+          return `grayscale(${f}) contrast(${1 + 0.5 * f})`;
+        case 'cyberpunk':
+          return `hue-rotate(${180 * f}deg) contrast(${1 + 0.4 * f}) saturate(${1 + f})`;
+        case 'warm':
+          return `sepia(${0.3 * f}) saturate(${1 + 0.4 * f}) hue-rotate(${-10 * f}deg)`;
+        case 'cool':
+          return `hue-rotate(${30 * f}deg) saturate(${1 + 0.2 * f}) brightness(${1 + 0.1 * f})`;
+        case 'invert':
+          return `invert(${f})`;
+        case 'hue-shift':
+          return `hue-rotate(${90 * f}deg)`;
+        case 'blur':
+          return `blur(${5 * f}px)`;
+        case 'high-contrast':
+          return `contrast(${1 + f})`;
+        case 'pastel':
+          return `saturate(${1 - 0.5 * f}) brightness(${1 + 0.3 * f}) contrast(${1 - 0.2 * f})`;
+        case 'neon':
+          return `saturate(${1 + 2 * f}) contrast(${1 + 0.5 * f}) brightness(${1 + 0.2 * f})`;
+        case 'cinema':
+          return `contrast(${1 + 0.3 * f}) saturate(${1 - 0.2 * f}) brightness(${1 - 0.1 * f})`;
+        case 'sunset':
+          return `sepia(${0.4 * f}) saturate(${1 + f}) hue-rotate(${-20 * f}deg)`;
+        case 'noir':
+          return `grayscale(${f}) contrast(${1 + f}) brightness(${1 - 0.2 * f})`;
+        case 'retro-green':
+          return `grayscale(${0.5 * f}) hue-rotate(${80 * f}deg) saturate(${1 + f})`;
+        case 'golden-hour':
+          return `sepia(${0.3 * f}) saturate(${1 + 0.8 * f}) brightness(${1 + 0.1 * f})`;
+        case 'hdr':
+          return `contrast(${1 + 0.6 * f}) saturate(${1 + 0.4 * f}) brightness(${1 + 0.05 * f})`;
+        case 'pop-art':
+          return `saturate(${1 + 4 * f}) hue-rotate(${45 * f}deg)`;
+        case 'faded':
+          return `contrast(${1 - 0.2 * f}) brightness(${1 + 0.2 * f}) sepia(${0.2 * f})`;
+        default:
+          return 'none';
       }
     }
 
-    // יצירת קובץ Blob פיזי מעובד (עובד בנייד ובמחשב)
+    function applyFilter() {
+      if (!currentMedia) return;
+      currentMedia.style.filter = getCSSFilterString();
+    }
+
+    // מעבד ומייצר קובץ פיזי אמיתי (Blob)
     async function createProcessedBlob() {
       if (!currentMedia) return null;
 
@@ -445,7 +449,7 @@
         canvas.width = currentMedia.naturalWidth || currentMedia.width || 800;
         canvas.height = currentMedia.naturalHeight || currentMedia.height || 600;
 
-        ctx.filter = getComputedStyle(currentMedia).filter;
+        ctx.filter = getCSSFilterString();
         ctx.drawImage(currentMedia, 0, 0, canvas.width, canvas.height);
 
         return new Promise(resolve => {
@@ -478,7 +482,7 @@
               recorder.stop();
               return;
             }
-            ctx.filter = getComputedStyle(currentMedia).filter;
+            ctx.filter = getCSSFilterString();
             ctx.drawImage(currentMedia, 0, 0, canvas.width, canvas.height);
             requestAnimationFrame(renderFrame);
           };
@@ -489,7 +493,7 @@
       }
     }
 
-    // הוספת פריט לתיקיית המדיה בתחתית
+    // הוספת קובץ לתיקייה בתחתית העמוד
     function addItemToFolder(blobData) {
       const url = URL.createObjectURL(blobData.blob);
       const item = document.createElement('div');
@@ -529,7 +533,7 @@
       galleryGrid.prepend(item);
     }
 
-    // שמירת קובץ למכשיר
+    // שמירת הקובץ הפיזי למכשיר
     function saveFileToDevice(blob, filename) {
       const a = document.createElement('a');
       const url = URL.createObjectURL(blob);
@@ -562,7 +566,7 @@
       downloadBtn.textContent = 'הורד מדיה';
     });
 
-    // שיתוף הקובץ עצמו לנייד
+    // שיתוף הקובץ עצמו (מדיה ולא קישור) למכשירים ניידים
     shareBtn.addEventListener('click', async () => {
       if (!currentMedia) {
         alert('אנא העלה תמונה או סרטון תחילה.');
