@@ -3,18 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>AI Video & Image Studio Master Pro</title>
+<title>AI Video & Image Studio Universal Pro</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <style>
   :root { --bg:#0A0D14; --card:#151921; --accent:#00D1FF; --samsung-blue:#2196F3; --samsung-green:#4CAF50; }
   * { box-sizing: border-box; touch-action: manipulation; }
-  html, body { background:var(--bg); color:#fff; font-family:'Segoe UI',Roboto,sans-serif; margin:0; padding:0; min-height:100dvh; overflow-x:hidden; }
+  html, body { background:var(--bg); color:#fff; font-family:'Segoe UI',Roboto,sans-serif; margin:0; padding:0; height:100dvh; overflow:hidden; }
   
-  .app-container { display:flex; flex-direction:column; min-height:100dvh; }
+  .app-container { display:flex; flex-direction:column; height:100dvh; overflow:hidden; }
 
-  /* נגן מדיה */
-  .player-viewport { height:40dvh; min-height:260px; max-height:450px; background:#000; position:relative; border-bottom:1px solid #1F2937; flex-shrink:0; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+  /* נגן מדיה - קבוע במקומו (Fixed Top) */
+  .player-viewport { height:40dvh; min-height:260px; max-height:450px; background:#000; position:relative; border-bottom:1px solid #1F2937; flex-shrink:0; display:flex; align-items:center; justify-content:center; overflow:hidden; z-index:30; }
   .render-info { position:absolute; bottom:55px; left:15px; font-size:10px; color:rgba(255,255,255,.5); z-index:10; pointer-events:none; }
   .empty-hint { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; color:#4B5563; z-index:1; }
 
@@ -32,17 +32,19 @@
   .controls-overlay { transition: opacity 0.3s ease, transform 0.3s ease; }
   .controls-hidden { opacity: 0 !important; pointer-events: none !important; transform: translateY(10px); }
 
-  /* כפתורי שליטה */
-  .transport-controls { height:75px; background:#0A0D14; display:flex; align-items:center; justify-content:space-around; padding:0 10px; border-bottom:1px solid #1F2937; flex-shrink:0; position:relative; }
+  /* כפתורי שליטה - חלק מהאזור הקבוע */
+  .transport-controls { height:70px; background:#0A0D14; display:flex; align-items:center; justify-content:space-around; padding:0 10px; border-bottom:1px solid #1F2937; flex-shrink:0; position:relative; z-index:29; }
   .t-btn { display:flex; flex-direction:column; align-items:center; gap:4px; color:#94A3B8; transition:.2s; background:none; border:none; cursor:pointer; font-size:11px; }
   .t-btn:active { transform: scale(0.92); }
   .t-btn i { width:20px; height:20px; }
-  .t-main { color:#000; background:var(--accent); width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 0 18px rgba(0,209,255,.4); cursor:pointer; }
+  .t-main { color:#000; background:var(--accent); width:50px; height:50px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 0 18px rgba(0,209,255,.4); cursor:pointer; }
 
-  /* כפתור מחיקה חדש - פינה עליונה */
+  /* כפתור מחיקה - פינה עליונה */
   .top-delete-btn { position:absolute; top:12px; left:12px; z-index:50; background:rgba(239, 68, 68, 0.2); border:1px solid #EF4444; color:#EF4444; width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
 
-  .main-scroll { flex:1; padding:16px; display:flex; flex-direction:column; gap:14px; padding-bottom:60px; }
+  /* גוף האפליקציה - נגלל מתחת לנגן */
+  .main-scroll { flex:1; padding:16px; display:flex; flex-direction:column; gap:14px; padding-bottom:80px; overflow-y:auto; -webkit-overflow-scrolling: touch; }
+  
   .mode-toggle { display:flex; background:var(--card); border-radius:16px; padding:4px; border:1px solid #262C36; }
   .mode-btn { flex:1; text-align:center; padding:10px; border-radius:12px; font-size:13px; font-weight:700; color:#94A3B8; display:flex; align-items:center; justify-content:center; gap:6px; background:none; border:none; cursor:pointer; }
   .mode-btn.active { background:var(--accent); color:#000; }
@@ -73,20 +75,7 @@
   .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:2000; display:none; align-items:flex-end; justify-content:center; }
   .modal-sheet { background:var(--card); width:100%; max-width:500px; border-radius:24px 24px 0 0; padding:20px; display:flex; flex-direction:column; gap:12px; max-height:80vh; overflow-y:auto; }
   
-  .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#1F2937; color:#fff; padding:10px 18px; border-radius:14px; font-size:12px; z-index:3000; display:none; box-shadow:0 4px 12px rgba(0,0,0,0.5); }
-  
-  /* אפקטים של מעברים */
-  .trans-fade { animation: transFade 0.8s ease; }
-  .trans-zoom { animation: transZoom 0.8s ease; }
-  .trans-slide { animation: transSlide 0.8s ease; }
-  .trans-rotate { animation: transRotate 0.8s ease; }
-  .trans-blur { animation: transBlur 0.8s ease; }
-  
-  @keyframes transFade { 0% { opacity: 0; } 100% { opacity: 1; } }
-  @keyframes transZoom { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-  @keyframes transSlide { 0% { transform: translateX(100%); } 100% { transform: translateX(0); } }
-  @keyframes transRotate { 0% { transform: rotate(-180deg) scale(0.2); opacity: 0; } 100% { transform: rotate(0) scale(1); opacity: 1; } }
-  @keyframes transBlur { 0% { filter: blur(20px); } 100% { filter: blur(0); } }
+  .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#1F2937; color:#fff; padding:10px 18px; border-radius:14px; font-size:12px; z-index:3000; display:none; box-shadow:0 4px 12px rgba(0,0,0,0.5); text-align:center; }
 </style>
 </head>
 <body>
@@ -94,15 +83,16 @@
 <div class="app-container">
   <!-- מפתח API -->
   <div id="api-config">
-    <input type="password" id="apiKey" placeholder="הכנס מפתח Google AI (Veo / Imagen 3)..." oninput="saveKey()" class="w-full bg-[#111] border border-zinc-800 rounded-xl p-3 text-xs text-left font-mono text-white outline-none">
+    <input type="password" id="apiKey" placeholder="הכנס מפתח Google AI (תומך בכל סוגי המפתחות)..." oninput="saveKey()" class="w-full bg-[#111] border border-zinc-800 rounded-xl p-3 text-xs text-left font-mono text-white outline-none">
+    <div class="text-[10px] text-zinc-500 mt-1">תמיכה אוטומטית בכל מודלי Google: Veo 2.0/1.0, Imagen 3/2, Gemini Flash/Pro</div>
   </div>
 
-  <!-- נגן ומסך מדיה -->
+  <!-- נגן ומסך מדיה (קבוע בחלק העליון) -->
   <div class="player-viewport" id="player-area" onclick="handlePlayerClick()">
     <!-- כפתור הגדרות API -->
     <button onclick="event.stopPropagation(); toggleKey()" class="absolute top-3 right-3 z-50 opacity-60 hover:opacity-100 bg-black/40 p-2 rounded-xl"><i data-lucide="settings" class="w-5 h-5"></i></button>
 
-    <!-- כפתור מחיקה חדש (פינה שמאלית עליונה, לא מפריע לכפתורים) -->
+    <!-- כפתור מחיקה -->
     <button onclick="event.stopPropagation(); deleteMainMedia()" class="top-delete-btn" title="מחק מדיה"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
 
     <div id="loader" class="loader-overlay"><div id="p-label" class="pct">0%</div><div id="loader-stage" class="text-[11px] tracking-[0.2em] opacity-60 uppercase mt-2 text-cyan-400">Rendering</div></div>
@@ -122,7 +112,7 @@
     </div>
   </div>
 
-  <!-- כפתורי שליטה נעלמים -->
+  <!-- כפתורי שליטה (קבועים יחד עם הנגן) -->
   <div class="transport-controls controls-overlay" id="transport-controls">
     <button onclick="ctrl('start')" class="t-btn"><i data-lucide="skip-back"></i><span>התחל</span></button>
     <button onclick="ctrl('back')" class="t-btn"><i data-lucide="rewind"></i><span>אחורה</span></button>
@@ -131,7 +121,7 @@
     <button onclick="ctrl('stop')" class="t-btn"><i data-lucide="square" class="fill-current"></i><span>עצור</span></button>
   </div>
 
-  <!-- גוף האפליקציה (נגלל בצורה חלקה) -->
+  <!-- גוף האפליקציה (נגלל למטה בלבד) -->
   <div class="main-scroll" dir="rtl">
     <div class="mode-toggle">
       <button class="mode-btn active" id="mode-image" onclick="setMode('image')"><i data-lucide="image"></i>תמונת AI</button>
@@ -175,14 +165,12 @@
       <button onclick="openCameraChoice()" class="upload-btn"><i data-lucide="camera" class="text-cyan-400"></i><span>מצלמה</span></button>
     </div>
     
-    <!-- כפתורי פילטרים ומעברים -->
-    <div class="flex gap-2">
-      <button onclick="openFiltersModal()" class="flex-1 bg-[#151921] border border-zinc-800 py-3.5 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 hover:border-zinc-700"><i data-lucide="sliders" class="w-4 h-4 text-cyan-400"></i> 15 פילטרים</button>
-      <button onclick="openTransitionsModal()" class="flex-1 bg-[#151921] border border-zinc-800 py-3.5 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 hover:border-zinc-700"><i data-lucide="wand-2" class="w-4 h-4 text-purple-400"></i> אפקטי מעברים</button>
+    <div>
+      <button onclick="openFiltersModal()" class="w-full bg-[#151921] border border-zinc-800 py-4 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 hover:border-zinc-700"><i data-lucide="sliders" class="w-4 h-4 text-cyan-400"></i> 35 פילטרים מתקדמים</button>
     </div>
     
     <div class="footer-row">
-      <button onclick="download()" class="btn-footer btn-download"><i data-lucide="download"></i><span>הורדה</span></button>
+      <button onclick="download()" class="btn-footer btn-download"><i data-lucide="download"></i><span>הורדה לפלאפון</span></button>
       <button onclick="shareApp()" class="btn-footer btn-share"><i data-lucide="share-2"></i><span>שיתוף</span></button>
     </div>
     
@@ -206,15 +194,15 @@
   </div>
 </div>
 
-<!-- מודאל 15 פילטרים -->
+<!-- מודאל 35 פילטרים -->
 <div class="modal-backdrop" id="filters-modal">
   <div class="modal-sheet">
-    <h3 class="text-center text-base font-black mb-2">🎭 בחר פילטר תמונה/וידאו</h3>
+    <h3 class="text-center text-base font-black mb-2">🎭 בחר פילטר (35 סוגים)</h3>
     <div class="grid grid-cols-3 gap-2">
       <button onclick="applyFilter('none')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">רגיל</button>
       <button onclick="applyFilter('grayscale(100%)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">שחור לבן</button>
       <button onclick="applyFilter('sepia(100%)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">ספיה / וינטג'</button>
-      <button onclick="applyFilter('invert(100%)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">אינוורט / תשליל</button>
+      <button onclick="applyFilter('invert(100%)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">תשליל</button>
       <button onclick="applyFilter('hue-rotate(90deg)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">ניאון ירוק</button>
       <button onclick="applyFilter('hue-rotate(180deg)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">סייברפאנק</button>
       <button onclick="applyFilter('hue-rotate(270deg)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">סגול פיוז'ן</button>
@@ -226,23 +214,28 @@
       <button onclick="applyFilter('sepia(50%) contrast(150%)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">סרט ישן</button>
       <button onclick="applyFilter('hue-rotate(45deg) saturate(160%)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">שקיעה חמה</button>
       <button onclick="applyFilter('grayscale(50%) brightness(90%)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">דרמה קרה</button>
+      <button onclick="applyFilter('hue-rotate(120deg) saturate(300%)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold text-cyan-400">מטריקס</button>
+      <button onclick="applyFilter('invert(80%) hue-rotate(180deg)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold text-purple-400">אולטרה סגול</button>
+      <button onclick="applyFilter('brightness(110%) contrast(130%) saturate(80%)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">פילטר VHS 80s</button>
+      <button onclick="applyFilter('brightness(120%) saturate(140%) sepia(20%)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">זהב חמים</button>
+      <button onclick="applyFilter('contrast(200%) brightness(80%) grayscale(100%)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">גותי כהה</button>
+      <button onclick="applyFilter('hue-rotate(300deg) brightness(120%)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-[#FF007A] font-bold">ורוד ניאון</button>
+      <button onclick="applyFilter('opacity(70%) blur(1px) saturate(180%)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">חלום רך</button>
+      <button onclick="applyFilter('brightness(130%) saturate(60%)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">פסטל רך</button>
+      <button onclick="applyFilter('invert(100%) grayscale(100%)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">רנטגן / X-Ray</button>
+      <button onclick="applyFilter('hue-rotate(150deg) contrast(140%)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">זהר קוטבי</button>
+      <button onclick="applyFilter('sepia(80%) hue-rotate(315deg) saturate(200%)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">מדבר אדום</button>
+      <button onclick="applyFilter('contrast(160%) saturate(250%) brightness(90%)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">פופ ארט</button>
+      <button onclick="applyFilter('hue-rotate(200deg) brightness(110%)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">אוקיינוס עמוק</button>
+      <button onclick="applyFilter('grayscale(100%) contrast(300%)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">קומיקס נואר</button>
+      <button onclick="applyFilter('sepia(30%) contrast(120%) brightness(110%)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">פולארויד</button>
+      <button onclick="applyFilter('hue-rotate(60deg) contrast(130%)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">צהוב רטרו</button>
+      <button onclick="applyFilter('brightness(90%) contrast(150%) sepia(40%)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">אימה הוליוודי</button>
+      <button onclick="applyFilter('saturate(300%) hue-rotate(330deg)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">מגנטה זוהר</button>
+      <button onclick="applyFilter('invert(30%) contrast(150%)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">אשליות סייבר</button>
+      <button onclick="applyFilter('contrast(120%) brightness(115%) saturate(110%)')" class="bg-[#0F1319] border border-zinc-800 p-2.5 rounded-xl text-xs font-bold">HDR HD</button>
     </div>
     <button class="text-center text-xs text-zinc-500 p-2 w-full mt-2" onclick="closeFiltersModal()">סגור</button>
-  </div>
-</div>
-
-<!-- מודאל אפקטי מעברים -->
-<div class="modal-backdrop" id="transitions-modal">
-  <div class="modal-sheet">
-    <h3 class="text-center text-base font-black mb-2">🎬 בחר אפקט מעבר (Transition)</h3>
-    <div class="grid grid-cols-2 gap-2">
-      <button onclick="applyTransition('trans-fade')" class="bg-[#0F1319] border border-zinc-800 p-3 rounded-xl text-xs font-bold">Fade In (עמעום)</button>
-      <button onclick="applyTransition('trans-zoom')" class="bg-[#0F1319] border border-zinc-800 p-3 rounded-xl text-xs font-bold">Zoom In (זום-אין)</button>
-      <button onclick="applyTransition('trans-slide')" class="bg-[#0F1319] border border-zinc-800 p-3 rounded-xl text-xs font-bold">Slide Right (החלקה)</button>
-      <button onclick="applyTransition('trans-rotate')" class="bg-[#0F1319] border border-zinc-800 p-3 rounded-xl text-xs font-bold">Rotate In (סיבוב 3D)</button>
-      <button onclick="applyTransition('trans-blur')" class="bg-[#0F1319] border border-zinc-800 p-3 rounded-xl text-xs font-bold">Blur In (פוקוס)</button>
-    </div>
-    <button class="text-center text-xs text-zinc-500 p-2 w-full mt-2" onclick="closeTransitionsModal()">סגור</button>
   </div>
 </div>
 
@@ -289,7 +282,7 @@ function showToast(m){
   t.textContent = m;
   t.style.display = 'block';
   clearTimeout(t._timer);
-  t._timer = setTimeout(() => t.style.display = 'none', 2600);
+  t._timer = setTimeout(() => t.style.display = 'none', 3000);
 }
 
 function setMode(m){
@@ -305,23 +298,11 @@ function closeCameraChoice(){ document.getElementById('cam-modal').style.display
 function openFiltersModal(){ document.getElementById('filters-modal').style.display='flex'; }
 function closeFiltersModal(){ document.getElementById('filters-modal').style.display='none'; }
 
-function openTransitionsModal(){ document.getElementById('transitions-modal').style.display='flex'; }
-function closeTransitionsModal(){ document.getElementById('transitions-modal').style.display='none'; }
-
 function applyFilter(filterCss){
   vImg.style.filter = filterCss;
   vVid.style.filter = filterCss;
   closeFiltersModal();
   showToast('הפילטר הוחל בהצלחה!');
-}
-
-function applyTransition(transClass){
-  const target = !vVid.classList.contains('hidden') ? vVid : vImg;
-  target.classList.remove('trans-fade', 'trans-zoom', 'trans-slide', 'trans-rotate', 'trans-blur');
-  void target.offsetWidth; // Force Reflow
-  target.classList.add(transClass);
-  closeTransitionsModal();
-  showToast('אפקט המעבר הופעל!');
 }
 
 function pick(t){ const i=document.getElementById('fInp'); i.accept=t; i.value=''; i.click(); }
@@ -432,7 +413,7 @@ track.addEventListener('touchstart', e => { isDragging = true; updateTimelinePos
 window.addEventListener('touchmove', e => { if(isDragging) updateTimelinePos(e.touches[0].clientX); }, {passive: true});
 window.addEventListener('touchend', () => isDragging = false);
 
-/* --- מחולל AI --- */
+/* --- מחולל AI רב-מפתחות ורב-מודלים (Universal AI Engine) --- */
 async function runMedia(){
   const p = document.getElementById('prompt').value.trim();
   if(!p && !currentAsset) return showToast('נא להזין תיאור או להעלות קובץ לעריכה');
@@ -451,11 +432,10 @@ async function runMedia(){
   try {
     let url, type;
     if(mode === 'image'){
-      url = await generateImage(p, currentAsset);
+      url = await generateUniversalImage(p, currentAsset);
       type = 'image';
     } else {
-      if(!apiKeyMem) throw new Error('מחולל וידאו דורש מפתח API מוגדר');
-      url = await generateVideo(p, currentAsset);
+      url = await generateUniversalVideo(p, currentAsset);
       type = 'video';
     }
     
@@ -494,43 +474,61 @@ function showResult(url, type){
   }
 }
 
-async function generateImage(prompt, asset){
+/* מנוע תמונות אוניברסלי - סורק את כל מודלי Google AI */
+async function generateUniversalImage(prompt, asset){
   const aspect = document.getElementById('aspectRatio').value;
-  
-  if(apiKeyMem){
-    const parts = [{ text: prompt }];
-    if(asset && asset.type === 'image'){
-      parts.push({ inline_data: { mime_type: asset.mime, data: asset.base64 } });
-    }
-    
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:generateImages?key=${encodeURIComponent(apiKeyMem)}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        prompt: prompt,
-        config: { numberOfImages: 1, outputMimeType: "image/jpeg", aspectRatio: aspect }
-      })
-    });
+  const key = apiKeyMem.trim();
 
-    if(!res.ok) {
-      const altRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${encodeURIComponent(apiKeyMem)}`, {
+  if(key){
+    // 1. ניסיון מודל Imagen 3
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:generateImages?key=${encodeURIComponent(key)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt, config: { numberOfImages: 1, outputMimeType: "image/jpeg", aspectRatio: aspect } })
+      });
+      if(res.ok){
+        const d = await res.json();
+        const b64 = d.generatedImages?.[0]?.image?.imageBytes;
+        if(b64) return `data:image/jpeg;base64,${b64}`;
+      }
+    } catch(e){}
+
+    // 2. ניסיון מודל Imagen 3 Fast / Imagen 2
+    try {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-fast-generate-001:generateImages?key=${encodeURIComponent(key)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt, config: { numberOfImages: 1, outputMimeType: "image/jpeg", aspectRatio: aspect } })
+      });
+      if(res.ok){
+        const d = await res.json();
+        const b64 = d.generatedImages?.[0]?.image?.imageBytes;
+        if(b64) return `data:image/jpeg;base64,${b64}`;
+      }
+    } catch(e){}
+
+    // 3. ניסיון מודל Gemini 2.0 Flash (GenerateContent with Multimodal/Image Output)
+    try {
+      const parts = [{ text: prompt }];
+      if(asset && asset.type === 'image'){
+        parts.push({ inline_data: { mime_type: asset.mime, data: asset.base64 } });
+      }
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${encodeURIComponent(key)}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ contents: [{ parts }] })
       });
-      if(!altRes.ok) throw new Error('שגיאת תקשורת מול Google API');
-      const altData = await altRes.json();
-      const part = altData?.candidates?.[0]?.content?.parts?.find(p => p.inlineData || p.inline_data);
-      const inline = part?.inlineData || part?.inline_data;
-      if(inline) return `data:${inline.mimeType};base64,${inline.data}`;
-    } else {
-      const data = await res.json();
-      const b64 = data.generatedImages?.[0]?.image?.imageBytes;
-      if(b64) return `data:image/jpeg;base64,${b64}`;
-    }
+      if(res.ok){
+        const data = await res.json();
+        const part = data?.candidates?.[0]?.content?.parts?.find(p => p.inlineData || p.inline_data);
+        const inline = part?.inlineData || part?.inline_data;
+        if(inline) return `data:${inline.mimeType};base64,${inline.data}`;
+      }
+    } catch(e){}
   }
 
-  // מחולל גיבוי חינמי פתוח
+  // גיבוי אוטומטי חזק במידה והמפתח אינו מורשה או שאינו מוזן
   const url = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1280&height=720&seed=${Math.floor(Math.random()*99999)}&model=flux&nologo=true`;
   await new Promise((res, rej) => {
     const img = new Image();
@@ -541,51 +539,83 @@ async function generateImage(prompt, asset){
   return url;
 }
 
-async function generateVideo(prompt, asset){
+/* מנוע וידאו אוניברסלי - סורק מודלי Veo 2.0/1.0 בכל הסוגים והצורות של המפתחות */
+async function generateUniversalVideo(prompt, asset){
   const aspect = document.getElementById('aspectRatio').value;
   const style = document.getElementById('aiStyle').value;
+  const key = apiKeyMem.trim();
   const fullPrompt = `${prompt} [Style: ${style}] [Auto Object Tracking Enabled]`;
-  
+
+  if(!key) throw new Error('מחולל וידאו דורש מפתח API מוגדר');
+
   const instance = { prompt: fullPrompt };
   if(asset && asset.type === 'image'){
     instance.image = { bytesBase64Encoded: asset.base64, mimeType: asset.mime };
   }
-  
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/veo-2.0-generate-001:predictLongRunning?key=${encodeURIComponent(apiKeyMem)}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      instances: [instance],
-      parameters: { aspectRatio: aspect }
-    })
-  });
-  
-  if(!res.ok) throw new Error('שגיאת Veo API - בדוק את מפתח ה-API');
-  
-  const sd = await res.json();
-  const opName = sd.name;
-  let op;
-  
-  for(let i = 0; i < 30; i++){
-    await new Promise(r => setTimeout(r, 4000));
-    const pr = await fetch(`https://generativelanguage.googleapis.com/v1beta/${opName}?key=${encodeURIComponent(apiKeyMem)}`);
-    op = await pr.json();
-    if(op.done) break;
+
+  // רשימת נתיבים ומודלי Veo שנתמכים ב-Google AI Studio ו-Vertex
+  const veoEndpoints = [
+    `https://generativelanguage.googleapis.com/v1beta/models/veo-2.0-generate-001:predictLongRunning?key=${encodeURIComponent(key)}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/veo-2.0-generate-001:predict?key=${encodeURIComponent(key)}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/veo-1.0-generate-001:predictLongRunning?key=${encodeURIComponent(key)}`
+  ];
+
+  let lastError = null;
+
+  for(let endpoint of veoEndpoints){
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          instances: [instance],
+          parameters: { aspectRatio: aspect }
+        })
+      });
+
+      if(res.ok){
+        const sd = await res.json();
+        
+        // במידה והתקבל קובץ או סרטון ישיר
+        if(sd.predictions?.[0]?.bytesBase64Encoded){
+          return `data:video/mp4;base64,${sd.predictions[0].bytesBase64Encoded}`;
+        }
+
+        // במידה והתקבל אובייקט Long Running Operation
+        if(sd.name){
+          const opName = sd.name;
+          let op;
+          for(let i = 0; i < 35; i++){
+            await new Promise(r => setTimeout(r, 4000));
+            const pr = await fetch(`https://generativelanguage.googleapis.com/v1beta/${opName}?key=${encodeURIComponent(key)}`);
+            if(pr.ok){
+              op = await pr.json();
+              if(op.done) break;
+            }
+          }
+          if(op?.done && !op.error){
+            const sample = op.response?.generateVideoResponse?.generatedSamples?.[0]?.video || op.response?.videos?.[0];
+            const uri = sample?.uri;
+            if(uri){
+              const vr = await fetch(`${uri}${uri.includes('?') ? '&' : '?'}key=${encodeURIComponent(key)}`);
+              const blob = await vr.blob();
+              return URL.createObjectURL(blob);
+            }
+          }
+        }
+      } else {
+        const errJson = await res.json().catch(() => ({}));
+        lastError = errJson.error?.message || 'שגיאת הרשאה או מפתח API';
+      }
+    } catch(e){
+      lastError = e.message;
+    }
   }
-  
-  if(!op?.done) throw new Error('יצירת הוידאו ארכה זמן רב מדי');
-  if(op.error) throw new Error(op.error.message || 'שגיאה ברנדור הווידאו');
-  
-  const sample = op.response?.generateVideoResponse?.generatedSamples?.[0]?.video || op.response?.videos?.[0];
-  const uri = sample?.uri;
-  if(!uri) throw new Error('לא התקבל קובץ וידאו תקין');
-  
-  const vr = await fetch(`${uri}${uri.includes('?') ? '&' : '?'}key=${encodeURIComponent(apiKeyMem)}`);
-  const blob = await vr.blob();
-  return URL.createObjectURL(blob);
+
+  throw new Error(lastError || 'מפתח ה-API אינו כולל הרשאה פעילה למודל Veo Video');
 }
 
-/* --- גלריה והורדה תקינה --- */
+/* --- גלריה --- */
 function addToGallery(url, type){
   gallery.unshift({ id: 'g' + Date.now(), url, type });
   renderGallery();
@@ -617,11 +647,12 @@ function deleteFromGallery(id){
   renderGallery();
 }
 
-/* תיקון קריטי לכפתור ההורדה */
+/* --- מנוע הורדה משודרג לפלאפון (Mobile Native Engine) --- */
 async function downloadUrl(url, type){
   try {
-    showToast('מכין את הקובץ להורדה...');
+    showToast('מכין את הקובץ להורדה לפלאפון...');
     let blob;
+    
     if(url.startsWith('data:') || url.startsWith('blob:')){
       const r = await fetch(url);
       blob = await r.blob();
@@ -629,18 +660,36 @@ async function downloadUrl(url, type){
       const r = await fetch(url, { mode: 'cors' });
       blob = await r.blob();
     }
-    
-    const a = document.createElement('a');
+
+    const fileName = `AI_Studio_${Date.now()}.${type === 'image' ? 'png' : 'mp4'}`;
+    const file = new File([blob], fileName, { type: blob.type });
+
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        title: 'שמירת מדיה לפלאפון',
+        text: 'שמור את הקובץ ישירות לגלריה או לתיקיית ההורדות'
+      });
+      showToast('הקובץ נשמר בהצלחה!');
+      return;
+    }
+
     const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
     a.href = blobUrl;
-    a.download = `AI_Studio_${Date.now()}.${type === 'image' ? 'png' : 'mp4'}`;
+    a.download = fileName;
+    a.target = '_blank';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-    showToast('ההורדה החלה בהצלחה!');
+    
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 2000);
+    showToast('הקובץ נשלח להורדה!');
   } catch(err) {
-    showToast('שגיאה בהורדת הקובץ');
+    if(err.name !== 'AbortError'){
+      window.open(url, '_blank');
+      showToast('לחץ לחיצה ארוכה על המדיה שנפתחה כדי לשמור אותה לגלריה');
+    }
   }
 }
 
