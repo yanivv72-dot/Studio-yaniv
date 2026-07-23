@@ -20,6 +20,7 @@
       flex-direction: column;
       align-items: center;
       padding: 20px;
+      overflow-x: hidden;
     }
 
     .app-container {
@@ -33,6 +34,8 @@
       display: flex;
       flex-direction: column;
       gap: 16px;
+      max-height: 95vh;
+      overflow-y: auto; /* גלילת העמוד */
     }
 
     /* Header Design */
@@ -104,17 +107,19 @@
       outline: none;
     }
 
-    /* Video / Preview Container */
+    /* Video / Preview Container (Sticky - המסך לא נגלל) */
     .preview-card {
+      position: sticky;
+      top: 0;
+      z-index: 100;
       background: #090d16;
       border: 1.5px solid #22d3ee;
       border-radius: 16px;
       padding: 12px;
-      box-shadow: 0 0 15px rgba(34, 211, 238, 0.15);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
       display: flex;
       flex-direction: column;
       gap: 8px;
-      position: relative;
     }
 
     .preview-header-actions {
@@ -145,7 +150,7 @@
 
     .preview-screen {
       width: 100%;
-      height: 190px;
+      height: 180px;
       background-color: #000000;
       border-radius: 10px;
       overflow: hidden;
@@ -166,8 +171,8 @@
     /* Samsung Style Play/Pause Overlay Button */
     .samsung-play-btn {
       position: absolute;
-      width: 54px;
-      height: 54px;
+      width: 50px;
+      height: 50px;
       background: rgba(15, 23, 42, 0.75);
       border: 2px solid #22d3ee;
       border-radius: 50%;
@@ -175,7 +180,7 @@
       align-items: center;
       justify-content: center;
       color: #ffffff;
-      font-size: 1.4rem;
+      font-size: 1.3rem;
       box-shadow: 0 0 15px rgba(34, 211, 238, 0.4);
       transition: opacity 0.3s, transform 0.2s;
       z-index: 10;
@@ -195,12 +200,13 @@
       font-size: 0.9rem;
     }
 
-    /* Thicker Scrollable Progress Bar (Auto-hides during playback) */
+    /* Thicker Scrollable Progress Bar */
     .progress-container {
       width: 100%;
       padding: 6px 0;
       cursor: pointer;
       transition: opacity 0.4s ease;
+      touch-action: none;
     }
 
     .preview-card.is-playing .progress-container {
@@ -213,7 +219,7 @@
 
     .progress-bar-thick {
       width: 100%;
-      height: 10px; /* עבה יותר */
+      height: 10px;
       background: #1e293b;
       border-radius: 5px;
       position: relative;
@@ -232,15 +238,15 @@
     .player-controls {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 6px;
     }
 
     .control-buttons {
       display: flex;
       justify-content: space-around;
       align-items: center;
-      padding-top: 4px;
-      direction: rtl; /* קדימה מצד ימין */
+      padding-top: 2px;
+      direction: rtl;
     }
 
     .ctrl-btn {
@@ -256,7 +262,7 @@
     }
 
     .ctrl-btn span.icon {
-      font-size: 1.1rem;
+      font-size: 1rem;
     }
 
     .ctrl-btn:hover {
@@ -297,11 +303,12 @@
       cursor: pointer;
     }
 
-    /* Media Selector Buttons */
+    /* Media Selector Buttons: תמונה (ימין) | סרטון (אמצע) | מצלמה (שמאל) */
     .media-type-selector {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 8px;
+      direction: rtl;
     }
 
     .media-type-btn {
@@ -322,7 +329,7 @@
       display: none;
     }
 
-    /* Filters Section - Scrollable horizontally */
+    /* Filters Section */
     .filters-container {
       display: flex;
       flex-direction: column;
@@ -374,6 +381,28 @@
       width: 100%;
       accent-color: #22d3ee;
       cursor: pointer;
+    }
+
+    /* Create Edit Button */
+    .btn-create-edit {
+      background: linear-gradient(135deg, #a855f7, #06b6d4);
+      color: #ffffff;
+      padding: 14px;
+      border-radius: 14px;
+      border: none;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+      transition: transform 0.1s, box-shadow 0.2s;
+    }
+
+    .btn-create-edit:active {
+      transform: scale(0.98);
     }
 
     /* Action Buttons */
@@ -483,7 +512,7 @@
       <input type="password" id="api-key" placeholder="sk-... או כל מפתח אחר">
     </div>
 
-    <!-- Preview Container -->
+    <!-- Preview Container (מקובע ולא נגלל) -->
     <div class="preview-card" id="preview-card">
       <div class="preview-header-actions">
         <span style="font-size:0.75rem; color:#64748b;">תצוגה מקדימה</span>
@@ -497,14 +526,12 @@
       
       <!-- Video Player Controls -->
       <div class="player-controls">
-        <!-- Thicker Progress Bar clickable and draggable -->
         <div class="progress-container" id="progress-container">
           <div class="progress-bar-thick">
             <div class="progress-fill" id="progress-fill"></div>
           </div>
         </div>
 
-        <!-- Controls: Forward on the right (RTL) -->
         <div class="control-buttons">
           <button class="ctrl-btn" id="btn-forward"><span class="icon">►►</span>קדימה</button>
           <button class="ctrl-btn" id="btn-play"><span class="icon">▶</span>התחל</button>
@@ -521,30 +548,34 @@
       <button class="surprise-btn" id="surprise-btn">הפתע אותי 🪄</button>
     </div>
 
-    <!-- Media Source Selector -->
+    <!-- Media Source Selector: תמונה (ימין) | סרטון (אמצע) | מצלמה (שמאל) -->
     <div class="media-type-selector">
       <label class="media-type-btn">
-        📷 מצלמה
-        <input type="file" accept="image/*" capture="environment" id="input-camera">
+        🖼️ תמונה
+        <input type="file" accept="image/*" id="input-image">
       </label>
       <label class="media-type-btn">
         🎥 סרטון
         <input type="file" accept="video/*" id="input-video">
       </label>
       <label class="media-type-btn">
-        🖼️ תמונה
-        <input type="file" accept="image/*" id="input-image">
+        📷 מצלמה
+        <input type="file" accept="image/*,video/*" capture="environment" id="input-camera">
       </label>
     </div>
 
-    <!-- Filters and Adjustments (Total 35 Filters) -->
+    <!-- Filters and Adjustments (כל 35 הפילטרים) -->
     <div class="filters-container">
       <div class="filters-grid" id="filters-grid">
         <button class="filter-btn active" data-filter="none">ללא פילטר</button>
+        <button class="filter-btn" data-filter="hollywood">הוליווד מוזהב</button>
+        <button class="filter-btn" data-filter="cinema">קולנועי</button>
+        <button class="filter-btn" data-filter="retro80s">רטרו 80s</button>
+        <button class="filter-btn" data-filter="cyberpunk">סייברפאנק</button>
+        <button class="filter-btn" data-filter="matrix">מטריקס ירוק</button>
         <button class="filter-btn" data-filter="vintage">וינטג'</button>
         <button class="filter-btn" data-filter="sepia">ספיה</button>
         <button class="filter-btn" data-filter="bw">שחור-לבן</button>
-        <button class="filter-btn" data-filter="cyberpunk">סייברפאנק</button>
         <button class="filter-btn" data-filter="warm">חם</button>
         <button class="filter-btn" data-filter="cool">קר</button>
         <button class="filter-btn" data-filter="invert">נגטיב</button>
@@ -552,16 +583,11 @@
         <button class="filter-btn" data-filter="high-contrast">קונטרסט</button>
         <button class="filter-btn" data-filter="pastel">פסטל</button>
         <button class="filter-btn" data-filter="neon">ניאון</button>
-        <button class="filter-btn" data-filter="cinema">קולנועי</button>
         <button class="filter-btn" data-filter="sunset">שקיעה</button>
         <button class="filter-btn" data-filter="noir">נואר</button>
-        <!-- 20 פילטרים חדשים נוספים -->
-        <button class="filter-btn" data-filter="retro80s">רטרו 80s</button>
-        <button class="filter-btn" data-filter="matrix">מטריקס ירוק</button>
         <button class="filter-btn" data-filter="dreamy">חלום קסום</button>
         <button class="filter-btn" data-filter="thermal">מצלמה תרמית</button>
         <button class="filter-btn" data-filter="old-vhs">קלטת וידאו ישנה</button>
-        <button class="filter-btn" data-filter="hollywood">הוליווד מוזהב</button>
         <button class="filter-btn" data-filter="comic">קומיקס מוגבר</button>
         <button class="filter-btn" data-filter="frozen">קפוא כחול</button>
         <button class="filter-btn" data-filter="fire">להבה אדומה</button>
@@ -586,6 +612,9 @@
         <input type="range" id="intensity-slider" class="intensity-slider" min="1" max="100" value="100">
       </div>
     </div>
+
+    <!-- Create Edit Button -->
+    <button class="btn-create-edit" id="btn-create-edit">✨ צור עריכה</button>
 
     <!-- Action Buttons -->
     <div class="action-buttons">
@@ -617,6 +646,7 @@
     const intensityValue = document.getElementById('intensity-value');
     const downloadBtn = document.getElementById('download-btn');
     const shareBtn = document.getElementById('share-btn');
+    const btnCreateEdit = document.getElementById('btn-create-edit');
     const galleryGrid = document.getElementById('gallery-grid');
     const surpriseBtn = document.getElementById('surprise-btn');
     const aiPrompt = document.getElementById('ai-prompt');
@@ -686,7 +716,7 @@
       });
     });
 
-    // Clear / Delete Top Video
+    // Clear Preview
     function clearPreview() {
       if (currentMedia) {
         if (mediaType === 'video') {
@@ -719,7 +749,7 @@
       }
     });
 
-    // Controls Logic (Forward on Right)
+    // Controls Logic
     document.getElementById('btn-play').onclick = () => currentMedia && currentMedia.play && currentMedia.play();
     document.getElementById('btn-pause').onclick = () => currentMedia && currentMedia.pause && currentMedia.pause();
     document.getElementById('btn-stop').onclick = () => {
@@ -735,7 +765,7 @@
       if (currentMedia && mediaType === 'video') currentMedia.currentTime -= 5;
     };
 
-    // Progress Bar Handling (Drag & Click)
+    // Progress Bar Handling (תוקן כיוון הנגינה לגרירה ב-RTL)
     function updateProgressBar() {
       if (!currentMedia || isDraggingProgress || !currentMedia.duration) return;
       const pct = (currentMedia.currentTime / currentMedia.duration) * 100;
@@ -746,9 +776,12 @@
       if (!currentMedia || mediaType !== 'video' || !currentMedia.duration) return;
       const rect = progressContainer.getBoundingClientRect();
       const clickX = e.clientX || (e.touches && e.touches[0].clientX);
-      let posX = clickX - rect.left;
+      
+      // תיקון חישוב מיקום לעברית RTL: ימין זה 0%, שמאל זה 100%
+      let posX = rect.right - clickX;
       posX = Math.max(0, Math.min(posX, rect.width));
       const percentage = posX / rect.width;
+      
       currentMedia.currentTime = percentage * currentMedia.duration;
       progressFill.style.width = `${percentage * 100}%`;
     }
@@ -777,13 +810,11 @@
       applyFilter();
     });
 
-    // 35 Filters Calculation
     function getCSSFilterString() {
       if (selectedFilter === 'none') return 'none';
       const f = filterIntensity / 100;
 
       switch (selectedFilter) {
-        // המקוריים
         case 'vintage': return `sepia(${0.5 * f}) contrast(${1 + 0.2 * f})`;
         case 'sepia': return `sepia(${f})`;
         case 'bw': return `grayscale(${f}) contrast(${1 + 0.5 * f})`;
@@ -798,8 +829,6 @@
         case 'cinema': return `contrast(${1 + 0.3 * f}) saturate(${1 - 0.2 * f})`;
         case 'sunset': return `sepia(${0.4 * f}) saturate(${1 + f})`;
         case 'noir': return `grayscale(${f}) contrast(${1 + f})`;
-        
-        // 20 החדשים
         case 'retro80s': return `hue-rotate(${-45 * f}deg) saturate(${1 + 1.5 * f}) contrast(${1 + 0.3 * f})`;
         case 'matrix': return `hue-rotate(${90 * f}deg) saturate(${1 + 2 * f}) brightness(${1 - 0.2 * f})`;
         case 'dreamy': return `blur(${2 * f}px) brightness(${1 + 0.25 * f}) saturate(${1 + 0.3 * f})`;
@@ -820,7 +849,6 @@
         case 'acid': return `hue-rotate(${270 * f}deg) saturate(${1 + 3 * f})`;
         case 'ocean': return `hue-rotate(${140 * f}deg) contrast(${1 + 0.2 * f})`;
         case 'dramatics': return `contrast(${1 + 1.5 * f}) grayscale(${0.4 * f})`;
-
         default: return 'none';
       }
     }
@@ -831,7 +859,7 @@
       }
     }
 
-    // Process & Download / Share Logic
+    // Process & Export Media
     async function createProcessedBlob() {
       if (!currentMedia) return null;
 
@@ -919,6 +947,23 @@
       item.appendChild(actions);
       galleryGrid.prepend(item);
     }
+
+    // Action: Create Edit
+    btnCreateEdit.addEventListener('click', async () => {
+      if (!currentMedia) return alert('אנא העלה תמונה או סרטון כדי ליצור עריכה.');
+      const origText = btnCreateEdit.textContent;
+      btnCreateEdit.textContent = 'מעבד ועורך... ⏳';
+      btnCreateEdit.disabled = true;
+
+      const processed = await createProcessedBlob();
+      if (processed) {
+        addItemToFolder(processed);
+        alert('העריכה נוצרה בהצלחה ונשמרה בתיקיית המדיה בתחתית העמוד!');
+      }
+
+      btnCreateEdit.textContent = origText;
+      btnCreateEdit.disabled = false;
+    });
 
     downloadBtn.addEventListener('click', async () => {
       if (!currentMedia) return alert('אנא העלה תמונה או סרטון תחילה.');
