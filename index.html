@@ -61,9 +61,47 @@
     }
 
     .settings-btn {
-      color: #64748b;
-      font-size: 1.2rem;
+      color: #94a3b8;
+      font-size: 1.3rem;
       cursor: pointer;
+      transition: color 0.2s, transform 0.2s;
+    }
+
+    .settings-btn:hover {
+      color: #22d3ee;
+      transform: rotate(30deg);
+    }
+
+    /* Hidden API Key Section */
+    .api-key-container {
+      display: none;
+      background: #0d131f;
+      border: 1px solid #0284c7;
+      border-radius: 12px;
+      padding: 10px;
+      margin-top: -6px;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .api-key-container.active {
+      display: flex;
+    }
+
+    .api-key-container label {
+      font-size: 0.75rem;
+      color: #22d3ee;
+    }
+
+    .api-key-container input {
+      width: 100%;
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #fff;
+      padding: 8px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      outline: none;
     }
 
     /* Video / Preview Container */
@@ -76,11 +114,38 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
+      position: relative;
+    }
+
+    .preview-header-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 4px;
+    }
+
+    .delete-media-btn {
+      background: #ef444422;
+      color: #ef4444;
+      border: 1px solid #ef4444;
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.2s;
+    }
+
+    .delete-media-btn:hover {
+      background: #ef4444;
+      color: #fff;
     }
 
     .preview-screen {
       width: 100%;
-      height: 180px;
+      height: 190px;
       background-color: #000000;
       border-radius: 10px;
       overflow: hidden;
@@ -88,6 +153,7 @@
       align-items: center;
       justify-content: center;
       position: relative;
+      cursor: pointer;
     }
 
     .preview-screen img,
@@ -97,31 +163,76 @@
       object-fit: cover;
     }
 
+    /* Samsung Style Play/Pause Overlay Button */
+    .samsung-play-btn {
+      position: absolute;
+      width: 54px;
+      height: 54px;
+      background: rgba(15, 23, 42, 0.75);
+      border: 2px solid #22d3ee;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-size: 1.4rem;
+      box-shadow: 0 0 15px rgba(34, 211, 238, 0.4);
+      transition: opacity 0.3s, transform 0.2s;
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    .preview-screen.playing .samsung-play-btn {
+      opacity: 0;
+    }
+
+    .preview-screen:hover .samsung-play-btn {
+      opacity: 1;
+    }
+
     .placeholder-text {
       color: #475569;
       font-size: 0.9rem;
     }
 
-    /* Video Player Controls */
-    .player-controls {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+    /* Thicker Scrollable Progress Bar (Auto-hides during playback) */
+    .progress-container {
+      width: 100%;
+      padding: 6px 0;
+      cursor: pointer;
+      transition: opacity 0.4s ease;
     }
 
-    .progress-bar {
+    .preview-card.is-playing .progress-container {
+      opacity: 0;
+    }
+
+    .preview-card.is-playing:hover .progress-container {
+      opacity: 1;
+    }
+
+    .progress-bar-thick {
       width: 100%;
-      height: 4px;
+      height: 10px; /* עבה יותר */
       background: #1e293b;
-      border-radius: 2px;
+      border-radius: 5px;
       position: relative;
       overflow: hidden;
     }
 
     .progress-fill {
-      width: 35%;
+      width: 0%;
       height: 100%;
-      background: #22d3ee;
+      background: linear-gradient(90deg, #0284c7, #22d3ee);
+      border-radius: 5px;
+      transition: width 0.1s linear;
+    }
+
+    /* Player Control Buttons */
+    .player-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
     .control-buttons {
@@ -129,6 +240,7 @@
       justify-content: space-around;
       align-items: center;
       padding-top: 4px;
+      direction: rtl; /* קדימה מצד ימין */
     }
 
     .ctrl-btn {
@@ -147,7 +259,11 @@
       font-size: 1.1rem;
     }
 
-    /* AI Prompt Input Section */
+    .ctrl-btn:hover {
+      color: #22d3ee;
+    }
+
+    /* AI Prompt Box */
     .prompt-box {
       background: #0d131f;
       border: 1.5px solid #06b6d4;
@@ -156,7 +272,6 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      position: relative;
     }
 
     .prompt-box textarea {
@@ -180,12 +295,9 @@
       font-weight: 700;
       font-size: 0.8rem;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
     }
 
-    /* Media Type Selection Buttons */
+    /* Media Selector Buttons */
     .media-type-selector {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -210,7 +322,7 @@
       display: none;
     }
 
-    /* Filter Controls Section (Scrollable & Adjustable) */
+    /* Filters Section - Scrollable horizontally */
     .filters-container {
       display: flex;
       flex-direction: column;
@@ -264,7 +376,7 @@
       cursor: pointer;
     }
 
-    /* Main Action Buttons (Download & Share) */
+    /* Action Buttons */
     .action-buttons {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -296,7 +408,7 @@
       box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }
 
-    /* Gallery Section at Bottom */
+    /* Gallery Section */
     .gallery-section {
       margin-top: 10px;
       border-top: 1px solid #1e293b;
@@ -351,7 +463,6 @@
     .btn-action-download { background-color: #10b981; color: #fff; }
     .btn-action-delete { background-color: #ef4444; color: #fff; }
 
-    /* Scrollbar */
     .filters-grid::-webkit-scrollbar { height: 4px; }
     .filters-grid::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
   </style>
@@ -363,24 +474,43 @@
     <header>
       <div class="user-profile">👤</div>
       <h1>מחולל וידאו AI</h1>
-      <div class="settings-btn">⚙️</div>
+      <div class="settings-btn" id="settings-btn">⚙️</div>
     </header>
 
+    <!-- Hidden API Key Box -->
+    <div class="api-key-container" id="api-key-container">
+      <label for="api-key">הכנס מפתח API מוסתר:</label>
+      <input type="password" id="api-key" placeholder="sk-... או כל מפתח אחר">
+    </div>
+
     <!-- Preview Container -->
-    <div class="preview-card">
+    <div class="preview-card" id="preview-card">
+      <div class="preview-header-actions">
+        <span style="font-size:0.75rem; color:#64748b;">תצוגה מקדימה</span>
+        <button class="delete-media-btn" id="delete-top-btn">🗑️ מחק סרטון</button>
+      </div>
+
       <div class="preview-screen" id="preview-screen">
-        <span class="placeholder-text">אין מדיה מוצגת</span>
+        <div class="samsung-play-btn" id="samsung-play-icon">▶</div>
+        <span class="placeholder-text" id="placeholder-text">אין מדיה מוצגת</span>
       </div>
       
-      <!-- Video Controls -->
+      <!-- Video Player Controls -->
       <div class="player-controls">
-        <div class="progress-bar"><div class="progress-fill"></div></div>
+        <!-- Thicker Progress Bar clickable and draggable -->
+        <div class="progress-container" id="progress-container">
+          <div class="progress-bar-thick">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+        </div>
+
+        <!-- Controls: Forward on the right (RTL) -->
         <div class="control-buttons">
+          <button class="ctrl-btn" id="btn-forward"><span class="icon">►►</span>קדימה</button>
           <button class="ctrl-btn" id="btn-play"><span class="icon">▶</span>התחל</button>
           <button class="ctrl-btn" id="btn-pause"><span class="icon">❚❚</span>השהה</button>
           <button class="ctrl-btn" id="btn-stop"><span class="icon">◼</span>עצור</button>
-          <button class="ctrl-btn"><span class="icon">►►</span>קדימה</button>
-          <button class="ctrl-btn"><span class="icon">◄◄</span>אחורה</button>
+          <button class="ctrl-btn" id="btn-rewind"><span class="icon">◄◄</span>אחורה</button>
         </div>
       </div>
     </div>
@@ -407,7 +537,7 @@
       </label>
     </div>
 
-    <!-- Filters and Adjustments -->
+    <!-- Filters and Adjustments (Total 35 Filters) -->
     <div class="filters-container">
       <div class="filters-grid" id="filters-grid">
         <button class="filter-btn active" data-filter="none">ללא פילטר</button>
@@ -425,6 +555,27 @@
         <button class="filter-btn" data-filter="cinema">קולנועי</button>
         <button class="filter-btn" data-filter="sunset">שקיעה</button>
         <button class="filter-btn" data-filter="noir">נואר</button>
+        <!-- 20 פילטרים חדשים נוספים -->
+        <button class="filter-btn" data-filter="retro80s">רטרו 80s</button>
+        <button class="filter-btn" data-filter="matrix">מטריקס ירוק</button>
+        <button class="filter-btn" data-filter="dreamy">חלום קסום</button>
+        <button class="filter-btn" data-filter="thermal">מצלמה תרמית</button>
+        <button class="filter-btn" data-filter="old-vhs">קלטת וידאו ישנה</button>
+        <button class="filter-btn" data-filter="hollywood">הוליווד מוזהב</button>
+        <button class="filter-btn" data-filter="comic">קומיקס מוגבר</button>
+        <button class="filter-btn" data-filter="frozen">קפוא כחול</button>
+        <button class="filter-btn" data-filter="fire">להבה אדומה</button>
+        <button class="filter-btn" data-filter="emerald">אזמרגד</button>
+        <button class="filter-btn" data-filter="amethyst">אמטיסט סגול</button>
+        <button class="filter-btn" data-filter="sharp">חדות גבוהה</button>
+        <button class="filter-btn" data-filter="soft-glow">זוהר רך</button>
+        <button class="filter-btn" data-filter="midnight">חצות כהה</button>
+        <button class="filter-btn" data-filter="golden-hour">שעת הזהב</button>
+        <button class="filter-btn" data-filter="pop-art">פופ ארט</button>
+        <button class="filter-btn" data-filter="faded-film">פילם דהוי</button>
+        <button class="filter-btn" data-filter="acid">אסיד צבעוני</button>
+        <button class="filter-btn" data-filter="ocean">עמוקי האוקיינוס</button>
+        <button class="filter-btn" data-filter="dramatics">דרמטי חזק</button>
       </div>
 
       <div class="intensity-container">
@@ -450,7 +601,17 @@
   </div>
 
   <script>
+    const settingsBtn = document.getElementById('settings-btn');
+    const apiKeyContainer = document.getElementById('api-key-container');
+    const previewCard = document.getElementById('preview-card');
     const previewScreen = document.getElementById('preview-screen');
+    const samsungPlayIcon = document.getElementById('samsung-play-icon');
+    const placeholderText = document.getElementById('placeholder-text');
+    const deleteTopBtn = document.getElementById('delete-top-btn');
+    
+    const progressContainer = document.getElementById('progress-container');
+    const progressFill = document.getElementById('progress-fill');
+    
     const filterButtons = document.querySelectorAll('.filter-btn');
     const intensitySlider = document.getElementById('intensity-slider');
     const intensityValue = document.getElementById('intensity-value');
@@ -465,8 +626,14 @@
     let fileName = 'edited_media';
     let selectedFilter = 'none';
     let filterIntensity = 100;
+    let isDraggingProgress = false;
 
-    // AI Surprise Prompts
+    // Toggle API Key Input
+    settingsBtn.addEventListener('click', () => {
+      apiKeyContainer.classList.toggle('active');
+    });
+
+    // AI Prompts Generator
     const prompts = [
       "אריה רץ בסוואנה בשעת השקיעה בטכנולוגיית HDR",
       "עיר עתידנית בלילה עם אורות ניאון וגשם",
@@ -475,11 +642,10 @@
     ];
 
     surpriseBtn.addEventListener('click', () => {
-      const randomPrompt = prompts[Math.floor(Math.random() * prompts.length)];
-      aiPrompt.value = randomPrompt;
+      aiPrompt.value = prompts[Math.floor(Math.random() * prompts.length)];
     });
 
-    // File Upload Handling
+    // Handle Uploads
     ['input-camera', 'input-video', 'input-image'].forEach(id => {
       document.getElementById(id).addEventListener('change', (e) => {
         const file = e.target.files[0];
@@ -487,7 +653,7 @@
 
         fileName = file.name;
         const fileUrl = URL.createObjectURL(file);
-        previewScreen.innerHTML = '';
+        clearPreview();
 
         if (file.type.startsWith('image/')) {
           mediaType = 'image';
@@ -501,6 +667,18 @@
           currentMedia.autoplay = true;
           currentMedia.loop = true;
           currentMedia.playsInline = true;
+
+          currentMedia.addEventListener('timeupdate', updateProgressBar);
+          currentMedia.addEventListener('play', () => {
+            previewCard.classList.add('is-playing');
+            previewScreen.classList.add('playing');
+            samsungPlayIcon.textContent = '❚❚';
+          });
+          currentMedia.addEventListener('pause', () => {
+            previewCard.classList.remove('is-playing');
+            previewScreen.classList.remove('playing');
+            samsungPlayIcon.textContent = '▶';
+          });
         }
 
         previewScreen.appendChild(currentMedia);
@@ -508,7 +686,40 @@
       });
     });
 
-    // Video Control Buttons
+    // Clear / Delete Top Video
+    function clearPreview() {
+      if (currentMedia) {
+        if (mediaType === 'video') {
+          currentMedia.pause();
+          currentMedia.removeAttribute('src');
+          currentMedia.load();
+        }
+        currentMedia.remove();
+        currentMedia = null;
+      }
+      previewScreen.innerHTML = '';
+      previewScreen.appendChild(samsungPlayIcon);
+      previewScreen.appendChild(placeholderText);
+      placeholderText.style.display = 'block';
+      progressFill.style.width = '0%';
+      previewCard.classList.remove('is-playing');
+      previewScreen.classList.remove('playing');
+      samsungPlayIcon.textContent = '▶';
+    }
+
+    deleteTopBtn.addEventListener('click', clearPreview);
+
+    // Samsung-Style Play/Pause Screen Tap
+    previewScreen.addEventListener('click', () => {
+      if (!currentMedia || mediaType !== 'video') return;
+      if (currentMedia.paused) {
+        currentMedia.play();
+      } else {
+        currentMedia.pause();
+      }
+    });
+
+    // Controls Logic (Forward on Right)
     document.getElementById('btn-play').onclick = () => currentMedia && currentMedia.play && currentMedia.play();
     document.getElementById('btn-pause').onclick = () => currentMedia && currentMedia.pause && currentMedia.pause();
     document.getElementById('btn-stop').onclick = () => {
@@ -517,8 +728,40 @@
         currentMedia.currentTime = 0;
       }
     };
+    document.getElementById('btn-forward').onclick = () => {
+      if (currentMedia && mediaType === 'video') currentMedia.currentTime += 5;
+    };
+    document.getElementById('btn-rewind').onclick = () => {
+      if (currentMedia && mediaType === 'video') currentMedia.currentTime -= 5;
+    };
 
-    // Filter Logic
+    // Progress Bar Handling (Drag & Click)
+    function updateProgressBar() {
+      if (!currentMedia || isDraggingProgress || !currentMedia.duration) return;
+      const pct = (currentMedia.currentTime / currentMedia.duration) * 100;
+      progressFill.style.width = `${pct}%`;
+    }
+
+    function seekMedia(e) {
+      if (!currentMedia || mediaType !== 'video' || !currentMedia.duration) return;
+      const rect = progressContainer.getBoundingClientRect();
+      const clickX = e.clientX || (e.touches && e.touches[0].clientX);
+      let posX = clickX - rect.left;
+      posX = Math.max(0, Math.min(posX, rect.width));
+      const percentage = posX / rect.width;
+      currentMedia.currentTime = percentage * currentMedia.duration;
+      progressFill.style.width = `${percentage * 100}%`;
+    }
+
+    progressContainer.addEventListener('mousedown', (e) => { isDraggingProgress = true; seekMedia(e); });
+    window.addEventListener('mousemove', (e) => { if (isDraggingProgress) seekMedia(e); });
+    window.addEventListener('mouseup', () => { isDraggingProgress = false; });
+
+    progressContainer.addEventListener('touchstart', (e) => { isDraggingProgress = true; seekMedia(e); });
+    window.addEventListener('touchmove', (e) => { if (isDraggingProgress) seekMedia(e); });
+    window.addEventListener('touchend', () => { isDraggingProgress = false; });
+
+    // Filters Handling
     filterButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         filterButtons.forEach(b => b.classList.remove('active'));
@@ -534,11 +777,13 @@
       applyFilter();
     });
 
+    // 35 Filters Calculation
     function getCSSFilterString() {
       if (selectedFilter === 'none') return 'none';
       const f = filterIntensity / 100;
 
       switch (selectedFilter) {
+        // המקוריים
         case 'vintage': return `sepia(${0.5 * f}) contrast(${1 + 0.2 * f})`;
         case 'sepia': return `sepia(${f})`;
         case 'bw': return `grayscale(${f}) contrast(${1 + 0.5 * f})`;
@@ -553,6 +798,29 @@
         case 'cinema': return `contrast(${1 + 0.3 * f}) saturate(${1 - 0.2 * f})`;
         case 'sunset': return `sepia(${0.4 * f}) saturate(${1 + f})`;
         case 'noir': return `grayscale(${f}) contrast(${1 + f})`;
+        
+        // 20 החדשים
+        case 'retro80s': return `hue-rotate(${-45 * f}deg) saturate(${1 + 1.5 * f}) contrast(${1 + 0.3 * f})`;
+        case 'matrix': return `hue-rotate(${90 * f}deg) saturate(${1 + 2 * f}) brightness(${1 - 0.2 * f})`;
+        case 'dreamy': return `blur(${2 * f}px) brightness(${1 + 0.25 * f}) saturate(${1 + 0.3 * f})`;
+        case 'thermal': return `invert(${f}) hue-rotate(${120 * f}deg) saturate(${1 + 2 * f})`;
+        case 'old-vhs': return `contrast(${1 - 0.2 * f}) sepia(${0.3 * f}) hue-rotate(${15 * f}deg)`;
+        case 'hollywood': return `sepia(${0.35 * f}) contrast(${1 + 0.4 * f}) saturate(${1 + 0.3 * f})`;
+        case 'comic': return `contrast(${1 + 1.2 * f}) saturate(${1 + 1.5 * f})`;
+        case 'frozen': return `hue-rotate(${160 * f}deg) saturate(${1 + 0.5 * f}) brightness(${1 + 0.1 * f})`;
+        case 'fire': return `hue-rotate(${-30 * f}deg) saturate(${1 + 2.5 * f})`;
+        case 'emerald': return `hue-rotate(${60 * f}deg) saturate(${1 + 0.8 * f})`;
+        case 'amethyst': return `hue-rotate(${220 * f}deg) saturate(${1 + 1.2 * f})`;
+        case 'sharp': return `contrast(${1 + 0.8 * f}) brightness(${1 + 0.1 * f})`;
+        case 'soft-glow': return `brightness(${1 + 0.3 * f}) contrast(${1 - 0.1 * f})`;
+        case 'midnight': return `brightness(${1 - 0.4 * f}) contrast(${1 + 0.5 * f}) hue-rotate(${190 * f}deg)`;
+        case 'golden-hour': return `sepia(${0.4 * f}) saturate(${1 + 1.2 * f}) brightness(${1 + 0.1 * f})`;
+        case 'pop-art': return `saturate(${1 + 3 * f}) contrast(${1 + 0.6 * f})`;
+        case 'faded-film': return `contrast(${1 - 0.25 * f}) brightness(${1 + 0.15 * f}) sepia(${0.2 * f})`;
+        case 'acid': return `hue-rotate(${270 * f}deg) saturate(${1 + 3 * f})`;
+        case 'ocean': return `hue-rotate(${140 * f}deg) contrast(${1 + 0.2 * f})`;
+        case 'dramatics': return `contrast(${1 + 1.5 * f}) grayscale(${0.4 * f})`;
+
         default: return 'none';
       }
     }
@@ -563,7 +831,7 @@
       }
     }
 
-    // Process & Export Media (Physical File Generation)
+    // Process & Download / Share Logic
     async function createProcessedBlob() {
       if (!currentMedia) return null;
 
@@ -654,16 +922,20 @@
 
     downloadBtn.addEventListener('click', async () => {
       if (!currentMedia) return alert('אנא העלה תמונה או סרטון תחילה.');
+      downloadBtn.textContent = 'מעבד...';
       const processed = await createProcessedBlob();
       if (processed) {
         saveFileToDevice(processed.blob, `edited_${fileName.split('.')[0]}.${processed.extension}`);
         addItemToFolder(processed);
       }
+      downloadBtn.textContent = '⬇ הורדה';
     });
 
     shareBtn.addEventListener('click', async () => {
       if (!currentMedia) return alert('אנא העלה תמונה או סרטון תחילה.');
+      shareBtn.textContent = 'מעבד...';
       const processed = await createProcessedBlob();
+      shareBtn.textContent = '🔗 שיתוף';
       if (!processed) return;
 
       const file = new File([processed.blob], `edited_${fileName.split('.')[0]}.${processed.extension}`, { type: processed.mime });
