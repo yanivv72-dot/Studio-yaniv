@@ -94,24 +94,24 @@
       gap: 16px;
     }
 
-    /* תיקון גלילת הפילטרים - לא מסתיר מסך */
+    /* תיקון גלילת הפילטרים - נגלל פנימית ללא הסתרת המסך */
     .filters-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
       gap: 10px;
       max-height: 180px;
       overflow-y: auto;
-      padding: 5px;
+      padding-left: 5px;
       background: #0f172a;
+      padding: 10px;
       border-radius: 8px;
-      border: 1px solid #334155;
     }
 
     .filter-btn {
-      background-color: #1e293b;
+      background-color: #334155;
       color: #f1f5f9;
       border: 2px solid transparent;
-      padding: 10px 5px;
+      padding: 10px;
       border-radius: 8px;
       cursor: pointer;
       font-size: 0.85rem;
@@ -120,7 +120,7 @@
     }
 
     .filter-btn:hover {
-      background-color: #334155;
+      background-color: #475569;
     }
 
     .filter-btn.active {
@@ -164,7 +164,7 @@
       border: none;
       font-weight: 600;
       cursor: pointer;
-      transition: opacity 0.2s, background-color 0.2s;
+      transition: opacity 0.2s;
       display: inline-flex;
       align-items: center;
       gap: 8px;
@@ -196,21 +196,23 @@
       font-size: 0.8rem;
       background-color: #38bdf8;
       color: #0f172a;
+      text-decoration: none;
+      border-radius: 6px;
     }
 
-    /* תיקיית קבצים מעובדים למטה */
-    .downloads-folder {
-      margin-top: 30px;
+    /* תיקיית מדיה מעובדת בתחתית */
+    .folder-container {
       width: 100%;
       max-width: 900px;
       background-color: #1e293b;
       border-radius: 16px;
       padding: 24px;
+      margin-top: 24px;
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
     }
 
-    .downloads-folder h2 {
-      font-size: 1.3rem;
+    .folder-container h2 {
+      font-size: 1.2rem;
       color: #38bdf8;
       margin-bottom: 16px;
       border-bottom: 1px solid #334155;
@@ -219,34 +221,40 @@
 
     .folder-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       gap: 16px;
     }
 
-    .folder-item {
+    .folder-card {
       background-color: #0f172a;
       border: 1px solid #334155;
       border-radius: 10px;
-      padding: 12px;
+      padding: 10px;
       display: flex;
       flex-direction: column;
       gap: 10px;
       align-items: center;
     }
 
-    .folder-item-media {
+    .folder-card-media {
       width: 100%;
-      height: 140px;
+      height: 120px;
       object-fit: contain;
-      background: #020617;
+      background-color: #020617;
       border-radius: 6px;
     }
 
-    .folder-item-actions {
+    .folder-card-actions {
       display: flex;
-      gap: 8px;
-      width: 100%;
       justify-content: space-between;
+      width: 100%;
+      gap: 8px;
+    }
+
+    .status-msg {
+      color: #38bdf8;
+      font-size: 0.9rem;
+      text-align: center;
     }
 
     /* custom scrollbar */
@@ -257,19 +265,13 @@
       background: #475569;
       border-radius: 3px;
     }
-
-    .status-msg {
-      font-size: 0.85rem;
-      color: #38bdf8;
-      text-align: center;
-    }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>עורך מדיה AI ומעבד פילטרים</h1>
-    <p>העלאת תמונות וסרטונים, החלת פילטרים בזמן אמת ושיתוף ישיר ל-WhatsApp ולפלאפון</p>
+    <h1>עורך מדיה AI</h1>
+    <p>העלאת כל סוגי התמונות והסרטונים והחלת פילטרים בזמן אמת</p>
   </header>
 
   <div class="container">
@@ -283,13 +285,13 @@
     </div>
 
     <div class="controls">
-      <h3>בחר פילטר AI:</h3>
+      <h3>בחר פילטר (20 סוגים):</h3>
       <div class="filters-grid" id="filters-grid">
         <button class="filter-btn active" data-filter="none">ללא פילטר</button>
         <button class="filter-btn" data-filter="vintage">וינטג'</button>
         <button class="filter-btn" data-filter="sepia">ספיה קלאסי</button>
         <button class="filter-btn" data-filter="bw">שחור-לבן דרמטי</button>
-        <button class="filter-btn" data-filter="cyberpunk">סייברפאנק AI</button>
+        <button class="filter-btn" data-filter="cyberpunk">סייברפאנק</button>
         <button class="filter-btn" data-filter="warm">חם</button>
         <button class="filter-btn" data-filter="cool">קר</button>
         <button class="filter-btn" data-filter="invert">אינוורס (נגטיב)</button>
@@ -297,13 +299,13 @@
         <button class="filter-btn" data-filter="blur">טשטוש עמוק</button>
         <button class="filter-btn" data-filter="high-contrast">קונטרסט גבוה</button>
         <button class="filter-btn" data-filter="pastel">פסטל רך</button>
-        <button class="filter-btn" data-filter="neon">ניאון זוהר AI</button>
+        <button class="filter-btn" data-filter="neon">ניאון זוהר</button>
         <button class="filter-btn" data-filter="cinema">קולנועי</button>
         <button class="filter-btn" data-filter="sunset">שקיעה רומנטית</button>
         <button class="filter-btn" data-filter="noir">פילם נואר</button>
         <button class="filter-btn" data-filter="retro-green">רפאים ירוק</button>
         <button class="filter-btn" data-filter="golden-hour">שעת הזהב</button>
-        <button class="filter-btn" data-filter="hdr">אפקט HDR AI</button>
+        <button class="filter-btn" data-filter="hdr">אפקט HDR</button>
         <button class="filter-btn" data-filter="pop-art">פופ ארט</button>
         <button class="filter-btn" data-filter="faded">דהוי וינטג'</button>
       </div>
@@ -320,16 +322,16 @@
     <div id="status-msg" class="status-msg"></div>
 
     <div class="actions">
-      <button class="btn btn-share" id="share-btn">שתף לפלאפון / WhatsApp</button>
+      <button class="btn btn-share" id="share-btn">שתף ל-WhatsApp / נייד</button>
       <button class="btn btn-download" id="download-btn">עבד ושמור לתיקייה</button>
     </div>
   </div>
 
-  <!-- תיקיית מדיה מעובדת -->
-  <div class="downloads-folder">
-    <h2>תיקיית מדיה מעובדת (מוכנה להורדה ומחיקה)</h2>
+  <!-- תיקיית מדיה מעובדת בתחתית -->
+  <div class="folder-container">
+    <h2>תיקיית קבצים מעובדים (להורדה ומחיקה)</h2>
     <div class="folder-grid" id="folder-grid">
-      <p class="placeholder-text" id="empty-folder-text">אין עדיין קבצים מעובדים. לחץ על "עבד ושמור לתיקייה".</p>
+      <p class="placeholder-text" id="empty-folder-text">אין עדיין קבצים מעובדים בתיקייה.</p>
     </div>
   </div>
 
@@ -345,20 +347,18 @@
     const emptyFolderText = document.getElementById('empty-folder-text');
     const statusMsg = document.getElementById('status-msg');
 
-    let currentMedia = null; 
-    let mediaType = null;   
+    let currentMedia = null;
+    let mediaType = null;
     let fileUrl = null;
     let fileName = 'media';
     let selectedFilter = 'none';
     let filterIntensity = 100;
-    let originalFile = null;
 
     // העלאת קובץ
     fileInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
 
-      originalFile = file;
       fileName = file.name.split('.')[0];
       fileUrl = URL.createObjectURL(file);
       previewContainer.innerHTML = '';
@@ -394,61 +394,40 @@
       });
     });
 
-    // שינוי עוצמה - משנה אך ורק את חוזק הצבע/האפקט ללא החשכת תמונה
+    // שינוי עוצמה - משנה צבע ואפקט בלבד ללא החשכה
     intensitySlider.addEventListener('input', (e) => {
       filterIntensity = e.target.value;
       intensityValue.textContent = `${filterIntensity}%`;
       applyFilter();
     });
 
-    // חישוב מחרוזת פילטר נקייה מבוססת עוצמה
+    // חישוב CSS Filter מדויק
     function getFilterCSS(filter, intensity) {
       if (filter === 'none') return 'none';
       const f = intensity / 100;
 
       switch (filter) {
-        case 'vintage': 
-          return `sepia(${0.6 * f}) contrast(${1 + 0.3 * f}) brightness(${1 - 0.05 * f})`;
-        case 'sepia': 
-          return `sepia(${f})`;
-        case 'bw': 
-          return `grayscale(${f}) contrast(${1 + 0.5 * f})`;
-        case 'cyberpunk': 
-          return `hue-rotate(${180 * f}deg) contrast(${1 + 0.4 * f}) saturate(${1 + 1 * f})`;
-        case 'warm': 
-          return `sepia(${0.4 * f}) saturate(${1 + 0.5 * f}) hue-rotate(${-15 * f}deg)`;
-        case 'cool': 
-          return `hue-rotate(${30 * f}deg) saturate(${1 + 0.3 * f})`;
-        case 'invert': 
-          return `invert(${f})`;
-        case 'hue-shift': 
-          return `hue-rotate(${180 * f}deg)`;
-        case 'blur': 
-          return `blur(${8 * f}px)`;
-        case 'high-contrast': 
-          return `contrast(${1 + 1.2 * f})`;
-        case 'pastel': 
-          return `saturate(${1 - 0.4 * f}) brightness(${1 + 0.2 * f})`;
-        case 'neon': 
-          return `saturate(${1 + 3 * f}) contrast(${1 + 0.6 * f})`;
-        case 'cinema': 
-          return `contrast(${1 + 0.4 * f}) saturate(${1 - 0.3 * f})`;
-        case 'sunset': 
-          return `sepia(${0.5 * f}) saturate(${1 + 1.2 * f}) hue-rotate(${-25 * f}deg)`;
-        case 'noir': 
-          return `grayscale(${f}) contrast(${1 + 1 * f})`;
-        case 'retro-green': 
-          return `grayscale(${0.5 * f}) hue-rotate(${90 * f}deg) saturate(${1 + 1 * f})`;
-        case 'golden-hour': 
-          return `sepia(${0.4 * f}) saturate(${1 + 1 * f})`;
-        case 'hdr': 
-          return `contrast(${1 + 0.7 * f}) saturate(${1 + 0.6 * f})`;
-        case 'pop-art': 
-          return `saturate(${1 + 4 * f}) hue-rotate(${60 * f}deg)`;
-        case 'faded': 
-          return `contrast(${1 - 0.3 * f}) sepia(${0.3 * f})`;
-        default: 
-          return 'none';
+        case 'vintage': return `sepia(${0.5 * f}) contrast(${1 + 0.2 * f}) brightness(${1 - 0.1 * f})`;
+        case 'sepia': return `sepia(${f})`;
+        case 'bw': return `grayscale(${f}) contrast(${1 + 0.5 * f})`;
+        case 'cyberpunk': return `hue-rotate(${180 * f}deg) contrast(${1 + 0.4 * f}) saturate(${1 + 1 * f})`;
+        case 'warm': return `sepia(${0.3 * f}) saturate(${1 + 0.4 * f}) hue-rotate(${-10 * f}deg)`;
+        case 'cool': return `hue-rotate(${30 * f}deg) saturate(${1 + 0.2 * f})`;
+        case 'invert': return `invert(${f})`;
+        case 'hue-shift': return `hue-rotate(${90 * f}deg)`;
+        case 'blur': return `blur(${5 * f}px)`;
+        case 'high-contrast': return `contrast(${1 + 1 * f})`;
+        case 'pastel': return `saturate(${1 - 0.5 * f}) brightness(${1 + 0.3 * f})`;
+        case 'neon': return `saturate(${1 + 2 * f}) contrast(${1 + 0.5 * f})`;
+        case 'cinema': return `contrast(${1 + 0.3 * f}) saturate(${1 - 0.2 * f})`;
+        case 'sunset': return `sepia(${0.4 * f}) saturate(${1 + 1 * f}) hue-rotate(${-20 * f}deg)`;
+        case 'noir': return `grayscale(${f}) contrast(${1 + 1 * f})`;
+        case 'retro-green': return `grayscale(${0.5 * f}) hue-rotate(${80 * f}deg) saturate(${1 + 1 * f})`;
+        case 'golden-hour': return `sepia(${0.3 * f}) saturate(${1 + 0.8 * f})`;
+        case 'hdr': return `contrast(${1 + 0.6 * f}) saturate(${1 + 0.4 * f})`;
+        case 'pop-art': return `saturate(${1 + 4 * f}) hue-rotate(${45 * f}deg)`;
+        case 'faded': return `contrast(${1 - 0.2 * f}) sepia(${0.2 * f})`;
+        default: return 'none';
       }
     }
 
@@ -457,13 +436,13 @@
       currentMedia.style.filter = getFilterCSS(selectedFilter, filterIntensity);
     }
 
-    // יצירת קובץ Blob מעובד מתוך קנבס
-    async function generateProcessedBlob() {
+    // מעבד קובץ (קנבס לתמונה / הקלטת פריים לווידאו)
+    async function processMediaBlob() {
       if (!currentMedia) return null;
 
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
-      const filterString = getFilterCSS(selectedFilter, filterIntensity);
+      const filterCSS = getFilterCSS(selectedFilter, filterIntensity);
 
       if (mediaType === 'image') {
         const width = currentMedia.naturalWidth || currentMedia.width;
@@ -471,14 +450,14 @@
         canvas.width = width;
         canvas.height = height;
 
-        ctx.filter = filterString;
+        ctx.filter = filterCSS;
         ctx.drawImage(currentMedia, 0, 0, width, height);
 
         return new Promise((resolve) => {
           canvas.toBlob((blob) => resolve({ blob, type: 'image/png', ext: 'png' }), 'image/png');
         });
       } else if (mediaType === 'video') {
-        statusMsg.textContent = 'מעבד סרטון בלופ... אנא המתן מספר שניות';
+        statusMsg.textContent = 'מייצר סרטון מעובד... אנא המתן מספר שניות';
         
         const width = currentMedia.videoWidth || 640;
         const height = currentMedia.videoHeight || 360;
@@ -502,18 +481,17 @@
           currentMedia.currentTime = 0;
           currentMedia.play();
 
-          const drawFrame = () => {
+          const renderFrame = () => {
             if (currentMedia.ended || currentMedia.paused) {
-              recorder.stop();
+              if (recorder.state === 'recording') recorder.stop();
               return;
             }
-            ctx.filter = filterString;
+            ctx.filter = filterCSS;
             ctx.drawImage(currentMedia, 0, 0, width, height);
-            requestAnimationFrame(drawFrame);
+            requestAnimationFrame(renderFrame);
           };
-          drawFrame();
+          renderFrame();
 
-          // עצירה כשהסרטון מסתיים פעם אחת
           currentMedia.onended = () => {
             if (recorder.state === 'recording') recorder.stop();
           };
@@ -521,28 +499,28 @@
       }
     }
 
-    // שמירה לתיקייה בתחתית
+    // עיבוד ושמירה לתיקייה
     downloadBtn.addEventListener('click', async () => {
       if (!currentMedia) {
         alert('אנא העלה תמונה או סרטון תחילה.');
         return;
       }
 
-      const processed = await generateProcessedBlob();
+      const processed = await processMediaBlob();
       if (!processed) return;
 
-      const itemUrl = URL.createObjectURL(processed.blob);
-      addToFolderGrid(itemUrl, processed.type, `edited_${fileName}.${processed.ext}`, processed.blob);
+      const blobUrl = URL.createObjectURL(processed.blob);
+      addMediaToFolder(blobUrl, processed.type, `edited_${fileName}.${processed.ext}`);
     });
 
-    // שיתוף ישיר ל-WhatsApp / פלאפון
+    // שיתוף ישיר לנייד ול-WhatsApp
     shareBtn.addEventListener('click', async () => {
       if (!currentMedia) {
         alert('אנא העלה תמונה או סרטון תחילה.');
         return;
       }
 
-      const processed = await generateProcessedBlob();
+      const processed = await processMediaBlob();
       if (!processed) return;
 
       const file = new File([processed.blob], `edited_${fileName}.${processed.ext}`, { type: processed.type });
@@ -552,66 +530,65 @@
           await navigator.share({
             files: [file],
             title: 'מדיה מעובדת AI',
-            text: 'הנה המדיה שערכתי בעורך AI!'
+            text: 'מדיה מעובדת מעורך AI'
           });
         } catch (err) {
-          console.log('שיתוף בוטל או נכשל', err);
+          console.log('השיתוף בוטל');
         }
       } else {
-        // Fallback למחשבים או דפדפנים שלא תומכים ב-Web Share
         const a = document.createElement('a');
         a.href = URL.createObjectURL(processed.blob);
         a.download = `edited_${fileName}.${processed.ext}`;
         a.click();
-        alert('הקובץ הורד ישירות! בניידים נתמכים ייפתח חלון השיתוף ל-WhatsApp.');
+        alert('הקובץ הורד למכשיר! בדפדפנים תומכים בנייד פונקציית השיתוף שולחת ישירות ל-WhatsApp.');
       }
     });
 
-    // הוספת אלמנט לתיקיית הקבצים המעובדים
-    function addToFolderGrid(url, type, name, blob) {
+    // ניהול התיקייה בתחתית
+    function addMediaToFolder(url, type, fullFileName) {
       if (emptyFolderText) emptyFolderText.style.display = 'none';
 
-      const itemDiv = document.createElement('div');
-      itemDiv.className = 'folder-item';
+      const card = document.createElement('div');
+      card.className = 'folder-card';
 
-      let mediaEl;
+      let mediaElem;
       if (type.startsWith('image/')) {
-        mediaEl = document.createElement('img');
-        mediaEl.src = url;
-        mediaEl.className = 'folder-item-media';
+        mediaElem = document.createElement('img');
+        mediaElem.src = url;
+        mediaElem.className = 'folder-card-media';
       } else {
-        mediaEl = document.createElement('video');
-        mediaEl.src = url;
-        mediaEl.controls = true;
-        mediaEl.className = 'folder-item-media';
+        mediaElem = document.createElement('video');
+        mediaElem.src = url;
+        mediaElem.controls = true;
+        mediaElem.className = 'folder-card-media';
       }
 
-      const actionsDiv = document.createElement('div');
-      actionsDiv.className = 'folder-item-actions';
+      const actions = document.createElement('div');
+      actions.className = 'folder-card-actions';
 
-      const downloadLink = document.createElement('a');
-      downloadLink.href = url;
-      downloadLink.download = name;
-      downloadLink.className = 'btn btn-small';
-      downloadLink.textContent = 'הורד';
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.href = url;
+      downloadAnchor.download = fullFileName;
+      downloadAnchor.className = 'btn-small';
+      downloadAnchor.textContent = 'הורד';
 
       const deleteBtn = document.createElement('button');
       deleteBtn.className = 'btn btn-danger';
       deleteBtn.textContent = 'מחק';
       deleteBtn.onclick = () => {
-        itemDiv.remove();
+        card.remove();
         if (folderGrid.children.length === 1 && emptyFolderText) {
           emptyFolderText.style.display = 'block';
         }
       };
 
-      actionsDiv.appendChild(downloadLink);
-      actionsDiv.appendChild(deleteBtn);
+      actions.appendChild(downloadAnchor);
+      actions.appendChild(deleteBtn);
 
-      itemDiv.appendChild(mediaEl);
-      itemDiv.appendChild(actionsDiv);
+      card.appendChild(mediaElem);
+      card.appendChild(actions);
 
-      folderGrid.appendChild(itemDiv);
+      folderGrid.appendChild(card);
     }
   </script>
 </body>
