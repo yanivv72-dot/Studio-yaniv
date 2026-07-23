@@ -35,7 +35,7 @@
       flex-direction: column;
       gap: 16px;
       max-height: 95vh;
-      overflow-y: auto; /* גלילת העמוד */
+      overflow-y: auto;
     }
 
     /* Header Design */
@@ -107,7 +107,7 @@
       outline: none;
     }
 
-    /* Video / Preview Container (Sticky - המסך לא נגלל) */
+    /* Video / Preview Container (Sticky) */
     .preview-card {
       position: sticky;
       top: 0;
@@ -159,6 +159,7 @@
       justify-content: center;
       position: relative;
       cursor: pointer;
+      transition: aspect-ratio 0.3s, height 0.3s;
     }
 
     .preview-screen img,
@@ -200,7 +201,7 @@
       font-size: 0.9rem;
     }
 
-    /* Thicker Scrollable Progress Bar */
+    /* Progress Bar */
     .progress-container {
       width: 100%;
       padding: 6px 0;
@@ -267,6 +268,78 @@
 
     .ctrl-btn:hover {
       color: #22d3ee;
+    }
+
+    /* Section Labels */
+    .section-title {
+      font-size: 0.8rem;
+      color: #22d3ee;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    /* Aspect Ratio Selector (גודל התמונה/סרטון) */
+    .size-selector-container {
+      background: #0d131f;
+      border: 1px solid #1e293b;
+      border-radius: 14px;
+      padding: 10px;
+    }
+
+    .size-buttons-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .size-btn {
+      background: #1e293b;
+      color: #cbd5e1;
+      border: 1px solid #334155;
+      padding: 6px 0;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .size-btn.active {
+      background: #0284c7;
+      border-color: #22d3ee;
+      color: #fff;
+    }
+
+    /* Movie Styles / Genres (סוגי סרטים) */
+    .genre-selector-container {
+      background: #0d131f;
+      border: 1px solid #1e293b;
+      border-radius: 14px;
+      padding: 10px;
+    }
+
+    .genre-grid {
+      display: flex;
+      overflow-x: auto;
+      gap: 8px;
+      padding-bottom: 4px;
+    }
+
+    .genre-btn {
+      background: #1e293b;
+      color: #cbd5e1;
+      border: 1px solid #334155;
+      padding: 6px 12px;
+      border-radius: 16px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .genre-btn.active {
+      background: #a855f7;
+      border-color: #c084fc;
+      color: #fff;
     }
 
     /* AI Prompt Box */
@@ -492,8 +565,8 @@
     .btn-action-download { background-color: #10b981; color: #fff; }
     .btn-action-delete { background-color: #ef4444; color: #fff; }
 
-    .filters-grid::-webkit-scrollbar { height: 4px; }
-    .filters-grid::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+    .filters-grid::-webkit-scrollbar, .genre-grid::-webkit-scrollbar { height: 4px; }
+    .filters-grid::-webkit-scrollbar-thumb, .genre-grid::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
   </style>
 </head>
 <body>
@@ -512,7 +585,7 @@
       <input type="password" id="api-key" placeholder="sk-... או כל מפתח אחר">
     </div>
 
-    <!-- Preview Container (מקובע ולא נגלל) -->
+    <!-- Preview Container (Sticky) -->
     <div class="preview-card" id="preview-card">
       <div class="preview-header-actions">
         <span style="font-size:0.75rem; color:#64748b;">תצוגה מקדימה</span>
@@ -542,6 +615,31 @@
       </div>
     </div>
 
+    <!-- Image / Video Size (Aspect Ratio Selector) -->
+    <div class="size-selector-container">
+      <div class="section-title">📐 גודל פריים / יחס גובה-רוחב:</div>
+      <div class="size-buttons-grid">
+        <button class="size-btn active" data-ratio="16/9" data-height="180px">16:9 🖥️</button>
+        <button class="size-btn" data-ratio="9/16" data-height="260px">9:16 📱</button>
+        <button class="size-btn" data-ratio="1/1" data-height="220px">1:1 ⏹️</button>
+        <button class="size-btn" data-ratio="4/3" data-height="200px">4:3 📺</button>
+      </div>
+    </div>
+
+    <!-- Movie Types / Genres Selector -->
+    <div class="genre-selector-container">
+      <div class="section-title">🎬 סוג הסרט / סגנון קולנועי:</div>
+      <div class="genre-grid">
+        <button class="genre-btn active" data-genre="action">💥 אקשן דרמטי</button>
+        <button class="genre-btn" data-genre="scifi">🚀 מדע בדיוני (Sci-Fi)</button>
+
+        <button class="genre-btn" data-genre="3d-anim">🎨 אנימציה 3D</button>
+        <button class="genre-btn" data-genre="documentary">🎙️ דוקומנטרי</button>
+        <button class="genre-btn" data-genre="fantasy">🧙‍♂️ פנטזיה קסומה</button>
+        <button class="genre-btn" data-genre="cartoon">✏️ סרט מצויר</button>
+      </div>
+    </div>
+
     <!-- AI Prompt Box -->
     <div class="prompt-box">
       <textarea id="ai-prompt" placeholder="תאר את הסרטון שלך כאן... (למשל, אריה רץ בסוואנה בשעת השקיעה)"></textarea>
@@ -564,8 +662,9 @@
       </label>
     </div>
 
-    <!-- Filters and Adjustments (כל 35 הפילטרים) -->
+    <!-- Filters and Adjustments (35 Filters) -->
     <div class="filters-container">
+      <div class="section-title">🎨 אפקטים ופילטרים:</div>
       <div class="filters-grid" id="filters-grid">
         <button class="filter-btn active" data-filter="none">ללא פילטר</button>
         <button class="filter-btn" data-filter="hollywood">הוליווד מוזהב</button>
@@ -642,6 +741,8 @@
     const progressFill = document.getElementById('progress-fill');
     
     const filterButtons = document.querySelectorAll('.filter-btn');
+    const sizeButtons = document.querySelectorAll('.size-btn');
+    const genreButtons = document.querySelectorAll('.genre-btn');
     const intensitySlider = document.getElementById('intensity-slider');
     const intensityValue = document.getElementById('intensity-value');
     const downloadBtn = document.getElementById('download-btn');
@@ -661,6 +762,23 @@
     // Toggle API Key Input
     settingsBtn.addEventListener('click', () => {
       apiKeyContainer.classList.toggle('active');
+    });
+
+    // Handle Aspect Ratio / Screen Height
+    sizeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        sizeButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        previewScreen.style.height = btn.dataset.height;
+      });
+    });
+
+    // Handle Movie Genres / Types
+    genreButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        genreButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
     });
 
     // AI Prompts Generator
@@ -765,7 +883,7 @@
       if (currentMedia && mediaType === 'video') currentMedia.currentTime -= 5;
     };
 
-    // Progress Bar Handling (תוקן כיוון הנגינה לגרירה ב-RTL)
+    // Progress Bar Handling (תואם RTL)
     function updateProgressBar() {
       if (!currentMedia || isDraggingProgress || !currentMedia.duration) return;
       const pct = (currentMedia.currentTime / currentMedia.duration) * 100;
@@ -777,7 +895,6 @@
       const rect = progressContainer.getBoundingClientRect();
       const clickX = e.clientX || (e.touches && e.touches[0].clientX);
       
-      // תיקון חישוב מיקום לעברית RTL: ימין זה 0%, שמאל זה 100%
       let posX = rect.right - clickX;
       posX = Math.max(0, Math.min(posX, rect.width));
       const percentage = posX / rect.width;
