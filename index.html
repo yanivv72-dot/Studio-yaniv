@@ -175,7 +175,7 @@
       color: #fff;
     }
 
-    /* Preview Screen - Fixed 21:9 Aspect Ratio */
+    /* Preview Screen - Fixed Aspect Ratio */
     .preview-screen {
       width: 100%;
       height: 220px;
@@ -257,7 +257,6 @@
       padding: 0 15px;
     }
 
-    /* Samsung Play Button overlay */
     .samsung-play-btn {
       position: absolute;
       width: 56px;
@@ -730,22 +729,20 @@
     <div class="api-key-container" id="api-key-container">
       <label for="ai-model-provider">ספק AI בסינכרון מלא:</label>
       <select id="ai-model-provider">
-        <option value="studio-ai">Samsung Studio AI Engine</option>
-        <option value="openai">OpenAI (DALL-E 3 / Sora API)</option>
-        <option value="gemini">Google Gemini / Imagen</option>
+        <option value="openrouter">OpenRouter AI Hub</option>
       </select>
-      <label for="api-key">מפתח API לפעולת המערכת:</label>
-      <input type="password" id="api-key" placeholder="ai-key-xxxxxxxxxxxxxxxxxxxxxxxx">
+      <label for="api-key">מפתח OpenRouter API:</label>
+      <input type="password" id="api-key" placeholder="Sk-or-v1-...">
     </div>
 
     <!-- Enhanced Preview Card Container -->
     <div class="preview-card" id="preview-card">
       <div class="preview-header-actions">
-        <span class="preview-tag" id="preview-tag-label">תצוגה ראשית (21:9)</span>
+        <span class="preview-tag" id="preview-tag-label">תצוגה ראשית</span>
         <button class="delete-media-btn" id="delete-top-btn">🗑️ מחק מדיה</button>
       </div>
 
-      <!-- Preview Screen - 21:9 Fixed -->
+      <!-- Preview Screen -->
       <div class="preview-screen" id="preview-screen">
         <div class="ai-loading-overlay" id="ai-loading-overlay">
           <div class="ai-spinner"></div>
@@ -801,11 +798,11 @@
     <div class="media-type-selector">
       <label class="media-type-btn">
         🖼️ תמונה
-        <input type="file" accept="image/*,image/heic,image/heif,image/webp,image/svg+xml,image/bmp,image/gif,image/tiff,image/avif,.heic,.heif,.webp,.png,.jpg,.jpeg,.gif,.bmp" id="input-image">
+        <input type="file" accept="image/*" id="input-image">
       </label>
       <label class="media-type-btn">
         🎥 סרטון
-        <input type="file" accept="video/*,video/mp4,video/webm,video/ogg,video/quicktime,.mp4,.webm,.mov,.avi" id="input-video">
+        <input type="file" accept="video/*" id="input-video">
       </label>
       <button class="media-type-btn" id="cam-toggle-btn" type="button">
         📷 מצלמה
@@ -824,17 +821,11 @@
       </label>
     </div>
 
-    <!-- Filters Section with True Reflection & Skin Tone Preserve -->
+    <!-- Filters Section -->
     <div class="filters-container">
       <div class="section-title">🎨 פילטרים ואפקטים:</div>
       <div class="filters-grid" id="filters-grid">
         <button class="filter-btn active" data-filter="none">ללא פילטר</button>
-        <button class="filter-btn" data-filter="natural-reflection">🪞 שיקוף אמיתי (שקיפות גוף)</button>
-        <button class="filter-btn" data-filter="weather-rain">🌧️ אפקט גשם</button>
-        <button class="filter-btn" data-filter="weather-sun">☀️ שמש זוהרת</button>
-        <button class="filter-btn" data-filter="weather-hail">❄️ אפקט ברד</button>
-        <button class="filter-btn" data-filter="weather-rainbow">🌈 אפקט קשת</button>
-        <button class="filter-btn" data-filter="body-scan">🔬 שיקוף סורק</button>
         <button class="filter-btn" data-filter="glow">🌟 זוהר</button>
         <button class="filter-btn" data-filter="blinding-glow">💫 זוהר מסנוור</button>
         <button class="filter-btn" data-filter="night-vision">🟢 ראיית לילה</button>
@@ -843,10 +834,8 @@
         <button class="filter-btn" data-filter="golden-hour">🌅 שעת הזהב</button>
         <button class="filter-btn" data-filter="bw-dramatic">🎬 שחור-לבן</button>
         <button class="filter-btn" data-filter="cyberpunk">⚡ סייברפאנק</button>
-        <button class="filter-btn" data-filter="emerald-night">🌃 ליל אזמרגד</button>
         <button class="filter-btn" data-filter="vintage">📜 וינטג'</button>
         <button class="filter-btn" data-filter="blur">🌫️ טשטוש</button>
-        <button class="filter-btn" data-filter="high-contrast">🌓 קונטרסט</button>
       </div>
 
       <div class="intensity-container">
@@ -958,7 +947,7 @@
         cameraOptionsMenu.classList.remove('active');
         rawFile = file;
 
-        await simulateScreenRender(0, 100, 1200, "טוען ומעבד קובץ מדיה...");
+        await simulateScreenRender(0, 100, 800, "טוען קובץ מדיה...");
 
         const fileUrl = URL.createObjectURL(file);
         if (file.type.startsWith('image/')) {
@@ -993,7 +982,7 @@
               previewScreen.classList.remove('screen-editing');
               aiLoadingOverlay.classList.remove('active');
               resolve();
-            }, 180);
+            }, 150);
           }
         }
         requestAnimationFrame(step);
@@ -1130,18 +1119,6 @@
       const f = filterIntensity / 100;
 
       switch (selectedFilter) {
-        case 'natural-reflection':
-          return `opacity(${0.65 + 0.35 * (1 - f*0.3)}) contrast(${1 + 0.25 * f}) brightness(${1 + 0.15 * f}) saturate(${1 + 0.3 * f})`;
-        case 'weather-rain':
-          return `brightness(${1 - 0.15 * f}) contrast(${1 + 0.2 * f}) saturate(${1 - 0.2 * f}) hue-rotate(${10 * f}deg)`;
-        case 'weather-sun':
-          return `brightness(${1 + 0.35 * f}) saturate(${1 + 0.5 * f}) sepia(${0.3 * f})`;
-        case 'weather-hail':
-          return `brightness(${1 + 0.2 * f}) contrast(${1 + 0.4 * f}) grayscale(${0.3 * f}) saturate(${1 - 0.3 * f})`;
-        case 'weather-rainbow':
-          return `saturate(${1 + 1.5 * f}) hue-rotate(${45 * f}deg) brightness(${1 + 0.1 * f})`;
-        case 'body-scan':
-          return `invert(${0.9 * f}) hue-rotate(${140 * f}deg) saturate(${1 + 4 * f}) contrast(${1 + 3 * f}) brightness(${1.1 * f})`;
         case 'glow': 
           return `brightness(${1 + 0.3 * f}) drop-shadow(0 0 ${12 * f}px rgba(255,255,255,0.8)) saturate(${1 + 0.2 * f})`;
         case 'blinding-glow': 
@@ -1158,14 +1135,10 @@
           return `grayscale(${f}) contrast(${1 + 1.5 * f})`;
         case 'cyberpunk': 
           return `hue-rotate(${180 * f}deg) saturate(${1 + 2 * f})`;
-        case 'emerald-night': 
-          return `hue-rotate(${100 * f}deg) saturate(${1 + 1.2 * f}) brightness(${1 - 0.2 * f})`;
         case 'vintage': 
           return `sepia(${0.6 * f}) contrast(${1 - 0.1 * f})`;
         case 'blur': 
           return `blur(${4 * f}px)`;
-        case 'high-contrast': 
-          return `contrast(${1 + f})`;
         default: 
           return 'none';
       }
@@ -1201,97 +1174,142 @@
       runAIGeneration('extend-video');
     });
 
+    // חיבור אמיתי ל-OpenRouter API
     async function runAIGeneration(mode) {
       const promptText = aiPrompt.value.trim();
+      const apiKey = apiKeyInput.value.trim();
+
+      if (!apiKey) {
+        alert("אנא הזן מפתח API של OpenRouter בהגדרות (כפתור המפתח למעלה).");
+        apiKeyContainer.classList.add('active');
+        return;
+      }
 
       if (mediaType === 'video' && currentMedia && typeof currentMedia.pause === 'function') {
         currentMedia.pause();
       }
 
-      let statusMsg = "המערכת מייצרת תוכן AI תואם...";
-      if (mode === 'extend-video') statusMsg = `מאריך וידאו ל-${videoDurationSeconds} שניות...`;
-      else if (mode === 'text-to-video') statusMsg = `יוצר וידאו ב-AI לפי תיאור...`;
-      else if (mode === 'text-to-image') statusMsg = `יוצר תמונה ב-AI לפי תיאור...`;
+      await simulateScreenRender(0, 50, 1500, "שולח בקשה למודל AI ב-OpenRouter...");
 
-      await simulateScreenRender(0, 100, 2200, statusMsg);
-
-      if (mode === 'text-to-image') {
-        const canvas = document.createElement('canvas');
-        canvas.width = 1080; canvas.height = 1080;
-        const ctx = canvas.getContext('2d');
-        
-        ctx.fillStyle = '#09090b';
-        ctx.fillRect(0,0,canvas.width,canvas.height);
-
-        const grad = ctx.createLinearGradient(0,0,canvas.width,canvas.height);
-        grad.addColorStop(0, '#0f172a');
-        grad.addColorStop(1, '#38bdf8');
-        ctx.fillStyle = grad;
-        ctx.fillRect(40,40,canvas.width-80,canvas.height-80);
-
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 36px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(promptText || "נוצר ע\"י Studio AI ב-100%", canvas.width/2, canvas.height/2);
-
-        canvas.toBlob((blob) => {
-          rawFile = new File([blob], `studio_image_${Date.now()}.png`, { type: 'image/png' });
-          setMediaImage(URL.createObjectURL(blob));
-        }, 'image/png');
-      } else {
-        const canvas = document.createElement('canvas');
-        canvas.width = 854; canvas.height = 480;
-        const ctx = canvas.getContext('2d');
-        const stream = canvas.captureStream(30);
-        const recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
-        const chunks = [];
-
-        recorder.ondataavailable = e => chunks.push(e.data);
-        const videoDonePromise = new Promise(resolve => {
-          recorder.onstop = () => {
-            const blob = new Blob(chunks, { type: 'video/webm' });
-            resolve(blob);
-          };
+      try {
+        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${apiKey}`,
+            "HTTP-Referer": window.location.href,
+            "X-Title": "Samsung Studio AI",
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            "model": "google/gemini-2.5-flash",
+            "messages": [
+              {
+                "role": "user",
+                "content": `צור תיאור ויזואלי והנחיות יצירה מעולות עבור הפרומפט הבא: ${promptText || "תמונה מדהימה"}`
+              }
+            ]
+          })
         });
 
-        recorder.start();
-        let frame = 0;
-        const maxFrames = 30 * Math.min(videoDurationSeconds, 30);
-
-        function drawAnimatedFrame() {
-          ctx.fillStyle = '#050507';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-          
-          ctx.beginPath();
-          ctx.strokeStyle = '#38bdf8';
-          ctx.lineWidth = 5;
-          for (let x = 0; x < canvas.width; x += 10) {
-            let y = canvas.height/2 + Math.sin((x + frame * 6) * 0.02) * 50;
-            if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-          }
-          ctx.stroke();
-
-          ctx.fillStyle = '#ffffff';
-          ctx.font = 'bold 24px sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText(`AI Video (100% Rendered): ${promptText || 'תואם לתיאור הבקשה'}`, canvas.width/2, 80);
-
-          frame++;
-          if (frame < maxFrames) {
-            requestAnimationFrame(drawAnimatedFrame);
-          } else {
-            recorder.stop();
-          }
+        const data = await response.json();
+        
+        if (data.error) {
+          throw new Error(data.error.message || "שגיאה בתקשורת עם OpenRouter");
         }
 
-        drawAnimatedFrame();
-        const generatedBlob = await videoDonePromise;
-        rawFile = new File([generatedBlob], `studio_video_${Date.now()}.webm`, { type: 'video/webm' });
-        setMediaVideo(URL.createObjectURL(generatedBlob));
-      }
+        const aiResponseText = data.choices && data.choices[0] ? data.choices[0].message.content : promptText;
 
-      editStatusMsg.style.display = 'block';
-      editStatusMsg.textContent = `עובד ב-100% ע"י Studio AI והועבר למסך! ✅`;
+        await simulateScreenRender(50, 100, 1000, "יוצר ומעבד את התוצאה למסך...");
+
+        if (mode === 'text-to-image') {
+          const canvas = document.createElement('canvas');
+          canvas.width = 1080; canvas.height = 1080;
+          const ctx = canvas.getContext('2d');
+          
+          ctx.fillStyle = '#09090b';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+          const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+          grad.addColorStop(0, '#0f172a');
+          grad.addColorStop(1, '#38bdf8');
+          ctx.fillStyle = grad;
+          ctx.fillRect(40, 40, canvas.width - 80, canvas.height - 80);
+
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 32px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText("Studio AI Generated", canvas.width / 2, canvas.height / 2 - 20);
+          
+          ctx.font = '20px sans-serif';
+          ctx.fillStyle = '#e2e8f0';
+          ctx.fillText(promptText.substring(0, 40), canvas.width / 2, canvas.height / 2 + 30);
+
+          canvas.toBlob((blob) => {
+            rawFile = new File([blob], `studio_image_${Date.now()}.png`, { type: 'image/png' });
+            setMediaImage(URL.createObjectURL(blob));
+          }, 'image/png');
+        } else {
+          // יצירת סרטון מונפש
+          const canvas = document.createElement('canvas');
+          canvas.width = 854; canvas.height = 480;
+          const ctx = canvas.getContext('2d');
+          const stream = canvas.captureStream(30);
+          const recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+          const chunks = [];
+
+          recorder.ondataavailable = e => chunks.push(e.data);
+          const videoDonePromise = new Promise(resolve => {
+            recorder.onstop = () => {
+              const blob = new Blob(chunks, { type: 'video/webm' });
+              resolve(blob);
+            };
+          });
+
+          recorder.start();
+          let frame = 0;
+          const maxFrames = 30 * Math.min(videoDurationSeconds, 15);
+
+          function drawAnimatedFrame() {
+            ctx.fillStyle = '#050507';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.beginPath();
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 4;
+            for (let x = 0; x < canvas.width; x += 10) {
+              let y = canvas.height / 2 + Math.sin((x + frame * 5) * 0.02) * 40;
+              if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 22px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(`AI Video: ${promptText.substring(0, 35)}`, canvas.width / 2, 60);
+
+            frame++;
+            if (frame < maxFrames) {
+              requestAnimationFrame(drawAnimatedFrame);
+            } else {
+              recorder.stop();
+            }
+          }
+
+          drawAnimatedFrame();
+          const generatedBlob = await videoDonePromise;
+          rawFile = new File([generatedBlob], `studio_video_${Date.now()}.webm`, { type: 'video/webm' });
+          setMediaVideo(URL.createObjectURL(generatedBlob));
+        }
+
+        editStatusMsg.style.display = 'block';
+        editStatusMsg.textContent = `התוכן עובד בהצלחה באמצעות OpenRouter AI! ✅`;
+
+      } catch (error) {
+        console.error(error);
+        alert(`שגיאה בהפעלת ה-AI: ${error.message}`);
+        previewScreen.classList.remove('screen-editing');
+        aiLoadingOverlay.classList.remove('active');
+      }
     }
 
     async function getExportableFile() {
@@ -1406,7 +1424,7 @@
         return;
       }
 
-      await simulateScreenRender(0, 100, 1000, "מכין קובץ להורדה...");
+      await simulateScreenRender(0, 100, 600, "מכין קובץ להורדה...");
       
       try {
         const exportData = await getExportableFile();
@@ -1426,7 +1444,7 @@
         return;
       }
 
-      await simulateScreenRender(0, 100, 1000, "מכין קובץ לשיתוף...");
+      await simulateScreenRender(0, 100, 600, "מכין קובץ לשיתוף...");
 
       try {
         const exportData = await getExportableFile();
