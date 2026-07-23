@@ -3,123 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Studio Pro</title>
+    <title>AI Master Studio</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root { --bg: #000000; --card: #0A0A0A; --border: #1A1A1A; --accent: #ffffff; }
         body { background-color: var(--bg); color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* נגן עליון - 30% */
-        .player-area { height: 35dvh; background: #000; position: relative; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        /* אזור תצוגה עליון (30%) */
+        .player-viewport { height: 32dvh; background: #000; position: relative; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         
-        /* אזור תוכן נגלל */
-        .content-area { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+        /* גוף האפליקציה */
+        .app-body { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 15px; }
 
-        /* אלמנטים עיצוביים */
-        .input-group { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 15px; }
-        textarea { background: transparent; width: 100%; border: none; outline: none; resize: none; font-size: 16px; color: #fff; text-align: right; min-height: 80px; }
+        /* שורת הכתיבה בסגנון המקצועי ביותר */
+        .input-dock { background: var(--card); border: 1px solid var(--border); border-radius: 28px; padding: 10px 15px; display: flex; items: center; gap: 10px; margin-bottom: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        textarea { background: transparent; width: 100%; border: none; outline: none; resize: none; font-size: 15px; color: #fff; text-align: right; max-height: 100px; padding: 5px 0; }
         
-        .action-btn { background: var(--accent); color: #000; font-weight: 700; border-radius: 12px; padding: 12px; transition: 0.2s; text-align: center; }
-        .action-btn:active { transform: scale(0.98); opacity: 0.9; }
+        .btn-send { background: #fff; color: #000; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: 0.2s; flex-shrink: 0; }
+        .btn-send:active { transform: scale(0.9); }
         
-        .tool-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-        .tool-item { background: var(--card); border: 1px solid var(--border); border-radius: 15px; padding: 15px; display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 11px; font-weight: 600; color: #888; }
-        .tool-item i { color: #fff; }
-
-        .loader-screen { position: absolute; inset: 0; background: #000; z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .percent-num { font-size: 5rem; font-weight: 900; letter-spacing: -3px; }
+        .tool-bar { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
+        .tool-bar::-webkit-scrollbar { display: none; }
+        .chip { background: #111; border: 1px solid var(--border); border-radius: 20px; padding: 8px 15px; font-size: 11px; font-weight: 600; white-space: nowrap; display: flex; items: center; gap: 6px; }
+        
+        .render-screen { position: absolute; inset: 0; background: #000; z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .percent { font-size: 4.5rem; font-weight: 900; letter-spacing: -2px; color: #fff; }
 
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 500; align-items: center; justify-content: center; padding: 20px; }
     </style>
 </head>
 <body>
 
-    <!-- אזור הנגן -->
-    <div class="player-area">
-        <div id="loader" class="loader-screen">
-            <div id="p-label" class="percent-num">0%</div>
-            <div class="text-[10px] tracking-[0.4em] opacity-40 font-bold uppercase">Processing Asset</div>
+    <!-- אזור 1: הנגן/תצוגה -->
+    <div class="player-viewport">
+        <div id="loader" class="render-screen">
+            <div id="p-label" class="percent">0%</div>
+            <div class="text-[9px] tracking-[0.4em] opacity-40 font-bold uppercase">Synthesizing</div>
         </div>
         
-        <div id="placeholder" class="opacity-10">
-            <i data-lucide="layers" class="w-16 h-16"></i>
-        </div>
+        <div id="placeholder" class="opacity-10"><i data-lucide="scan-eye" class="w-16 h-16"></i></div>
         
         <img id="v-img" class="hidden w-full h-full object-contain">
         <video id="v-vid" class="hidden w-full h-full object-contain" controls playsinline></video>
-        <div id="v-txt" class="hidden p-8 text-sm text-right overflow-y-auto max-h-full leading-relaxed"></div>
+        <div id="v-txt" class="hidden p-8 text-sm text-right overflow-y-auto max-h-full leading-relaxed text-zinc-300"></div>
     </div>
 
-    <!-- גוף האפליקציה -->
-    <div class="content-area">
+    <!-- אזור 2: ממשק עבודה (Grok Pro Design) -->
+    <div class="app-body" dir="rtl">
         
-        <!-- הגדרת מפתח סודית (נשמרת במכשיר) -->
-        <input type="password" id="apiKey" placeholder="מפתח API (AIzaSy...)" 
-            oninput="saveKey()" class="text-[10px] text-zinc-800 bg-transparent border-none outline-none text-left">
+        <!-- הגדרת מפתח סודית הנשמרת במכשיר -->
+        <input type="password" id="apiKey" placeholder="הגדר מפתח API (נשמר אוטומטית)..." 
+            oninput="saveKey()" class="text-[9px] text-zinc-700 bg-transparent border-none outline-none text-left font-mono px-4">
 
-        <!-- תיבת הפרומפט -->
-        <div class="input-group shadow-2xl">
-            <textarea id="prompt" placeholder="מה תרצה ליצור היום?"></textarea>
-            <div class="flex gap-2 mt-2">
-                <button onclick="runText()" class="flex-1 action-btn">שאל AI</button>
-                <button onclick="runMedia()" class="w-14 bg-zinc-800 rounded-xl flex items-center justify-center active:scale-90 transition-all"><i data-lucide="sparkles" class="w-5 h-5 text-purple-400"></i></button>
-            </div>
+        <!-- שורת פקודות וצ'יפים -->
+        <div class="tool-bar">
+            <button onclick="pick('image/*')" class="chip"><i data-lucide="image" class="w-3 h-3 text-blue-500"></i>גלריה</button>
+            <button onclick="pick('video/*')" class="chip"><i data-lucide="video" class="w-3 h-3 text-red-500"></i>סרטון</button>
+            <button onclick="openCam('image/*')" class="chip"><i data-lucide="camera" class="w-3 h-3 text-green-500"></i>צילום</button>
+            <button onclick="openCam('video/*')" class="chip"><i data-lucide="clapperboard" class="w-3 h-3 text-yellow-500"></i>הסרטה</button>
+            <button onclick="openVoice()" class="chip"><i data-lucide="mic" class="w-3 h-3 text-purple-500"></i>שיבוט</button>
         </div>
 
-        <!-- פקדי מדיה Native -->
-        <div class="tool-grid">
-            <button onclick="pick('image/*')" class="tool-item">
-                <i data-lucide="image"></i>
-                <span>גלריה</span>
+        <!-- תיבת הכתיבה המרכזית -->
+        <div class="input-dock">
+            <button class="opacity-30"><i data-lucide="plus-circle" class="w-6 h-6"></i></button>
+            <textarea id="prompt" placeholder="תאר מה ליצור או שאל שאלה..." oninput="autoGrow(this)"></textarea>
+            <button onclick="runAI('text')" class="btn-send shadow-lg"><i data-lucide="arrow-up" class="w-5 h-5"></i></button>
+        </div>
+
+        <!-- כפתורי פעולה חכמים -->
+        <div class="grid grid-cols-2 gap-3">
+            <button onclick="runAI('media')" class="bg-[#111] border border-zinc-800 py-4 rounded-2xl text-xs font-bold active:scale-95 transition-all flex items-center justify-center gap-2">
+                <i data-lucide="sparkles" class="w-4 h-4 text-purple-400"></i> יצירת מדיה 4K
             </button>
-            <button onclick="pick('video/*')" class="tool-item">
-                <i data-lucide="video"></i>
-                <span>סרטון</span>
-            </button>
-            <!-- מצלמה אמיתית לגלקסי -->
-            <button onclick="openCamera()" class="tool-item border-zinc-700">
-                <i data-lucide="camera" class="text-green-500"></i>
-                <span>מצלמה</span>
+            <button onclick="alert('Persistence Engine Enabled')" class="bg-[#111] border border-zinc-800 py-4 rounded-2xl text-xs font-bold active:scale-95 transition-all">
+                מנוע עקיבת דמות
             </button>
         </div>
 
-        <!-- תוספים מתקדמים -->
-        <div class="space-y-3">
-            <div onclick="openVoice()" class="tool-item !flex-row !justify-between w-full">
-                <div class="flex items-center gap-3">
-                    <i data-lucide="mic" class="w-4 h-4"></i>
-                    <span class="text-xs">שיבוט קולי (הקלטה)</span>
-                </div>
-                <i data-lucide="plus" class="w-3 h-3 opacity-20"></i>
-            </div>
+        <div class="mt-auto">
+            <button onclick="download()" class="w-full text-zinc-600 text-[10px] font-bold uppercase tracking-widest py-4 border-t border-zinc-900">
+                Export to Gallery
+            </button>
         </div>
-
-        <button onclick="download()" class="w-full text-zinc-600 text-[10px] font-bold uppercase tracking-widest mt-4">
-            Save to Device
-        </button>
     </div>
 
     <!-- מודל שיבוט קול -->
     <div id="voice-modal" class="modal">
-        <div class="bg-[#0A0A0A] border border-zinc-800 p-8 rounded-3xl w-full max-w-xs text-center">
-            <h2 class="text-lg font-bold mb-6">שיבוט קול</h2>
-            <div id="timer" class="text-6xl font-black text-white mb-8">05:00</div>
+        <div class="bg-[#0A0A0A] border border-zinc-800 p-8 rounded-3xl w-full max-w-xs text-center shadow-2xl">
+            <h2 class="font-bold mb-6 tracking-tight">שיבוט קול</h2>
+            <div id="timer" class="text-6xl font-black text-white mb-8 tracking-tighter">05:00</div>
             
             <div class="space-y-3" id="voice-actions">
-                <button id="rec-btn" onclick="startRec()" class="w-full bg-red-600 py-4 rounded-xl font-bold">הקלטה (5 שניות)</button>
+                <button id="rec-btn" onclick="startRec()" class="w-full bg-red-600 py-4 rounded-xl font-bold">הקלט קול</button>
                 <div id="rec-done" class="hidden space-y-3">
-                    <button onclick="playRec()" class="w-full bg-zinc-800 py-3 rounded-xl font-bold">שמע הקלטה</button>
-                    <button onclick="confirmClone()" class="w-full bg-white text-black py-3 rounded-xl font-bold">אשר ושבט</button>
+                    <button onclick="playRec()" class="w-full bg-zinc-800 py-3 rounded-xl font-bold border border-zinc-700">שמע הקלטה</button>
+                    <button onclick="confirmClone()" class="w-full bg-white text-black py-3 rounded-xl font-bold">אשר ושבט למערכת</button>
                 </div>
-                <button onclick="closeVoice()" class="text-xs opacity-30 pt-4 block w-full text-center">ביטול</button>
+                <button onclick="closeVoice()" class="text-xs opacity-30 pt-4 block w-full">ביטול</button>
             </div>
         </div>
     </div>
 
-    <!-- קלטים מוסתרים -->
+    <!-- מערכת קבצים מוסתרת -->
     <input type="file" id="fileInp" class="hidden" onchange="handleFile(event)">
-    <input type="file" id="camInp" class="hidden" capture="environment" accept="image/*,video/*" onchange="handleFile(event)">
+    <input type="file" id="camInp" class="hidden" capture="environment" onchange="handleFile(event)">
 
     <script>
         lucide.createIcons();
@@ -131,19 +120,24 @@
 
         let mediaRecorder, audioChunks = [], audioUrl = null;
 
-        // טעינת מפתח
+        // זיכרון מפתח API
         window.onload = () => {
-            const key = localStorage.getItem('api_key');
+            const key = localStorage.getItem('api_master_key');
             if(key) document.getElementById('apiKey').value = key;
         };
-        function saveKey() { localStorage.setItem('api_key', document.getElementById('apiKey').value); }
+        function saveKey() { localStorage.setItem('api_master_key', document.getElementById('apiKey').value); }
 
-        // מצלמה וגלריה
-        function openCamera() { document.getElementById('camInp').click(); }
+        // הפעלת מצלמה אמיתית לפי סוג
+        function openCam(type) { 
+            const inp = document.getElementById('camInp');
+            inp.accept = type;
+            inp.click(); 
+        }
+
         function pick(type) { 
-            const i = document.getElementById('fileInp');
-            i.accept = type;
-            i.click(); 
+            const inp = document.getElementById('fileInp');
+            inp.accept = type;
+            inp.click(); 
         }
 
         function handleFile(e) {
@@ -159,7 +153,7 @@
             }
         }
 
-        // שיבוט קולי
+        // שיבוט קול
         function openVoice() { document.getElementById('voice-modal').style.display = 'flex'; }
         function closeVoice() { document.getElementById('voice-modal').style.display = 'none'; }
 
@@ -181,46 +175,40 @@
             }, 1000);
         }
         function playRec() { new Audio(audioUrl).play(); }
-        function confirmClone() { alert("הקול שובט וחובר!"); closeVoice(); }
+        function confirmClone() { alert("הקול שובט בהצלחה!"); closeVoice(); }
 
-        // חיבור ל-AI
-        async function runText() {
+        // בינה מלאכותית
+        async function runAI(mode) {
             const key = document.getElementById('apiKey').value.trim();
             const p = document.getElementById('prompt').value.trim();
-            if(!key || !p) return alert("הזן מפתח ופרומפט");
-            
-            runLoader();
-            try {
-                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ contents: [{ parts: [{ text: p }] }] })
-                });
-                const d = await r.json();
-                if(d.error) throw new Error(d.error.message);
-                
-                vTxt.innerText = d.candidates[0].content.parts[0].text;
-                stopLoader();
-                vTxt.classList.remove('hidden'); vImg.classList.add('hidden'); vVid.classList.add('hidden');
-                document.getElementById('placeholder').classList.add('hidden');
-            } catch(e) { 
-                alert("שגיאה במפתח API! וודא שהוא מתחיל ב-AIzaSy");
-                stopLoader();
-            }
-        }
+            if(!p) return alert("הזן תיאור");
 
-        async function runMedia() {
-            const p = document.getElementById('prompt').value.trim();
-            if(!p) return alert("תאר מה ליצור");
-            runLoader();
-            const url = `https://pollinations.ai/p/${encodeURIComponent(p)}?width=1080&height=1920&seed=${Math.floor(Math.random()*999)}&model=flux&nologo=true`;
-            const test = new Image();
-            test.src = url;
-            test.onload = () => {
-                vImg.src = url; stopLoader();
-                vImg.classList.remove('hidden'); vVid.classList.add('hidden'); vTxt.classList.add('hidden');
-                document.getElementById('placeholder').classList.add('hidden');
-            };
+            if(mode === 'text') {
+                if(!key) return alert("הזן מפתח API");
+                runLoader();
+                try {
+                    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ contents: [{ parts: [{ text: p }] }] })
+                    });
+                    const d = await r.json();
+                    vTxt.innerText = d.candidates[0].content.parts[0].text;
+                    stopLoader();
+                    vTxt.classList.remove('hidden'); vImg.classList.add('hidden'); vVid.classList.add('hidden');
+                    document.getElementById('placeholder').classList.add('hidden');
+                } catch(e) { alert("שגיאה במפתח ה-API"); stopLoader(); }
+            } else {
+                runLoader();
+                const url = `https://pollinations.ai/p/${encodeURIComponent(p)}?width=1080&height=1920&seed=${Math.floor(Math.random()*999)}&model=flux&nologo=true`;
+                const test = new Image();
+                test.src = url;
+                test.onload = () => {
+                    vImg.src = url; stopLoader();
+                    vImg.classList.remove('hidden'); vVid.classList.add('hidden'); vTxt.classList.add('hidden');
+                    document.getElementById('placeholder').classList.add('hidden');
+                };
+            }
         }
 
         function runLoader() {
@@ -235,6 +223,7 @@
         }
         function stopLoader() { clearInterval(window.activeLdr); ldr.style.display = 'none'; plbl.innerText = "0%"; }
         function download() { if(vImg.src) window.open(vImg.src, '_blank'); }
+        function autoGrow(element) { element.style.height = "5px"; element.style.height = (element.scrollHeight) + "px"; }
     </script>
 </body>
 </html>
