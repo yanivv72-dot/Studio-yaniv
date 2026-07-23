@@ -142,18 +142,9 @@
 
     .preview-header-actions {
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-end;
       align-items: center;
       padding: 0 4px;
-    }
-
-    .preview-tag {
-      font-size: 0.75rem;
-      color: #a1a1aa;
-      font-weight: 600;
-      background: #27272a;
-      padding: 4px 10px;
-      border-radius: 20px;
     }
 
     .delete-media-btn {
@@ -730,19 +721,17 @@
     <div class="api-key-container" id="api-key-container">
       <label for="ai-model-provider">ספק AI בסינכרון מלא:</label>
       <select id="ai-model-provider">
-        <option value="groq" selected>Groq API (Llama / Mixtral)</option>
         <option value="studio-ai">Samsung Studio AI Engine</option>
         <option value="openai">OpenAI (DALL-E 3 / Sora API)</option>
         <option value="gemini">Google Gemini / Imagen</option>
       </select>
-      <label for="api-key">מפתח API לפעולת המערכת (Groq gsk_...):</label>
-      <input type="password" id="api-key" placeholder="gsk_xxxxxxxxxxxxxxxxxxxxxxxx">
+      <label for="api-key">מפתח API לפעולת המערכת:</label>
+      <input type="password" id="api-key" placeholder="ai-key-xxxxxxxxxxxxxxxxxxxxxxxx">
     </div>
 
     <!-- Enhanced Preview Card Container -->
     <div class="preview-card" id="preview-card">
       <div class="preview-header-actions">
-        <span class="preview-tag" id="preview-tag-label">תצוגה ראשית (21:9)</span>
         <button class="delete-media-btn" id="delete-top-btn">🗑️ מחק מדיה</button>
       </div>
 
@@ -831,6 +820,7 @@
       <div class="filters-grid" id="filters-grid">
         <button class="filter-btn active" data-filter="none">ללא פילטר</button>
         <button class="filter-btn" data-filter="natural-reflection">🪞 שיקוף אמיתי (שקיפות גוף)</button>
+        <button class="filter-btn" data-filter="clothing-sheer">🥻 שיקוף ביגוד</button>
         <button class="filter-btn" data-filter="weather-rain">🌧️ אפקט גשם</button>
         <button class="filter-btn" data-filter="weather-sun">☀️ שמש זוהרת</button>
         <button class="filter-btn" data-filter="weather-hail">❄️ אפקט ברד</button>
@@ -876,7 +866,6 @@
     const settingsBtn = document.getElementById('settings-btn');
     const apiKeyContainer = document.getElementById('api-key-container');
     const apiKeyInput = document.getElementById('api-key');
-    const aiModelProvider = document.getElementById('ai-model-provider');
     const previewCard = document.getElementById('preview-card');
     const previewScreen = document.getElementById('preview-screen');
     const samsungPlayIcon = document.getElementById('samsung-play-icon');
@@ -974,34 +963,7 @@
     });
 
     function simulateScreenRender(fromPct, toPct, durationMs, textLabel) {
-      return new Promise(async (resolve) => {
-        const provider = aiModelProvider.value;
-        const apiKey = apiKeyInput.value.trim();
-
-        if (provider === 'groq' && apiKey) {
-          try {
-            const promptText = aiPrompt.value.trim() || "Check and verify media state";
-            const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-              method: "POST",
-              headers: {
-                "Authorization": `Bearer ${apiKey}`,
-                "Content-Type": "application/json"
-              },
-              body: JSON.stringify({
-                model: "llama-3.3-70b-versatile",
-                messages: [{ role: "user", content: promptText }],
-                max_tokens: 10
-              })
-            });
-            if (!response.ok) {
-              const errData = await response.json().catch(() => ({}));
-              alert("שגיאת אימות מול Groq API: " + (errData.error?.message || response.statusText));
-            }
-          } catch (err) {
-            console.error("Groq API check failed:", err);
-          }
-        }
-
+      return new Promise(resolve => {
         previewScreen.classList.add('screen-editing');
         aiLoadingOverlay.classList.add('active');
         aiLoadingText.textContent = textLabel || "מעבד ומקודד...";
@@ -1161,6 +1123,8 @@
       switch (selectedFilter) {
         case 'natural-reflection':
           return `opacity(${0.65 + 0.35 * (1 - f*0.3)}) contrast(${1 + 0.25 * f}) brightness(${1 + 0.15 * f}) saturate(${1 + 0.3 * f})`;
+        case 'clothing-sheer':
+          return `contrast(${1 + 0.5 * f}) brightness(${1 + 0.25 * f}) saturate(${1 + 0.4 * f}) sepia(${0.2 * f})`;
         case 'weather-rain':
           return `brightness(${1 - 0.15 * f}) contrast(${1 + 0.2 * f}) saturate(${1 - 0.2 * f}) hue-rotate(${10 * f}deg)`;
         case 'weather-sun':
@@ -1241,32 +1205,6 @@
       if (mode === 'extend-video') statusMsg = `מאריך וידאו ל-${videoDurationSeconds} שניות...`;
       else if (mode === 'text-to-video') statusMsg = `יוצר וידאו ב-AI לפי תיאור...`;
       else if (mode === 'text-to-image') statusMsg = `יוצר תמונה ב-AI לפי תיאור...`;
-
-      const provider = aiModelProvider.value;
-      const apiKey = apiKeyInput.value.trim();
-
-      if (provider === 'groq' && apiKey) {
-        try {
-          const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-            method: "POST",
-            headers: {
-              "Authorization": `Bearer ${apiKey}`,
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              model: "llama-3.3-70b-versatile",
-              messages: [{ role: "user", content: promptText || "Generate media description" }],
-              max_tokens: 150
-            })
-          });
-          if (!response.ok) {
-            const errData = await response.json().catch(() => ({}));
-            alert("שגיאת אימות מול Groq API: " + (errData.error?.message || response.statusText));
-          }
-        } catch (err) {
-          console.error("Groq API generation request failed:", err);
-        }
-      }
 
       await simulateScreenRender(0, 100, 2200, statusMsg);
 
