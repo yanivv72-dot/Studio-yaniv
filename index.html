@@ -169,4 +169,31 @@
                 });
                 const d = await r.json();
                 vTxt.innerText = d.candidates[0].content.parts[0].text;
-                hideLdr(); vTxt.classList.remove('hidden'); vImg.classList.add('hidden'); vVid.classList.add('hidden'); document.getElementById('placeho
+                hideLdr(); vTxt.classList.remove('hidden'); vImg.classList.add('hidden'); vVid.classList.add('hidden'); document.getElementById('placeholder').classList.add('hidden');
+            } catch(e) { alert("API Error"); hideLdr(); }
+        }
+
+        function showLdr() { ldr.style.display = 'flex'; let p = 0; const t = setInterval(() => { p += 15; if(p >= 100) { p = 100; clearInterval(t); plbl.innerText = "100%"; } else { plbl.innerText = p + "%"; } }, 200); window.activeT = t; }
+        function hideLdr() { clearInterval(window.activeT); ldr.style.display = 'none'; plbl.innerText = "0%"; }
+
+        // שליטה
+        function toggleMedia() { if(!vVid.classList.contains('hidden')) { vVid.paused ? vVid.play() : vVid.pause(); document.getElementById('playIcon').dataset.lucide = vVid.paused ? 'play' : 'pause'; lucide.createIcons(); } }
+        function ctrl(cmd) { if(cmd === 'stop') { vVid.pause(); vVid.currentTime = 0; } else if(cmd === 'start') vVid.currentTime = 0; else vVid.currentTime += cmd; }
+
+        // שיבוט
+        async function startRec() {
+            const s = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(s); audioChunks = [];
+            mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+            mediaRecorder.onstop = () => { audioUrl = URL.createObjectURL(new Blob(audioChunks, { type: 'audio/wav' })); document.getElementById('r-btn').classList.add('hidden'); document.getElementById('r-done').classList.remove('hidden'); };
+            let c = 5; mediaRecorder.start();
+            const i = setInterval(() => { c--; document.getElementById('v-timer').innerText = `0${c}:00`; if(c <= 0) { clearInterval(i); mediaRecorder.stop(); document.getElementById('v-timer').innerText = "DONE"; } }, 1000);
+        }
+
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal() { document.querySelectorAll('.modal').forEach(m => m.style.display = 'none'); }
+        function surpriseMe() { const l = ["Cyberpunk Tel Aviv rain", "Golden dragon 4k", "Space nebula portrait", "Future robot cooking"]; document.getElementById('prompt').value = l[Math.floor(Math.random()*l.length)]; }
+        function download() { if(vImg.src) { const a = document.createElement('a'); a.href = vImg.src; a.download = `AI_Studio.png`; a.click(); } }
+    </script>
+</body>
+</html>
