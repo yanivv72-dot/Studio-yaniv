@@ -171,7 +171,6 @@
       transition: height 0.3s, filter 0.3s;
     }
 
-    /* התאמת התמונה והסרטון לאורך ולרוחב הפריים ללא מתיחה */
     .preview-screen img,
     .preview-screen video {
       max-width: 100%;
@@ -182,7 +181,7 @@
       transition: filter 0.3s;
     }
 
-    /* AI Loading Overlay */
+    /* AI Loading Overlay (ללא כוכבים) */
     .ai-loading-overlay {
       position: absolute;
       inset: 0;
@@ -202,14 +201,18 @@
       display: flex;
     }
 
-    .sparkles-container {
-      font-size: 2.2rem;
-      animation: sparkleAnim 1.2s infinite alternate ease-in-out;
+    .ai-spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid rgba(34, 211, 238, 0.2);
+      border-top-color: #22d3ee;
+      border-radius: 50%;
+      animation: spinAnim 0.8s linear infinite;
     }
 
-    @keyframes sparkleAnim {
-      0% { transform: scale(0.8) rotate(-10deg); opacity: 0.6; }
-      100% { transform: scale(1.2) rotate(15deg); opacity: 1; filter: drop-shadow(0 0 10px #22d3ee); }
+    @keyframes spinAnim {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
 
     .ai-loading-text {
@@ -692,9 +695,9 @@
       </div>
 
       <div class="preview-screen" id="preview-screen">
-        <!-- AI Processing Overlay -->
+        <!-- AI Processing Overlay (ללא כוכבים) -->
         <div class="ai-loading-overlay" id="ai-loading-overlay">
-          <div class="sparkles-container">✨✨⭐</div>
+          <div class="ai-spinner"></div>
           <div class="ai-loading-text">מעבד עריכת AI...</div>
         </div>
 
@@ -787,7 +790,6 @@
         <button class="filter-btn" data-filter="emerald-night">🌃 ליל אזמרגד</button>
         <button class="filter-btn" data-filter="vintage">📜 וינטג' קלאסי</button>
         <button class="filter-btn" data-filter="infrared">🔴 אינפרא-אדום</button>
-
         <button class="filter-btn" data-filter="invert">🔄 נגטיב</button>
         <button class="filter-btn" data-filter="blur">🌫️ טשטוש</button>
         <button class="filter-btn" data-filter="high-contrast">🌓 קונטרסט גבוה</button>
@@ -862,17 +864,14 @@
     let isDraggingProgress = false;
     let lastProcessedBlob = null;
 
-    // Toggle Camera Menu
     camToggleBtn.addEventListener('click', () => {
       cameraOptionsMenu.classList.toggle('active');
     });
 
-    // Toggle API Key Input
     settingsBtn.addEventListener('click', () => {
       apiKeyContainer.classList.toggle('active');
     });
 
-    // Handle Frame Height Adjustment
     sizeButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         sizeButtons.forEach(b => b.classList.remove('active'));
@@ -881,7 +880,6 @@
       });
     });
 
-    // Handle Movie Genres
     genreButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         genreButtons.forEach(b => b.classList.remove('active'));
@@ -889,7 +887,6 @@
       });
     });
 
-    // AI Prompts Generator
     const prompts = [
       "אריה רץ בסוואנה בשעת השקיעה",
       "עיר עתידנית בלילה עם אורות ניאון",
@@ -901,7 +898,6 @@
       aiPrompt.value = prompts[Math.floor(Math.random() * prompts.length)];
     });
 
-    // Handle File Uploads & Camera Captures
     ['input-video', 'input-image', 'input-camera-photo', 'input-camera-video'].forEach(id => {
       const el = document.getElementById(id);
       if (!el) return;
@@ -946,7 +942,6 @@
       });
     });
 
-    // Clear Preview State
     function clearPreview() {
       if (currentMedia) {
         if (mediaType === 'video') {
@@ -972,7 +967,6 @@
 
     deleteTopBtn.addEventListener('click', clearPreview);
 
-    // Play/Pause Tap Action
     previewScreen.addEventListener('click', (e) => {
       if (e.target === deleteTopBtn || e.target.closest('.delete-media-btn')) return;
       if (!currentMedia || mediaType !== 'video') return;
@@ -983,7 +977,6 @@
       }
     });
 
-    // Media Control Actions
     document.getElementById('btn-play').onclick = () => currentMedia && currentMedia.play && currentMedia.play();
     document.getElementById('btn-pause').onclick = () => currentMedia && currentMedia.pause && currentMedia.pause();
     document.getElementById('btn-stop').onclick = () => {
@@ -999,7 +992,6 @@
       if (currentMedia && mediaType === 'video') currentMedia.currentTime -= 5;
     };
 
-    // Progress Bar Handling
     function updateProgressBar() {
       if (!currentMedia || isDraggingProgress || !currentMedia.duration) return;
       const pct = (currentMedia.currentTime / currentMedia.duration) * 100;
@@ -1027,7 +1019,6 @@
     window.addEventListener('touchmove', (e) => { if (isDraggingProgress) seekMedia(e); });
     window.addEventListener('touchend', () => { isDraggingProgress = false; });
 
-    // Filter Selection and Intensity
     filterButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         filterButtons.forEach(b => b.classList.remove('active'));
@@ -1043,7 +1034,6 @@
       applyFilter();
     });
 
-    // Unique CSS Filter Calculations
     function getCSSFilterString() {
       if (selectedFilter === 'none') return 'none';
       const f = filterIntensity / 100;
@@ -1069,7 +1059,6 @@
       }
     }
 
-    // Export Processing Engine
     async function createProcessedBlob() {
       if (!currentMedia) return null;
 
@@ -1159,7 +1148,7 @@
       galleryGrid.prepend(item);
     }
 
-    // Button Click: Create Edit (עם אפקט טשטוש ותנועה לכל المسך)
+    // Button Click: Create Edit (עצירת הסרטון + טשטוש המסך)
     btnCreateEdit.addEventListener('click', async () => {
       if (!currentMedia) {
         editStatusMsg.style.display = 'block';
@@ -1170,7 +1159,12 @@
         return;
       }
 
-      // הוספת אפקט טשטוש ותנועה לאפליקציה
+      // עצירת הסרטון באופן מיידי שלא ימשיך להתנגן
+      if (mediaType === 'video' && currentMedia && typeof currentMedia.pause === 'function') {
+        currentMedia.pause();
+      }
+
+      // הפעלת אפקט טשטוש ותנועה לאפליקציה
       appContainer.classList.add('app-blur-effect');
       aiLoadingOverlay.classList.add('active');
       const origText = btnCreateEdit.textContent;
@@ -1196,13 +1190,13 @@
       }
     });
 
-    // Button Click: Download
     downloadBtn.addEventListener('click', async () => {
       if (!currentMedia) return;
       downloadBtn.textContent = 'מוריד...';
 
       let processed = lastProcessedBlob;
       if (!processed) {
+        if (mediaType === 'video' && currentMedia) currentMedia.pause();
         appContainer.classList.add('app-blur-effect');
         aiLoadingOverlay.classList.add('active');
         processed = await createProcessedBlob();
@@ -1217,10 +1211,10 @@
       downloadBtn.textContent = '⬇ הורדה';
     });
 
-    // Button Click: Share
     shareBtn.addEventListener('click', async () => {
       if (!currentMedia) return;
       shareBtn.textContent = 'מעבד...';
+      if (mediaType === 'video' && currentMedia) currentMedia.pause();
       let processed = lastProcessedBlob || await createProcessedBlob();
       shareBtn.textContent = '🔗 שיתוף';
       if (!processed) return;
