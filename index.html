@@ -3,223 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Studio Elite</title>
+    <title>AI Studio Pro | Samsung Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        :root { --bg: #000000; --border: #1F1F1F; --accent: #7C3AED; --samsung-grey: #121212; }
-        body { background-color: var(--bg); color: #fff; font-family: -apple-system, system-ui, sans-serif; margin: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+        :root { --bg: #000000; --panel: #121212; --accent: #7C3AED; --samsung-border: #222222; }
+        body { background-color: var(--bg); color: #fff; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* אזור 1: הנגן (32% גובה) */
-        .player-viewport { height: 32dvh; background: #000; position: relative; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden; }
+        /* אזור 1: נגן (30% קבוע) */
+        .viewport { height: 30dvh; background: #000; position: relative; border-bottom: 1px solid var(--samsung-border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
         
-        /* אזור 2: פס תחבורה סמסונג (70px גובה) */
-        .transport-bar { height: 75px; background: #000; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-around; flex-shrink: 0; padding: 0 10px; }
+        /* אזור 2: פס תחבורה (סמסונג סטייל) */
+        .transport { height: 75px; background: #000; border-bottom: 1px solid var(--samsung-border); display: flex; align-items: center; justify-content: space-around; flex-shrink: 0; }
         
-        /* אזור 3: תוכן נגלל (כל השאר) */
-        .app-content { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 15px; padding-bottom: 40px; }
+        /* אזור 3: גוף נגלל */
+        .main-scroll { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; padding-bottom: 100px; }
 
-        /* כפתורי סמסונג One UI */
-        .samsung-btn { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--samsung-grey); border: 1px solid #222; transition: 0.15s; }
-        .samsung-btn:active { transform: scale(0.88); background: #222; }
-        .samsung-btn.main { width: 54px; height: 54px; background: #fff; color: #000; border: none; }
-        .samsung-btn i { width: 20px; height: 20px; }
-
-        /* פקדים בתוך הנגן */
-        .player-overlay-btn { position: absolute; background: rgba(255,255,255,0.1); backdrop-filter: blur(5px); border-radius: 50%; padding: 20px; border: 1px solid rgba(255,255,255,0.2); transition: 0.3s; opacity: 0; }
-        .player-viewport:active .player-overlay-btn { opacity: 1; }
-        .timeline-container { position: absolute; bottom: 0; width: 100%; height: 4px; background: rgba(255,255,255,0.1); }
-        .timeline-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.1s linear; }
-
-        /* UI Elements */
-        .grok-dock { background: #0A0A0A; border: 1px solid var(--border); border-radius: 26px; padding: 10px 18px; display: flex; items: center; gap: 12px; }
-        textarea { background: transparent; width: 100%; border: none; outline: none; resize: none; font-size: 15px; color: #fff; text-align: right; max-height: 80px; }
-        .chip { background: #000; border: 1px solid var(--border); border-radius: 20px; padding: 8px 16px; font-size: 11px; font-weight: 600; white-space: nowrap; color: #888; display: flex; items: center; gap: 6px; }
-        .loader-overlay { position: absolute; inset: 0; background: #000; z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .percent { font-size: 5rem; font-weight: 900; color: #fff; letter-spacing: -3px; }
+        /* אלמנטים של סמסונג */
+        .samsung-card { background: var(--panel); border-radius: 28px; padding: 20px; border: 1px solid var(--samsung-border); }
+        .samsung-btn { width: 46px; height: 46px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: #1A1A1A; border: 1px solid #333; transition: 0.15s; }
+        .samsung-btn:active { transform: scale(0.9); background: #252525; }
+        .btn-play { width: 56px; height: 56px; background: #fff; color: #000; border: none; }
+        
+        .chip { background: #1A1A1A; border: 1px solid #333; border-radius: 20px; padding: 10px 18px; font-size: 11px; font-weight: 600; white-space: nowrap; display: flex; items: center; gap: 8px; }
+        
+        /* מנדול */
+        .render-overlay { position: absolute; inset: 0; background: #000; z-index: 100; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .percent { font-size: 5rem; font-weight: 900; letter-spacing: -3px; }
+        
+        /* מודלים של עריכה */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 500; align-items: center; justify-content: center; padding: 20px; }
     </style>
 </head>
 <body>
 
-    <!-- אזור 1: הנגן המקצועי -->
-    <div class="player-viewport">
-        <div id="loader" class="loader-overlay">
+    <!-- אזור 1: הנגן המרכזי -->
+    <div class="viewport">
+        <div id="loader" class="render-overlay">
             <div id="p-label" class="percent">0%</div>
-            <div class="text-[9px] tracking-[0.4em] opacity-40 font-bold">GENERATING ASSET</div>
+            <div class="text-[10px] tracking-[0.3em] font-bold opacity-40 uppercase">Rendering 4K Asset</div>
         </div>
         
-        <div id="placeholder" class="opacity-10"><i data-lucide="aperture" class="w-16 h-16"></i></div>
+        <div id="placeholder" class="opacity-10 flex flex-col items-center">
+            <i data-lucide="aperture" class="w-16 h-16 mb-2"></i>
+            <span class="text-[10px] font-bold tracking-widest">ENGINE READY</span>
+        </div>
         
-        <!-- כפתור נגן פנימי -->
-        <button onclick="toggleMedia()" class="player-overlay-btn" id="innerPlayBtn">
-            <i data-lucide="play" class="w-8 h-8 fill-white"></i>
-        </button>
-
         <img id="v-img" class="hidden w-full h-full object-contain">
-        <video id="v-vid" class="hidden w-full h-full object-contain" playsinline loop></video>
+        <video id="v-vid" class="hidden w-full h-full object-contain" controls playsinline loop></video>
+        <div id="v-txt" class="hidden p-8 text-sm text-right overflow-y-auto max-h-full leading-relaxed text-zinc-300"></div>
 
-        <!-- סרגל ניווט פנימי -->
-        <div class="timeline-container">
-            <div id="t-fill" class="timeline-fill"></div>
-        </div>
+        <!-- סרגל זמן פנימי -->
+        <div class="absolute bottom-0 w-full h-1 bg-zinc-900"><div id="t-bar" class="h-full bg-purple-600 w-0"></div></div>
     </div>
 
-    <!-- אזור 2: פס תחבורה סמסונג (Transport) -->
-    <div class="transport-bar">
-        <button onclick="seek('start')" class="samsung-btn" title="התחל"><i data-lucide="skip-back"></i></button>
-        <button onclick="seek(-2)" class="samsung-btn" title="-2 שניות"><i data-lucide="rewind"></i></button>
-        <button onclick="toggleMedia()" class="samsung-btn main shadow-xl" id="mainPlayBtn"><i data-lucide="play" class="fill-current"></i></button>
-        <button onclick="seek(2)" class="samsung-btn" title="+2 שניות"><i data-lucide="fast-forward"></i></button>
-        <button onclick="seek('stop')" class="samsung-btn text-red-500 border-red-900/20" title="עצור"><i data-lucide="square" class="fill-current"></i></button>
+    <!-- אזור 2: פס תחבורה סמסונג -->
+    <div class="transport">
+        <button onclick="control('start')" class="samsung-btn"><i data-lucide="skip-back" class="w-5 h-5"></i></button>
+        <button onclick="control('back')" class="samsung-btn"><i data-lucide="rewind" class="w-5 h-5"></i></button>
+        <button onclick="toggleMedia()" class="samsung-btn btn-play shadow-xl"><i data-lucide="play" id="playIcon" class="w-6 h-6 fill-current"></i></button>
+        <button onclick="control('forward')" class="samsung-btn"><i data-lucide="fast-forward" class="w-5 h-5"></i></button>
+        <button onclick="control('stop')" class="samsung-btn text-red-500"><i data-lucide="square" class="w-4 h-4 fill-current"></i></button>
     </div>
 
-    <!-- אזור 3: ממשק עבודה נגלל -->
-    <div class="app-content" dir="rtl">
+    <!-- אזור 3: גוף נגלל (כל הכפתורים) -->
+    <div class="main-scroll" dir="rtl">
         
         <!-- מפתח API (נשמר במכשיר) -->
-        <input type="password" id="apiKey" placeholder="הגדר מפתח API (לפעם אחת)..." oninput="saveKey()" 
-               class="text-[9px] text-zinc-800 bg-transparent border-none outline-none text-left px-2">
+        <input type="password" id="apiKey" placeholder="הגדר מפתח API (לפעם אחת בלבד)..." 
+               oninput="saveKey()" class="text-[10px] text-zinc-700 bg-transparent border-none outline-none text-left px-2 font-mono">
 
-        <!-- סרגל כלים -->
-        <div class="flex gap-2 overflow-x-auto scrollbar-hide">
-            <button onclick="pick('image/*')" class="chip"><i data-lucide="image" class="w-3.5 h-3.5 text-blue-500"></i>גלריה</button>
-            <button onclick="pick('video/*')" class="chip"><i data-lucide="video" class="w-3.5 h-3.5 text-red-500"></i>סרטון</button>
-            <button onclick="openCam()" class="chip border-zinc-700"><i data-lucide="camera" class="w-3.5 h-3.5 text-green-500"></i>מצלמה</button>
-            <button onclick="openVoice()" class="chip"><i data-lucide="mic" class="w-3.5 h-3.5 text-purple-500"></i>שיבוט</button>
+        <!-- כרטיס יצירה -->
+        <div class="samsung-card shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-[10px] font-black text-purple-500 uppercase tracking-widest">AI Master Engine</span>
+                <button onclick="surpriseMe()" class="chip !py-1 !px-3">🎲 הפתע אותי</button>
+            </div>
+            <textarea id="prompt" placeholder="תאר את הויז'ן שלך כאן..." class="w-full bg-transparent border-none outline-none text-lg text-white text-right resize-none mb-4 min-h-[80px]"></textarea>
+            <div class="flex gap-2">
+                <button onclick="runAI('media')" class="flex-1 bg-white text-black py-4 rounded-2xl font-bold active:scale-95 transition-all">צור יצירה</button>
+                <button onclick="runAI('text')" class="flex-1 bg-zinc-800 text-white py-4 rounded-2xl font-bold border border-zinc-700 active:scale-95 transition-all">שאל AI</button>
+            </div>
+            <div class="flex gap-2 mt-3">
+                <button onclick="alert('Extend Mode: +10s')" class="flex-1 bg-[#1A1A1A] py-2 rounded-xl text-[10px] font-bold text-zinc-500 uppercase">הארכה +10ש'</button>
+                <button onclick="togglePersist()" id="persistBtn" class="flex-1 bg-[#1A1A1A] py-2 rounded-xl text-[10px] font-bold text-zinc-500 uppercase">עקיבת דמות</button>
+            </div>
         </div>
 
-        <!-- דוק כתיבה -->
-        <div class="grok-dock shadow-xl">
-            <textarea id="prompt" placeholder="שאל שאלה או תאר משהו..." rows="1" oninput="this.style.height='5px';this.style.height=this.scrollHeight+'px'"></textarea>
-            <button onclick="runAI('text')" class="btn-send"><i data-lucide="arrow-up" class="w-5 h-5"></i></button>
+        <!-- העלאת מדיה (מצלמה אמיתית) -->
+        <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            <button onclick="pick('image/*')" class="chip"><i data-lucide="image" class="text-blue-500"></i>גלריה תמונות</button>
+            <button onclick="pick('video/*')" class="chip"><i data-lucide="video" class="text-red-500"></i>גלריה סרטונים</button>
+            <button onclick="openRealCam()" class="chip border-zinc-700"><i data-lucide="camera" class="text-green-500"></i>מצלמה</button>
         </div>
 
-        <!-- כפתורי AI -->
-        <div class="grid grid-cols-2 gap-2">
-            <button onclick="runAI('media')" class="bg-[#111] border border-zinc-800 py-4 rounded-2xl text-xs font-bold active:scale-95 flex items-center justify-center gap-2 transition-all">
-                <i data-lucide="sparkles" class="w-4 h-4 text-purple-400"></i> יצירת מדיה 4K
+        <!-- פונקציות עריכה מתקדמות -->
+        <div class="space-y-3">
+            <button onclick="openModal('voice-modal')" class="w-full samsung-card !py-4 flex justify-between items-center">
+                <div class="flex items-center gap-4"><i data-lucide="mic" class="text-purple-500"></i><span class="text-sm font-bold">שיבוט קולי (Voice Clone)</span></div>
+                <i data-lucide="plus" class="w-4 h-4 opacity-20"></i>
             </button>
-            <button onclick="alert('Character Persistence Enabled')" class="bg-[#111] border border-zinc-800 py-4 rounded-2xl text-xs font-bold active:scale-95 flex items-center justify-center gap-2 transition-all text-zinc-400">
-                <i data-lucide="lock" class="w-3 h-3"></i> עקיבת דמות
+            <button onclick="openModal('lipsync-modal')" class="w-full samsung-card !py-4 flex justify-between items-center">
+                <div class="flex items-center gap-4"><i data-lucide="languages" class="text-purple-500"></i><span class="text-sm font-bold">סנכרון שפתיים (Lip-Sync)</span></div>
+                <i data-lucide="plus" class="w-4 h-4 opacity-20"></i>
+            </button>
+            <button onclick="openModal('filter-modal')" class="w-full samsung-card !py-4 flex justify-between items-center">
+                <div class="flex items-center gap-4"><i data-lucide="palette" class="text-purple-500"></i><span class="text-sm font-bold">פילטרים ומניפת צבעים</span></div>
+                <i data-lucide="chevron-left" class="w-4 h-4 opacity-20"></i>
+            </button>
+            <button onclick="openModal('effects-modal')" class="w-full samsung-card !py-4 flex justify-between items-center">
+                <div class="flex items-center gap-4"><i data-lucide="zap" class="text-purple-500"></i><span class="text-sm font-bold">עורך אפקטים (אש, גשם, מים)</span></div>
+                <i data-lucide="chevron-left" class="w-4 h-4 opacity-20"></i>
             </button>
         </div>
 
-        <!-- תחתית: הורדה, שיתוף, הפתע אותי -->
-        <div class="grid grid-cols-3 gap-2 mt-2">
-            <button onclick="surpriseMe()" class="bg-[#0D0D0D] border border-zinc-800 p-4 rounded-xl flex flex-col items-center gap-2 active:scale-95">
-                <i data-lucide="dices" class="text-purple-500 w-5 h-5"></i>
-                <span class="text-[9px] font-bold">הפתע אותי</span>
-            </button>
-            <button onclick="download()" class="bg-[#0D0D0D] border border-zinc-800 p-4 rounded-xl flex flex-col items-center gap-2 active:scale-95">
-                <i data-lucide="download" class="text-white w-5 h-5"></i>
-                <span class="text-[9px] font-bold">הורדה</span>
-            </button>
-            <button onclick="shareApp()" class="bg-[#0D0D0D] border border-zinc-800 p-4 rounded-xl flex flex-col items-center gap-2 active:scale-95">
-                <i data-lucide="share-2" class="text-blue-500 w-5 h-5"></i>
-                <span class="text-[9px] font-bold">שיתוף</span>
-            </button>
+        <!-- ספרייה אישית -->
+        <div class="mt-4">
+            <h3 class="text-[10px] font-black text-zinc-700 uppercase tracking-widest mb-3">Library</h3>
+            <div id="gallery" class="grid grid-cols-4 gap-2"></div>
+        </div>
+
+        <!-- כפתורי ייצוא סופיים (בסוף הגלילה) -->
+        <div class="grid grid-cols-2 gap-3 mt-6">
+            <button onclick="download()" class="bg-white text-black py-4 rounded-3xl font-black text-xs uppercase tracking-widest active:scale-95 shadow-2xl transition-all">הורדה למכשיר</button>
+            <button onclick="share()" class="bg-zinc-900 text-white py-4 rounded-3xl font-black text-xs uppercase tracking-widest border border-zinc-800">שיתוף מהיר</button>
         </div>
     </div>
 
-    <!-- מודל שיבוט קולי -->
-    <div id="v-modal" class="modal">
-        <div class="bg-[#0A0A0A] border border-zinc-800 p-10 rounded-3xl w-80 text-center shadow-2xl">
+    <!-- מודלים (Modals) -->
+    <div id="voice-modal" class="modal">
+        <div class="bg-zinc-900 border border-zinc-800 p-8 rounded-[32px] w-full max-w-xs text-center">
             <h2 class="font-bold mb-6">שיבוט קול</h2>
             <div id="v-timer" class="text-6xl font-black text-white mb-8 tracking-tighter">05:00</div>
-            <div class="space-y-3" id="v-actions">
-                <button id="r-btn" onclick="startRec()" class="w-full bg-red-600 py-4 rounded-xl font-bold">הקלטה (5 שניות)</button>
-                <div id="r-done" class="hidden space-y-3">
-                    <button onclick="playRec()" class="w-full bg-zinc-800 py-3 rounded-xl font-bold border border-zinc-700">שמע הקלטה</button>
-                    <button onclick="confirmClone()" class="w-full bg-white text-black py-3 rounded-xl font-bold">אשר ושבט</button>
+            <div class="space-y-3">
+                <button id="r-btn" onclick="startRec()" class="w-full bg-red-600 py-4 rounded-2xl font-bold">הקלטה</button>
+                <div id="r-done" class="hidden space-y-2">
+                    <button onclick="new Audio(audioUrl).play()" class="w-full bg-zinc-800 py-3 rounded-xl font-bold">שמע הקלטה</button>
+                    <button onclick="alert('Voice Cloned!'); closeAll()" class="w-full bg-white text-black py-3 rounded-xl font-bold">אשר ושבט</button>
                 </div>
-                <button onclick="closeVoice()" class="text-xs opacity-30 pt-4 block w-full">ביטול</button>
+                <button onclick="closeAll()" class="text-xs opacity-30 pt-4">ביטול</button>
             </div>
         </div>
     </div>
 
-    <input type="file" id="f-inp" class="hidden" onchange="handleAsset(event)">
-    <input type="file" id="c-inp" class="hidden" accept="image/*,video/*" capture="environment" onchange="handleAsset(event)">
+    <div id="filter-modal" class="modal"><div class="bg-zinc-900 p-6 rounded-[32px] w-full grid grid-cols-2 gap-3">
+        <button class="chip" onclick="alert('B&W Applied')">שחור לבן</button>
+        <button class="chip" onclick="alert('Cinematic Applied')">סינמטי</button>
+        <button class="chip" onclick="alert('Green Screen')">מסך ירוק</button>
+        <button onclick="closeAll()" class="col-span-2 text-xs opacity-30 mt-4">סגור</button>
+    </div></div>
 
-    <script>
-        lucide.createIcons();
-        const vImg = document.getElementById('v-img'), vVid = document.getElementById('v-vid'), ldr = document.getElementById('loader'), plbl = document.getElementById('p-label');
-        let mediaRecorder, audioChunks = [], audioUrl = null;
-
-        // זיכרון
-        window.onload = () => { const key = localStorage.getItem('ak'); if(key) document.getElementById('apiKey').value = key; };
-        function saveKey() { localStorage.setItem('ak', document.getElementById('apiKey').value); }
-
-        // פקדי מדיה
-        function toggleMedia() {
-            if(!vVid.classList.contains('hidden')) {
-                vVid.paused ? vVid.play() : vVid.pause();
-                const icon = vVid.paused ? 'play' : 'pause';
-                document.getElementById('mainPlayBtn').innerHTML = `<i data-lucide="${icon}" class="fill-current"></i>`;
-                document.getElementById('innerPlayBtn').innerHTML = `<i data-lucide="${icon}" class="w-8 h-8 fill-white"></i>`;
-                lucide.createIcons();
-            }
-        }
-        function seek(cmd) {
-            if(cmd === 'stop') { vVid.pause(); vVid.currentTime = 0; }
-            else if(cmd === 'start') vVid.currentTime = 0;
-            else vVid.currentTime += cmd;
-        }
-        vVid.ontimeupdate = () => { document.getElementById('t-fill').style.width = (vVid.currentTime/vVid.duration*100) + "%"; };
-
-        // מצלמה וגלריה
-        function openCam() { document.getElementById('c-inp').click(); }
-        function pick(type) { const i = document.getElementById('f-inp'); i.accept = type; i.click(); }
-        function handleAsset(e) {
-            const f = e.target.files[0]; if(!f) return;
-            const u = URL.createObjectURL(f);
-            document.getElementById('placeholder').classList.add('hidden');
-            if(f.type.startsWith('image/')) { vImg.src = u; vImg.classList.remove('hidden'); vVid.classList.add('hidden'); }
-            else { vVid.src = u; vVid.classList.remove('hidden'); vImg.classList.add('hidden'); }
-        }
-
-        // AI
-        async function runAI(mode) {
-            const key = document.getElementById('apiKey').value.trim();
-            const p = document.getElementById('prompt').value.trim();
-            if(!p) return alert("הזן תיאור");
-            showLdr();
-            if(mode === 'text') {
-                try {
-                    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
-                        method: 'POST', headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ contents: [{ parts: [{ text: p }] }] })
-                    });
-                    const d = await r.json();
-                    document.getElementById('v-txt').innerText = d.candidates[0].content.parts[0].text;
-                    hideLdr(); document.getElementById('v-txt').classList.remove('hidden'); vImg.classList.add('hidden'); vVid.classList.add('hidden');
-                } catch(e) { alert("שגיאה במפתח API"); hideLdr(); }
-            } else {
-                const u = `https://pollinations.ai/p/${encodeURIComponent(p)}?width=1080&height=1920&seed=${Math.floor(Math.random()*999)}&model=flux&nologo=true`;
-                const t = new Image(); t.src = u;
-                t.onload = () => { vImg.src = u; hideLdr(); vImg.classList.remove('hidden'); vVid.classList.add('hidden'); document.getElementById('v-txt').classList.add('hidden'); };
-            }
-        }
-
-        function showLdr() { ldr.style.display = 'flex'; let p = 0; const t = setInterval(() => { p += 15; if(p >= 100) { p = 100; clearInterval(t); plbl.innerText = "100%"; } else { plbl.innerText = p + "%"; } }, 200); window.activeT = t; }
-        function hideLdr() { clearInterval(window.activeT); ldr.style.display = 'none'; plbl.innerText = "0%"; }
-        
-        function surpriseMe() { const list = ["Cinematic cyberpunk Tel Aviv rain", "Golden dragon over mountains 4k", "Astronaut cooking in space station", "Hyper-realistic forest glowing plants"]; document.getElementById('prompt').value = list[Math.floor(Math.random()*list.length)]; }
-        function shareApp() { navigator.share ? navigator.share({title:'AI Studio', url:window.location.href}) : window.open(`https://wa.me/?text=${window.location.href}`); }
-        function download() { if(vImg.src) { const a = document.createElement('a'); a.href = vImg.src; a.download = `AI_Asset_${Date.now()}.png`; a.click(); } }
-
-        // שיבוט
-        function openVoice() { document.getElementById('v-modal').style.display = 'flex'; }
-        function closeVoice() { document.getElementById('v-modal').style.display = 'none'; }
-        async function startRec() {
-            const s = await navigator.mediaDevices.getUserMedia({ audio: true });
-            mediaRecorder = new MediaRecorder(s); audioChunks = [];
-            mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-            mediaRecorder.onstop = () => { audioUrl = URL.createObjectURL(new Blob(audioChunks, { type: 'audio/wav' })); document.getElementById('r-btn').classList.add('hidden'); document.getElementById('r-done').classList.remove('hidden'); };
-            let c = 5; mediaRecorder.start();
-            const i = setInterval(() => { c--; document.getElementById('v-timer').innerText = `0${c}:00`; if(c <= 0) { clearInterval(i); mediaRecorder.stop(); document.getElementById('v-timer').innerText = "DONE"; } }, 1000);
-        }
-        function playRec() { new Audio(audioUrl).play(); }
-        function confirmClone() { alert("הקול שובט למערכת!"); closeVoice(); }
-    </script>
-</body>
-</html>
+    <div id="effects-modal" class="modal"><div class="bg-zinc-900 p-6 rounded-[32px] w-full grid grid-cols-2 gap-3">
+        <button class="chip" onclick="alert('Fire Effect')">🔥 אש</butto
