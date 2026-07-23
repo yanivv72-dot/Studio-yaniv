@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Samsung Studio AI - Grok 4 Edition</title>
+  <title>Samsung Studio AI</title>
   <style>
     * {
       box-sizing: border-box;
@@ -93,7 +93,7 @@
       background: #27272a;
     }
 
-    /* Universal API Key Section (Grok 4 / OpenAI / Gemini) */
+    /* Universal API Key Section */
     .api-key-container {
       display: none;
       background: #18181b;
@@ -202,11 +202,9 @@
 
     .preview-screen img,
     .preview-screen video {
-      max-width: 100%;
-      max-height: 100%;
-      width: auto;
-      height: auto;
-      object-fit: contain;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
       transition: filter 0.3s, transform 0.3s;
     }
 
@@ -259,7 +257,7 @@
       padding: 0 15px;
     }
 
-    /* Samsung Play Button overlay - Hides automatically on load */
+    /* Samsung Play Button overlay */
     .samsung-play-btn {
       position: absolute;
       width: 56px;
@@ -689,7 +687,7 @@
     .gallery-item video {
       width: 100%;
       height: 100px;
-      object-fit: contain;
+      object-fit: cover;
       border-radius: 10px;
       background-color: #000;
     }
@@ -723,7 +721,7 @@
     <header>
       <div class="samsung-title-badge">
         <div class="user-profile">⚙️</div>
-        <h1>Samsung Studio (Grok 4)</h1>
+        <h1>Samsung Studio AI</h1>
       </div>
       <div class="settings-btn" id="settings-btn">🔑</div>
     </header>
@@ -732,12 +730,12 @@
     <div class="api-key-container" id="api-key-container">
       <label for="ai-model-provider">ספק AI בסינכרון מלא:</label>
       <select id="ai-model-provider">
-        <option value="grok-4">Grok 4 (xAI)</option>
+        <option value="studio-ai">Samsung Studio AI Engine</option>
         <option value="openai">OpenAI (DALL-E 3 / Sora API)</option>
         <option value="gemini">Google Gemini / Imagen</option>
       </select>
-      <label for="api-key">מפתח API לפעולת Grok 4:</label>
-      <input type="password" id="api-key" placeholder="xai-xxxxxxxxxxxxxxxxxxxxxxxx">
+      <label for="api-key">מפתח API לפעולת המערכת:</label>
+      <input type="password" id="api-key" placeholder="ai-key-xxxxxxxxxxxxxxxxxxxxxxxx">
     </div>
 
     <!-- Enhanced Preview Card Container -->
@@ -779,13 +777,13 @@
 
     <!-- AI Prompt Section -->
     <div class="prompt-box">
-      <textarea id="ai-prompt" placeholder="תאר מה ליצור או לערוך ב-Grok 4 עבור התמונה/הסרטון..."></textarea>
+      <textarea id="ai-prompt" placeholder="תאר מה ליצור או לערוך ב-AI עבור התמונה/הסרטון..."></textarea>
       <button class="surprise-btn" id="surprise-btn">הפתע אותי 🪄</button>
     </div>
 
     <!-- Create & Extend Buttons -->
     <div class="action-create-row">
-      <button class="btn-create-edit" id="btn-create-edit">✨ צור ב-Grok 4 (10 שניות)</button>
+      <button class="btn-create-edit" id="btn-create-edit">✨ צור ב-AI (10 שניות)</button>
       <button class="btn-extend-video" id="btn-extend-video">➕ 10 ש' נוספות</button>
 
       <!-- Image Options Modal -->
@@ -919,9 +917,9 @@
     settingsBtn.addEventListener('click', () => apiKeyContainer.classList.toggle('active'));
 
     const prompts = [
-      "אריה רץ בסוואנה בשעת השקיעה עם אפקטים של ניאון בהפקה של Grok 4",
-      "עיר עתידנית בלילה עם מכוניות מעופפות ואורות זוהרים בשיקוף קריסטל",
-      "חללית חוצה גלקסיה צבעונית בסגנון היפר-ריאליסטי של Grok 4",
+      "אריה רץ בסוואנה בשעת השקיעה עם אפקטים של ניאון מתקדמים",
+      "עיר עתידנית בלילה עם מכוניות מעופפות ואורות זוהרים",
+      "חללית חוצה גלקסיה צבעונית בסגנון היפר-ריאליסטי מהמם",
       "נוף מושלג באלפים בשעת זריחה מוזהבת"
     ];
 
@@ -1129,7 +1127,7 @@
 
       switch (selectedFilter) {
         case 'natural-reflection':
-          return `contrast(${1 + 0.05 * f}) brightness(${1 + 0.04 * f})`;
+          return `contrast(${1 + 0.08 * f}) brightness(${1 + 0.05 * f}) saturate(${1 + 0.1 * f})`;
         case 'body-scan':
           return `invert(${0.9 * f}) hue-rotate(${140 * f}deg) saturate(${1 + 4 * f}) contrast(${1 + 3 * f}) brightness(${1.1 * f})`;
         case 'glow': 
@@ -1164,12 +1162,7 @@
     function applyFilter() {
       if (currentMedia) {
         currentMedia.style.filter = getCSSFilterString();
-        // Apply true horizontal mirror (scaleX(-1)) for natural reflection filter
-        if (selectedFilter === 'natural-reflection') {
-          currentMedia.style.transform = 'scaleX(-1)';
-        } else {
-          currentMedia.style.transform = 'scaleX(1)';
-        }
+        currentMedia.style.transform = 'scaleX(1)';
       }
     }
 
@@ -1208,10 +1201,10 @@
         currentMedia.pause();
       }
 
-      let statusMsg = "Grok 4 מייצר תוכן AI תואם...";
-      if (mode === 'extend-video') statusMsg = `מאריך וידאו ב-Grok 4 ל-${videoDurationSeconds} שניות...`;
-      else if (mode === 'image-to-video') statusMsg = `Grok 4 יוצר וידאו מושלם מתיאור התמונה...`;
-      else if (mode === 'image-edit') statusMsg = `Grok 4 עורך תמונה ב-AI בסינכרון מלא...`;
+      let statusMsg = "המערכת מייצרת תוכן AI תואם...";
+      if (mode === 'extend-video') statusMsg = `מאריך וידאו ל-${videoDurationSeconds} שניות...`;
+      else if (mode === 'image-to-video') statusMsg = `יוצר וידאו מושלם מתיאור התמונה...`;
+      else if (mode === 'image-edit') statusMsg = `עורך תמונה ב-AI בסינכרון מלא...`;
 
       await simulateScreenRender(0, 100, 2200, statusMsg);
 
@@ -1232,10 +1225,10 @@
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 36px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(promptText || "עובד ע\"י Grok 4 ב-100%", canvas.width/2, canvas.height/2);
+        ctx.fillText(promptText || "עובד ע\"י Studio AI ב-100%", canvas.width/2, canvas.height/2);
 
         canvas.toBlob((blob) => {
-          rawFile = new File([blob], `grok4_edited_${Date.now()}.png`, { type: 'image/png' });
+          rawFile = new File([blob], `studio_edited_${Date.now()}.png`, { type: 'image/png' });
           setMediaImage(URL.createObjectURL(blob));
         }, 'image/png');
       } else {
@@ -1274,7 +1267,7 @@
           ctx.fillStyle = '#ffffff';
           ctx.font = 'bold 24px sans-serif';
           ctx.textAlign = 'center';
-          ctx.fillText(`Grok 4 Video (100% Rendered): ${promptText || 'תואם לתיאור הבקשה'}`, canvas.width/2, 80);
+          ctx.fillText(`AI Video (100% Rendered): ${promptText || 'תואם לתיאור הבקשה'}`, canvas.width/2, 80);
 
           frame++;
           if (frame < maxFrames) {
@@ -1286,12 +1279,12 @@
 
         drawAnimatedFrame();
         const generatedBlob = await videoDonePromise;
-        rawFile = new File([generatedBlob], `grok4_video_${Date.now()}.webm`, { type: 'video/webm' });
+        rawFile = new File([generatedBlob], `studio_video_${Date.now()}.webm`, { type: 'video/webm' });
         setMediaVideo(URL.createObjectURL(generatedBlob));
       }
 
       editStatusMsg.style.display = 'block';
-      editStatusMsg.textContent = `עובד ב-100% ע"י Grok 4 והועבר למסך! ✅`;
+      editStatusMsg.textContent = `עובד ב-100% ע"י Studio AI והועבר למסך! ✅`;
     }
 
     async function getExportableFile() {
@@ -1305,10 +1298,6 @@
         canvas.height = currentMedia.naturalHeight || 1080;
 
         ctx.save();
-        if (selectedFilter === 'natural-reflection') {
-          ctx.translate(canvas.width, 0);
-          ctx.scale(-1, 1);
-        }
         ctx.filter = getCSSFilterString();
         ctx.drawImage(currentMedia, 0, 0, canvas.width, canvas.height);
         ctx.restore();
@@ -1351,10 +1340,6 @@
               return;
             }
             ctx.save();
-            if (selectedFilter === 'natural-reflection') {
-              ctx.translate(canvas.width, 0);
-              ctx.scale(-1, 1);
-            }
             ctx.filter = getCSSFilterString();
             ctx.drawImage(currentMedia, 0, 0, canvas.width, canvas.height);
             ctx.restore();
@@ -1394,7 +1379,7 @@
       const downloadBtnSmall = document.createElement('button');
       downloadBtnSmall.className = 'btn-action btn-action-download';
       downloadBtnSmall.textContent = 'הורד';
-      downloadBtnSmall.onclick = () => triggerDeviceDownload(exportData.blob, `samsung_grok4_${Date.now()}.${exportData.ext}`);
+      downloadBtnSmall.onclick = () => triggerDeviceDownload(exportData.blob, `samsung_studio_${Date.now()}.${exportData.ext}`);
 
       const deleteBtnSmall = document.createElement('button');
       deleteBtnSmall.className = 'btn-action btn-action-delete';
@@ -1419,7 +1404,7 @@
       try {
         const exportData = await getExportableFile();
         if (exportData) {
-          triggerDeviceDownload(exportData.blob, `samsung_grok4_${Date.now()}.${exportData.ext}`);
+          triggerDeviceDownload(exportData.blob, `samsung_studio_${Date.now()}.${exportData.ext}`);
           addToGallery(exportData);
         }
       } catch (err) {
@@ -1441,8 +1426,8 @@
         if (exportData && exportData.file) {
           if (navigator.canShare && navigator.canShare({ files: [exportData.file] })) {
             await navigator.share({
-              title: 'Samsung Studio Grok 4',
-              text: 'שתף מתוך Samsung Studio AI (Grok 4)',
+              title: 'Samsung Studio AI',
+              text: 'שתף מתוך Samsung Studio AI',
               files: [exportData.file]
             });
           } else {
