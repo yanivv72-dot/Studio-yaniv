@@ -3,131 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Grok 4 Studio Pro</title>
+    <title>Grok 4 Pro Studio</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        :root { --accent: #7C3AED; --bg: #000000; --border: #1A1A1A; }
-        body { background-color: var(--bg); color: #E5E7EB; font-family: -apple-system, system-ui, sans-serif; margin: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+        :root { --accent: #7C3AED; --bg: #000000; --card: #0D0D0D; --border: #1F1F1F; }
+        body { background-color: var(--bg); color: #FFFFFF; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
         
+        /* נגן עליון 30% - Grok Style */
         .viewport { height: 32dvh; background: #000; position: relative; border-bottom: 1px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-        .grok-content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 60px; }
+        
+        /* אזור פקדים נגלל */
+        .grok-container { flex: 1; overflow-y: auto; padding: 16px; padding-bottom: 40px; }
 
-        /* Grok UI Elements */
-        .grok-card { background: #080808; border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
-        .grok-input { background: #000; border: 1px solid var(--border); border-radius: 12px; padding: 14px; width: 100%; outline: none; transition: 0.2s; font-size: 15px; }
-        .grok-input:focus { border-color: var(--accent); box-shadow: 0 0 10px rgba(124,58,237,0.1); }
+        .grok-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+        .grok-input { background: transparent; border: 1px solid var(--border); border-radius: 12px; padding: 14px; width: 100%; outline: none; transition: 0.2s; font-size: 15px; color: white; }
+        .grok-input:focus { border-color: var(--accent); }
         
-        .btn-main { background: var(--accent); color: white; font-weight: 600; border-radius: 12px; padding: 14px; width: 100%; transition: 0.2s; border: none; }
-        .btn-main:active { transform: scale(0.97); opacity: 0.9; }
+        .btn-primary { background: var(--accent); border-radius: 12px; padding: 14px; width: 100%; font-weight: 700; transition: 0.2s; }
+        .btn-primary:active { transform: scale(0.97); opacity: 0.8; }
         
-        .tool-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-        .tool-item { background: #080808; border: 1px solid var(--border); padding: 12px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 10px; font-weight: 500; color: #9CA3AF; }
+        .tool-btn { background: var(--card); border: 1px solid var(--border); padding: 12px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 10px; color: #A1A1AA; }
         
-        .render-text { font-size: 4rem; font-weight: 900; color: var(--accent); text-shadow: 0 0 25px rgba(124,58,237,0.4); }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 500; align-items: center; justify-content: center; padding: 20px; }
+        .render-digit { font-size: 5rem; font-weight: 900; color: var(--accent); text-shadow: 0 0 30px rgba(124,58,237,0.3); }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 500; align-items: center; justify-content: center; padding: 20px; }
     </style>
 </head>
 <body>
 
-    <!-- נגן עליון (Grok Minimalist) -->
+    <!-- נגן Grok 4 -->
     <div class="viewport">
         <div id="loader" class="hidden absolute inset-0 bg-black flex flex-col items-center justify-center z-50">
-            <div id="p-label" class="render-text">0%</div>
-            <div class="text-[9px] tracking-[0.4em] text-zinc-500 font-bold">GENERATING GEN 4</div>
+            <div id="p-label" class="render-digit">0%</div>
+            <div class="text-[10px] tracking-[0.4em] text-zinc-500 font-bold">RENDERING GEN-4</div>
         </div>
         
         <div id="placeholder" class="opacity-10 flex flex-col items-center">
-            <i data-lucide="zap" class="w-16 h-16 mb-2"></i>
-            <span class="text-xs font-bold tracking-widest uppercase">Engine 4.0 Pro</span>
+            <i data-lucide="zap" class="w-12 h-12 mb-2"></i>
+            <span class="text-[10px] font-bold tracking-widest">GROK ENGINE 4.0</span>
         </div>
         
         <img id="v-img" class="hidden w-full h-full object-contain">
         <video id="v-vid" class="hidden w-full h-full object-contain" controls playsinline></video>
-        <div id="v-txt" class="hidden p-6 text-sm text-center overflow-y-auto max-h-full leading-relaxed text-zinc-300"></div>
+        <div id="v-txt" class="hidden p-8 text-sm text-center overflow-y-auto max-h-full leading-relaxed text-zinc-200"></div>
     </div>
 
-    <!-- גוף האפליקציה (Grok Content) -->
-    <div class="grok-content" dir="rtl">
+    <!-- גוף האפליקציה -->
+    <div class="grok-container" dir="rtl">
         
-        <!-- הגדרת API - פעם אחת ולתמיד -->
-        <div id="api-section" class="mb-4">
-            <input type="password" id="apiKey" placeholder="הכנס מפתח Gemini (AIzaSy...)" 
-                oninput="saveKey()" class="grok-input text-left font-mono text-xs opacity-50 focus:opacity-100">
+        <!-- הגדרת API (נשמר בזיכרון) -->
+        <div class="mb-4">
+            <input type="password" id="apiKey" placeholder="הזן מפתח API (פעם אחת בלבד)" 
+                oninput="saveKey()" class="grok-input text-left font-mono text-[10px] py-2 border-zinc-900 opacity-40 focus:opacity-100">
         </div>
 
-        <!-- תיבת הפרומפט המרכזית -->
-        <div class="grok-card">
-            <textarea id="prompt" placeholder="שאל את גרוק או תאר תמונה/וידאו..." 
-                class="grok-input h-28 text-right resize-none placeholder-zinc-700 mb-3"></textarea>
+        <!-- תיבת הפרומפט המקצועית -->
+        <div class="grok-card shadow-xl">
+            <textarea id="prompt" placeholder="שאל את גרוק או תאר מדיה..." 
+                class="grok-input h-24 text-right resize-none placeholder-zinc-700 mb-4 border-none p-0"></textarea>
             
-            <div class="flex gap-2">
-                <button onclick="runGemini()" class="btn-main flex-1">שאל AI</button>
-                <button onclick="runMedia()" class="bg-zinc-900 border border-zinc-800 text-white font-bold rounded-12 rounded-[12px] px-6 py-4 active:scale-95 transition-all"><i data-lucide="sparkles" class="w-5 h-5"></i></button>
+            <div class="grid grid-cols-4 gap-2">
+                <button onclick="runGemini()" class="col-span-3 btn-primary">שאל AI</button>
+                <button onclick="runMedia()" class="bg-zinc-900 rounded-12 rounded-[12px] flex items-center justify-center active:scale-90"><i data-lucide="sparkles" class="w-5 h-5 text-purple-400"></i></button>
             </div>
         </div>
 
-        <!-- פקדים משולבים (Native Choice) -->
-        <div class="tool-grid mb-6">
-            <button onclick="triggerFile('image/*')" class="tool-item">
+        <!-- כפתורי שליטה Native (מצלמה אמיתית) -->
+        <div class="grid grid-cols-3 gap-2 mb-4">
+            <button onclick="triggerInput('image/*')" class="tool-btn">
                 <i data-lucide="image" class="text-blue-500 w-5 h-5"></i>
                 <span>גלריה</span>
             </button>
-            <button onclick="triggerFile('video/*')" class="tool-item">
+            <button onclick="triggerInput('video/*')" class="tool-btn">
                 <i data-lucide="film" class="text-red-500 w-5 h-5"></i>
-                <span>סרטונים</span>
+                <span>סרטון</span>
             </button>
-            <button onclick="triggerFile('image/*,video/*')" class="tool-item border-zinc-800">
+            <button onclick="openCamera()" class="tool-btn border-purple-900/30">
                 <i data-lucide="camera" class="text-green-500 w-5 h-5"></i>
                 <span>מצלמה</span>
             </button>
         </div>
 
-        <!-- פונקציות עריכה -->
-        <div class="space-y-3">
-            <div onclick="openVoiceModal()" class="grok-card flex justify-between items-center py-4 cursor-pointer active:bg-zinc-900/50">
+        <!-- שיבוט קולי ופילטרים -->
+        <div class="space-y-2">
+            <div onclick="openVoiceModal()" class="grok-card flex justify-between items-center py-4 cursor-pointer active:bg-zinc-900">
                 <div class="flex items-center gap-3">
                     <i data-lucide="mic" class="text-purple-500 w-5 h-5"></i>
                     <span class="text-sm font-bold">שיבוט קולי (Voice Clone)</span>
                 </div>
-                <i data-lucide="chevron-left" class="w-4 h-4 opacity-30"></i>
+                <i data-lucide="plus" class="w-4 h-4 opacity-20"></i>
             </div>
             
-            <div onclick="alert('Filters Active')" class="grok-card flex justify-between items-center py-4 cursor-pointer active:bg-zinc-900/50">
+            <div onclick="alert('Filter Menu')" class="grok-card flex justify-between items-center py-4 cursor-pointer active:bg-zinc-900">
                 <div class="flex items-center gap-3">
                     <i data-lucide="palette" class="text-purple-500 w-5 h-5"></i>
                     <span class="text-sm font-bold">פילטרים ומניפת צבעים</span>
                 </div>
-                <i data-lucide="chevron-left" class="w-4 h-4 opacity-30"></i>
+                <i data-lucide="chevron-left" class="w-4 h-4 opacity-20"></i>
             </div>
         </div>
 
-        <!-- הורדה סופית -->
-        <button onclick="download()" class="w-full bg-white text-black py-4 rounded-xl font-black text-xs uppercase tracking-widest mt-4 active:scale-95 transition-all">
-            Download Content
+        <button onclick="download()" class="w-full bg-white text-black py-4 rounded-xl font-black text-xs uppercase tracking-widest mt-6 active:scale-95">
+            Download 4K
         </button>
     </div>
 
-    <!-- מודל שיבוט קולי - הגרסה המקצועית -->
+    <!-- מודל הקלטה ושיבוט -->
     <div id="voice-modal" class="modal">
-        <div class="bg-[#080808] border border-zinc-800 p-8 rounded-3xl w-full max-w-xs text-center">
-            <h2 class="text-lg font-bold mb-2">שיבוט קול Gen 4</h2>
-            <p class="text-[10px] text-zinc-500 mb-6 uppercase tracking-wider">הקלטה של 5 שניות לדיוק מקסימלי</p>
+        <div class="bg-[#0A0A0B] border border-zinc-800 p-8 rounded-3xl w-full max-w-xs text-center">
+            <h2 class="text-lg font-bold mb-1">שיבוט קול</h2>
+            <p class="text-[9px] text-zinc-500 mb-6 uppercase tracking-widest">RECORD 5 SECONDS</p>
             
-            <div id="timer" class="text-5xl font-black text-purple-500 mb-6">05:00</div>
+            <div id="timer" class="text-6xl font-black text-purple-600 mb-8 tracking-tighter">05:00</div>
             
             <div class="space-y-3">
-                <button id="rec-btn" onclick="startRecording()" class="w-full bg-red-600 py-4 rounded-xl font-bold">הקלט קול</button>
-                <button id="play-btn" onclick="previewAudio()" class="hidden w-full bg-zinc-800 py-3 rounded-xl font-bold flex items-center justify-center gap-2">
-                    <i data-lucide="play" class="w-4 h-4"></i> שמע הקלטה
-                </button>
-                <button id="clone-btn" onclick="confirmClone()" class="hidden w-full bg-purple-600 py-3 rounded-xl font-bold">בצע שיבוט והדבק</button>
-                <button onclick="closeVoice()" class="text-xs opacity-40 pt-2 block w-full text-center">ביטול</button>
+                <button id="rec-btn" onclick="startRecording()" class="w-full bg-red-600 py-4 rounded-xl font-bold">הקלט עכשיו</button>
+                <div id="after-rec" class="hidden space-y-3">
+                    <button onclick="previewAudio()" class="w-full bg-zinc-800 py-3 rounded-xl font-bold flex items-center justify-center gap-2 border border-zinc-700">
+                        <i data-lucide="play" class="w-4 h-4"></i> שמע הקלטה
+                    </button>
+                    <button onclick="confirmClone()" class="w-full bg-purple-600 py-3 rounded-xl font-bold">בצע שיבוט והדבק</button>
+                </div>
+                <button onclick="closeVoice()" class="text-xs opacity-30 pt-4 block w-full">סגור</button>
             </div>
         </div>
     </div>
 
-    <input type="file" id="h-inp" class="hidden" onchange="loadAsset(event)">
+    <!-- קלטים מוסתרים -->
+    <input type="file" id="h-inp" class="hidden" onchange="loadMedia(event)">
+    <input type="file" id="c-inp" class="hidden" capture="environment" accept="image/*,video/*" onchange="loadMedia(event)">
 
     <script>
         lucide.createIcons();
@@ -141,23 +145,22 @@
         let audioChunks = [];
         let audioUrl = null;
 
-        // טעינת מפתח API אוטומטית
+        // שמירה וטעינה של המפתח
         window.onload = () => {
-            const key = localStorage.getItem('grok_key');
-            if(key) document.getElementById('apiKey').value = key;
+            const saved = localStorage.getItem('grok_key');
+            if(saved) document.getElementById('apiKey').value = saved;
         };
+        function saveKey() { localStorage.setItem('grok_key', document.getElementById('apiKey').value); }
 
-        function saveKey() {
-            localStorage.setItem('grok_key', document.getElementById('apiKey').value);
+        // מצלמה וגלריה
+        function openCamera() { document.getElementById('c-inp').click(); }
+        function triggerInput(accept) { 
+            const i = document.getElementById('h-inp');
+            i.accept = accept;
+            i.click(); 
         }
 
-        function triggerFile(accept) {
-            const inp = document.getElementById('h-inp');
-            inp.accept = accept;
-            inp.click();
-        }
-
-        function loadAsset(e) {
+        function loadMedia(e) {
             const f = e.target.files[0];
             if(!f) return;
             const u = URL.createObjectURL(f);
@@ -170,7 +173,7 @@
             }
         }
 
-        // --- שיבוט קולי לוגיקה ---
+        // שיבוט קולי
         function openVoiceModal() { document.getElementById('voice-modal').style.display = 'flex'; }
         function closeVoice() { document.getElementById('voice-modal').style.display = 'none'; }
 
@@ -178,86 +181,65 @@
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             mediaRecorder = new MediaRecorder(stream);
             audioChunks = [];
-            
             mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
             mediaRecorder.onstop = () => {
-                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-                audioUrl = URL.createObjectURL(audioBlob);
-                document.getElementById('play-btn').classList.remove('hidden');
-                document.getElementById('clone-btn').classList.remove('hidden');
+                const blob = new Blob(audioChunks, { type: 'audio/wav' });
+                audioUrl = URL.createObjectURL(blob);
+                document.getElementById('rec-btn').classList.add('hidden');
+                document.getElementById('after-rec').classList.remove('hidden');
             };
 
-            let c = 5;
-            const btn = document.getElementById('rec-btn');
+            let count = 5;
             const t = document.getElementById('timer');
-            btn.disabled = true;
-            btn.innerText = "מקליט...";
-            
+            const btn = document.getElementById('rec-btn');
+            btn.disabled = true; btn.innerText = "מקליט...";
             mediaRecorder.start();
+
             const int = setInterval(() => {
-                c--;
-                t.innerText = `0${c}:00`;
-                if(c <= 0) {
+                count--;
+                t.innerText = `0${count}:00`;
+                if(count <= 0) {
                     clearInterval(int);
                     mediaRecorder.stop();
-                    btn.innerText = "הקלטה הושלמה";
                     t.innerText = "בוצע ✅";
                 }
             }, 1000);
         }
+        function previewAudio() { new Audio(audioUrl).play(); }
+        function confirmClone() { alert("הקול שובט וחובר ל-AI!"); closeVoice(); }
 
-        function previewAudio() {
-            const audio = new Audio(audioUrl);
-            audio.play();
-        }
-
-        function confirmClone() {
-            alert("הקול שובט בהצלחה והוצמד למנוע ה-AI!");
-            closeVoice();
-        }
-
-        // --- AI לוגיקה ---
+        // AI
         async function runGemini() {
             const key = document.getElementById('apiKey').value;
             const p = document.getElementById('prompt').value.trim();
             if(!key || !p) return alert("הזן מפתח ופרומפט");
-            
             runLoader();
             try {
-                const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
+                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ contents: [{ parts: [{ text: p }] }] })
                 });
-                const data = await resp.json();
-                const text = data.candidates[0].content.parts[0].text;
-                
+                const d = await r.json();
+                vTxt.innerText = d.candidates[0].content.parts[0].text;
                 stopLoader();
-                vTxt.innerText = text;
-                vTxt.classList.remove('hidden');
-                vImg.classList.add('hidden'); vVid.classList.add('hidden');
+                vTxt.classList.remove('hidden'); vImg.classList.add('hidden'); vVid.classList.add('hidden');
                 document.getElementById('placeholder').classList.add('hidden');
-            } catch(e) { 
-                alert("שגיאה במפתח ה-API");
-                stopLoader();
-            }
+            } catch(e) { alert("שגיאה במפתח!"); stopLoader(); }
         }
 
         async function runMedia() {
             const p = document.getElementById('prompt').value.trim();
             if(!p) return alert("תאר מה ליצור");
             runLoader();
-            const seed = Math.floor(Math.random()*99999);
-            const url = `https://pollinations.ai/p/${encodeURIComponent(p)}?width=1080&height=1920&seed=${seed}&model=flux&nologo=true`;
-            
+            const url = `https://pollinations.ai/p/${encodeURIComponent(p)}?width=1080&height=1920&seed=${Math.floor(Math.random()*9999)}&model=flux&nologo=true`;
             const test = new Image();
             test.src = url;
             test.onload = () => {
                 vImg.src = url;
-                vImg.classList.remove('hidden');
-                vVid.classList.add('hidden'); vTxt.classList.add('hidden');
-                document.getElementById('placeholder').classList.add('hidden');
                 stopLoader();
+                vImg.classList.remove('hidden'); vVid.classList.add('hidden'); vTxt.classList.add('hidden');
+                document.getElementById('placeholder').classList.add('hidden');
             };
         }
 
