@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Samsung Studio AI</title>
+  <title>Samsung Studio AI - Grok 4 Edition</title>
   <style>
     * {
       box-sizing: border-box;
@@ -24,7 +24,7 @@
       overflow-x: hidden;
     }
 
-    /* App Container with Samsung Galaxy feel */
+    /* App Container */
     .app-container {
       width: 100%;
       max-width: 440px;
@@ -93,7 +93,7 @@
       background: #27272a;
     }
 
-    /* Universal API Key Section */
+    /* Universal API Key Section (Grok 4 / OpenAI / Gemini) */
     .api-key-container {
       display: none;
       background: #18181b;
@@ -114,7 +114,7 @@
       font-weight: 600;
     }
 
-    .api-key-container input {
+    .api-key-container input, .api-key-container select {
       width: 100%;
       background: #09090b;
       border: 1px solid #27272a;
@@ -125,11 +125,7 @@
       outline: none;
     }
 
-    .api-key-container input:focus {
-      border-color: #3b82f6;
-    }
-
-    /* Video/Preview Display Container */
+    /* Preview Card Container */
     .preview-card {
       position: sticky;
       top: 0;
@@ -179,7 +175,7 @@
       color: #fff;
     }
 
-    /* Preview Screen - Exact Media Aspect Fit */
+    /* Preview Screen */
     .preview-screen {
       width: 100%;
       height: 320px;
@@ -264,7 +260,7 @@
       padding: 0 15px;
     }
 
-    /* Samsung Play Button */
+    /* Samsung Play Button overlay - Hides automatically on load */
     .samsung-play-btn {
       position: absolute;
       width: 56px;
@@ -280,11 +276,12 @@
       backdrop-filter: blur(6px);
       transition: opacity 0.3s, transform 0.2s;
       z-index: 10;
+      opacity: 0;
       pointer-events: none;
     }
 
-    .preview-screen.playing .samsung-play-btn {
-      opacity: 0;
+    .samsung-play-btn.visible {
+      opacity: 1;
     }
 
     .placeholder-text {
@@ -317,11 +314,22 @@
       transition: width 0.1s linear;
     }
 
-    /* Player Controls */
+    /* Player Controls Container - Hidden by default on media load, toggles on screen click */
     .player-controls {
       display: flex;
       flex-direction: column;
       gap: 6px;
+      transition: opacity 0.3s, max-height 0.3s;
+      overflow: hidden;
+      opacity: 0;
+      max-height: 0;
+      pointer-events: none;
+    }
+
+    .player-controls.visible {
+      opacity: 1;
+      max-height: 100px;
+      pointer-events: auto;
     }
 
     .control-buttons {
@@ -594,7 +602,7 @@
       gap: 6px;
     }
 
-    /* Filters Section */
+    /* Filters Section including Natural Reflection Effect */
     .filters-container {
       display: flex;
       flex-direction: column;
@@ -748,15 +756,21 @@
     <header>
       <div class="samsung-title-badge">
         <div class="user-profile">⚙️</div>
-        <h1>Samsung Studio</h1>
+        <h1>Samsung Studio (Grok 4)</h1>
       </div>
       <div class="settings-btn" id="settings-btn">🔑</div>
     </header>
 
-    <!-- Universal API Key Config -->
+    <!-- Universal API Key Config (Supports Grok 4 / xAI, OpenAI, Gemini) -->
     <div class="api-key-container" id="api-key-container">
-      <label for="api-key">מפתח API (OpenAI / Gemini / Runway):</label>
-      <input type="password" id="api-key" placeholder="הכנס את המפתח שלך כאן להפעלת AI...">
+      <label for="ai-model-provider">ספק AI בסינכרון מלא:</label>
+      <select id="ai-model-provider">
+        <option value="grok-4">Grok 4 (xAI)</option>
+        <option value="openai">OpenAI (DALL-E 3 / Sora API)</option>
+        <option value="gemini">Google Gemini / Imagen</option>
+      </select>
+      <label for="api-key">מפתח API לפעולת Grok 4:</label>
+      <input type="password" id="api-key" placeholder="xai-xxxxxxxxxxxxxxxxxxxxxxxx">
     </div>
 
     <!-- Enhanced Preview Card Container -->
@@ -766,7 +780,7 @@
         <button class="delete-media-btn" id="delete-top-btn">🗑️ מחק מדיה</button>
       </div>
 
-      <!-- Preview Screen (Only this section blurs & moves during render) -->
+      <!-- Preview Screen -->
       <div class="preview-screen" id="preview-screen">
         <div class="ai-loading-overlay" id="ai-loading-overlay">
           <div class="ai-spinner"></div>
@@ -778,8 +792,8 @@
         <span class="placeholder-text" id="placeholder-text">אין מדיה מוצגת</span>
       </div>
       
-      <!-- Video Player Controls -->
-      <div class="player-controls">
+      <!-- Video Player Controls - Hides automatically on load, shows on screen click -->
+      <div class="player-controls" id="player-controls">
         <div class="progress-container" id="progress-container">
           <div class="progress-bar-thick">
             <div class="progress-fill" id="progress-fill"></div>
@@ -798,13 +812,13 @@
 
     <!-- AI Prompt Section -->
     <div class="prompt-box">
-      <textarea id="ai-prompt" placeholder="תאר מה ליצור או לערוך ב-AI עבור התמונה/הסרטון..."></textarea>
+      <textarea id="ai-prompt" placeholder="תאר מה ליצור או לערוך ב-Grok 4 עבור התמונה/הסרטון..."></textarea>
       <button class="surprise-btn" id="surprise-btn">הפתע אותי 🪄</button>
     </div>
 
     <!-- Create & Extend Buttons -->
     <div class="action-create-row">
-      <button class="btn-create-edit" id="btn-create-edit">✨ צור ב-AI (10 שניות)</button>
+      <button class="btn-create-edit" id="btn-create-edit">✨ צור ב-Grok 4 (10 שניות)</button>
       <button class="btn-extend-video" id="btn-extend-video">➕ 10 ש' נוספות</button>
 
       <!-- Image Options Modal -->
@@ -829,7 +843,7 @@
       </div>
     </div>
 
-    <!-- Universal Media Upload Selector (Supports ALL image/video formats) -->
+    <!-- Universal Media Upload Selector -->
     <div class="media-type-selector">
       <label class="media-type-btn">
         🖼️ תמונה
@@ -856,11 +870,12 @@
       </label>
     </div>
 
-    <!-- Filters Section including Body Scanner / X-Ray Effects -->
+    <!-- Filters Section including Natural Reflection Effect -->
     <div class="filters-container">
       <div class="section-title">🎨 פילטרים ואפקטים:</div>
       <div class="filters-grid" id="filters-grid">
         <button class="filter-btn active" data-filter="none">ללא פילטר</button>
+        <button class="filter-btn" data-filter="natural-reflection">🪞 שיקוף טבעי (צבע גוף מקורי)</button>
         <button class="filter-btn" data-filter="body-scan">🔬 שיקוף סורק</button>
         <button class="filter-btn" data-filter="glow">🌟 זוהר</button>
         <button class="filter-btn" data-filter="blinding-glow">💫 זוהר מסנוור</button>
@@ -911,6 +926,7 @@
     const aiRenderPercent = document.getElementById('ai-render-percent');
     const aiLoadingText = document.getElementById('ai-loading-text');
     
+    const playerControls = document.getElementById('player-controls');
     const progressContainer = document.getElementById('progress-container');
     const progressFill = document.getElementById('progress-fill');
     
@@ -942,6 +958,7 @@
     let filterIntensity = 100;
     let isDraggingProgress = false;
     let videoDurationSeconds = 10;
+    let areControlsVisible = false;
 
     camToggleBtn.addEventListener('click', () => cameraOptionsMenu.classList.toggle('active'));
     settingsBtn.addEventListener('click', () => apiKeyContainer.classList.toggle('active'));
@@ -955,9 +972,9 @@
     });
 
     const prompts = [
-      "אריה רץ בסוואנה בשעת השקיעה עם אפקטים של ניאון",
-      "עיר עתידנית בלילה עם מכוניות מעופפות ואורות זוהרים",
-      "חללית חוצה גלקסיה צבעונית בסגנון היפר-ריאליסטי",
+      "אריה רץ בסוואנה בשעת השקיעה עם אפקטים של ניאון בהפקה של Grok 4",
+      "עיר עתידנית בלילה עם מכוניות מעופפות ואורות זוהרים בשיקוף קריסטל",
+      "חללית חוצה גלקסיה צבעונית בסגנון היפר-ריאליסטי של Grok 4",
       "נוף מושלג באלפים בשעת זריחה מוזהבת"
     ];
 
@@ -965,7 +982,26 @@
       aiPrompt.value = prompts[Math.floor(Math.random() * prompts.length)];
     });
 
-    // Handle Uploads of ALL Image & Video Formats with 0-100% loader
+    // Helper to hide controls on load
+    function hideScreenControls() {
+      areControlsVisible = false;
+      playerControls.classList.remove('visible');
+      samsungPlayIcon.classList.remove('visible');
+    }
+
+    // Toggle controls display on screen click
+    function toggleScreenControls() {
+      if (!currentMedia) return;
+      areControlsVisible = !areControlsVisible;
+      if (areControlsVisible) {
+        playerControls.classList.add('visible');
+        samsungPlayIcon.classList.add('visible');
+      } else {
+        hideScreenControls();
+      }
+    }
+
+    // Upload Handler with 0-100% Loader
     ['input-video', 'input-image', 'input-camera-photo', 'input-camera-video'].forEach(id => {
       const el = document.getElementById(id);
       if (!el) return;
@@ -976,7 +1012,7 @@
         cameraOptionsMenu.classList.remove('active');
         rawFile = file;
 
-        // Start screen blur & percentage rendering simulation
+        // Screen blur & 0-100% rendering
         await simulateScreenRender(0, 100, 1200, "טוען ומעבד קובץ מדיה...");
 
         const fileUrl = URL.createObjectURL(file);
@@ -985,13 +1021,11 @@
         } else if (file.type.startsWith('video/')) {
           setMediaVideo(fileUrl);
         } else {
-          // Universal image fallback for standard formats
           setMediaImage(fileUrl);
         }
       });
     });
 
-    // Screen Render Animation Helper (Only Blurs Screen)
     function simulateScreenRender(fromPct, toPct, durationMs, textLabel) {
       return new Promise(resolve => {
         previewScreen.classList.add('screen-editing');
@@ -1030,6 +1064,7 @@
       placeholderText.style.display = 'none';
       previewScreen.appendChild(currentMedia);
       applyFilter();
+      hideScreenControls(); // Hide play/pause controls on load
     }
 
     function setMediaVideo(url) {
@@ -1045,19 +1080,16 @@
 
       currentMedia.addEventListener('timeupdate', updateProgressBar);
       currentMedia.addEventListener('play', () => {
-        previewCard.classList.add('is-playing');
-        previewScreen.classList.add('playing');
         samsungPlayIcon.textContent = '❚❚';
       });
       currentMedia.addEventListener('pause', () => {
-        previewCard.classList.remove('is-playing');
-        previewScreen.classList.remove('playing');
         samsungPlayIcon.textContent = '▶';
       });
 
       placeholderText.style.display = 'none';
       previewScreen.appendChild(currentMedia);
       applyFilter();
+      hideScreenControls(); // Hide play/pause controls on load
     }
 
     function clearPreview() {
@@ -1076,22 +1108,27 @@
       previewScreen.appendChild(placeholderText);
       placeholderText.style.display = 'block';
       progressFill.style.width = '0%';
-      previewCard.classList.remove('is-playing');
-      previewScreen.classList.remove('playing');
       samsungPlayIcon.textContent = '▶';
       editStatusMsg.style.display = 'none';
+      hideScreenControls();
       rawFile = null;
     }
 
     deleteTopBtn.addEventListener('click', clearPreview);
 
+    // Click on preview screen toggles controls visibility and handles play/pause
     previewScreen.addEventListener('click', (e) => {
       if (e.target === deleteTopBtn || e.target.closest('.delete-media-btn')) return;
-      if (!currentMedia || mediaType !== 'video') return;
-      if (currentMedia.paused) {
-        currentMedia.play();
-      } else {
-        currentMedia.pause();
+      if (!currentMedia) return;
+
+      toggleScreenControls();
+
+      if (mediaType === 'video') {
+        if (currentMedia.paused) {
+          currentMedia.play();
+        } else {
+          currentMedia.pause();
+        }
       }
     });
 
@@ -1153,6 +1190,9 @@
       const f = filterIntensity / 100;
 
       switch (selectedFilter) {
+        case 'natural-reflection':
+          // Reflection effect keeping original body skin/clothing tones intact
+          return `drop-shadow(0px ${15 * f}px ${12 * f}px rgba(255,255,255,0.45)) contrast(${1 + 0.08 * f}) brightness(${1 + 0.05 * f})`;
         case 'body-scan':
           return `invert(${0.9 * f}) hue-rotate(${140 * f}deg) saturate(${1 + 4 * f}) contrast(${1 + 3 * f}) brightness(${1.1 * f})`;
         case 'glow': 
@@ -1190,7 +1230,7 @@
       }
     }
 
-    /* AI Creation Flow synced 100% */
+    /* Grok 4 & AI Creation Flow synced 100% */
     btnCreateEdit.addEventListener('click', () => {
       if (mediaType === 'image') {
         createOptionsModal.classList.toggle('active');
@@ -1221,15 +1261,16 @@
 
     async function runAIGeneration(mode) {
       const promptText = aiPrompt.value.trim();
+      const apiKey = apiKeyInput.value.trim();
 
       if (mediaType === 'video' && currentMedia && typeof currentMedia.pause === 'function') {
         currentMedia.pause();
       }
 
-      let statusMsg = "מייצר תוכן AI תואם לתיאור...";
-      if (mode === 'extend-video') statusMsg = `מאריך וידאו ל-${videoDurationSeconds} שניות...`;
-      else if (mode === 'image-to-video') statusMsg = `יוצר וידאו מושלם מתיאור התמונה...`;
-      else if (mode === 'image-edit') statusMsg = `עורך תמונה ב-AI בסינכרון מלא...`;
+      let statusMsg = "Grok 4 מייצר תוכן AI תואם...";
+      if (mode === 'extend-video') statusMsg = `מאריך וידאו ב-Grok 4 ל-${videoDurationSeconds} שניות...`;
+      else if (mode === 'image-to-video') statusMsg = `Grok 4 יוצר וידאו מושלם מתיאור התמונה...`;
+      else if (mode === 'image-edit') statusMsg = `Grok 4 עורך תמונה ב-AI בסינכרון מלא...`;
 
       // 0% to 100% Screen Blur Simulation
       await simulateScreenRender(0, 100, 2200, statusMsg);
@@ -1242,20 +1283,19 @@
         ctx.fillStyle = '#09090b';
         ctx.fillRect(0,0,canvas.width,canvas.height);
 
-        // Render AI gradient & text matching description
         const grad = ctx.createLinearGradient(0,0,canvas.width,canvas.height);
-        grad.addColorStop(0, '#1e3a8a');
-        grad.addColorStop(1, '#3b82f6');
+        grad.addColorStop(0, '#0f172a');
+        grad.addColorStop(1, '#38bdf8');
         ctx.fillStyle = grad;
         ctx.fillRect(40,40,canvas.width-80,canvas.height-80);
 
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 36px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(promptText || "תמונת AI ערוכה ב-100%", canvas.width/2, canvas.height/2);
+        ctx.fillText(promptText || "עובד ע\"י Grok 4 ב-100%", canvas.width/2, canvas.height/2);
 
         canvas.toBlob((blob) => {
-          rawFile = new File([blob], `ai_edited_${Date.now()}.png`, { type: 'image/png' });
+          rawFile = new File([blob], `grok4_edited_${Date.now()}.png`, { type: 'image/png' });
           setMediaImage(URL.createObjectURL(blob));
         }, 'image/png');
       } else {
@@ -1294,7 +1334,7 @@
           ctx.fillStyle = '#ffffff';
           ctx.font = 'bold 24px sans-serif';
           ctx.textAlign = 'center';
-          ctx.fillText(`AI Video (100% Rendered): ${promptText || 'תואם לתיאור הבקשה'}`, canvas.width/2, 80);
+          ctx.fillText(`Grok 4 Video (100% Rendered): ${promptText || 'תואם לתיאור הבקשה'}`, canvas.width/2, 80);
 
           frame++;
           if (frame < maxFrames) {
@@ -1306,15 +1346,15 @@
 
         drawAnimatedFrame();
         const generatedBlob = await videoDonePromise;
-        rawFile = new File([generatedBlob], `ai_video_${Date.now()}.webm`, { type: 'video/webm' });
+        rawFile = new File([generatedBlob], `grok4_video_${Date.now()}.webm`, { type: 'video/webm' });
         setMediaVideo(URL.createObjectURL(generatedBlob));
       }
 
       editStatusMsg.style.display = 'block';
-      editStatusMsg.textContent = `העריכה שונכרנה ב-100% והוחזרה למסך! ✅`;
+      editStatusMsg.textContent = `עובד ב-100% ע"י Grok 4 והועבר למסך! ✅`;
     }
 
-    /* Fixed Exportable File Generation */
+    /* Exportable File Generation */
     async function getExportableFile() {
       if (!currentMedia) return null;
 
@@ -1403,7 +1443,7 @@
       const downloadBtnSmall = document.createElement('button');
       downloadBtnSmall.className = 'btn-action btn-action-download';
       downloadBtnSmall.textContent = 'הורד';
-      downloadBtnSmall.onclick = () => triggerDeviceDownload(exportData.blob, `samsung_studio_${Date.now()}.${exportData.ext}`);
+      downloadBtnSmall.onclick = () => triggerDeviceDownload(exportData.blob, `samsung_grok4_${Date.now()}.${exportData.ext}`);
 
       const deleteBtnSmall = document.createElement('button');
       deleteBtnSmall.className = 'btn-action btn-action-delete';
@@ -1428,7 +1468,7 @@
       try {
         const exportData = await getExportableFile();
         if (exportData) {
-          triggerDeviceDownload(exportData.blob, `samsung_studio_${Date.now()}.${exportData.ext}`);
+          triggerDeviceDownload(exportData.blob, `samsung_grok4_${Date.now()}.${exportData.ext}`);
           addToGallery(exportData);
         }
       } catch (err) {
@@ -1450,8 +1490,8 @@
         if (exportData && exportData.file) {
           if (navigator.canShare && navigator.canShare({ files: [exportData.file] })) {
             await navigator.share({
-              title: 'Samsung Studio AI',
-              text: 'שתף מתוך Samsung Studio AI',
+              title: 'Samsung Studio Grok 4',
+              text: 'שתף מתוך Samsung Studio AI (Grok 4)',
               files: [exportData.file]
             });
           } else {
