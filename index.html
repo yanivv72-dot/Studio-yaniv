@@ -3,112 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Studio Pro | Enterprise Edition</title>
+    <title>AI Video Studio Master</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        :root { --bg: #0A0A0B; --card: #161618; --accent: #7C3AED; --border: #222222; }
-        body { background-color: var(--bg); color: #fff; font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+        :root { --bg: #0A0D14; --card: #151921; --accent: #00D1FF; --samsung-blue: #2196F3; --samsung-green: #4CAF50; }
+        body { background-color: var(--bg); color: white; font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
         
-        /* 1. נגן (30%) */
-        .viewport { height: 30dvh; background: #000; position: relative; border-bottom: 1px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+        /* נגן וידאו בדיוק כמו בתמונה */
+        .player-viewport { height: 35dvh; background: #000; position: relative; border-bottom: 1px solid #1F2937; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+        .render-info { position: absolute; bottom: 40px; left: 15px; font-size: 10px; color: rgba(255,255,255,0.5); line-height: 1.4; text-align: left; z-index: 10; }
         
-        /* 2. פס תחבורה סמסונג (75px) */
-        .transport { height: 75px; background: #000; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-around; flex-shrink: 0; padding: 0 10px; }
-        
-        /* 3. גוף נגלל */
-        .main-scroll { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; padding-bottom: 100px; }
+        /* פס תחבורה סמסונג */
+        .transport-controls { height: 85px; background: #0A0D14; display: flex; align-items: center; justify-content: space-around; padding: 0 10px; border-bottom: 1px solid #1F2937; flex-shrink: 0; }
+        .t-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #94A3B8; transition: 0.2s; }
+        .t-btn i { width: 24px; height: 24px; }
+        .t-btn:active { color: white; transform: scale(0.9); }
+        .t-btn span { font-size: 10px; font-weight: 600; }
 
-        /* סגנון סמסונג */
-        .samsung-card { background: var(--card); border-radius: 28px; padding: 20px; border: 1px solid var(--border); }
-        .s-btn { width: 48px; height: 48px; border-radius: 50%; background: #1A1A1A; display: flex; align-items: center; justify-content: center; border: 1px solid #333; transition: 0.1s; }
-        .s-btn:active { transform: scale(0.9); background: #222; }
-        .s-btn-play { width: 56px; height: 56px; background: #fff; color: #000; border: none; }
+        /* אזור גלילה */
+        .main-scroll { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 15px; padding-bottom: 40px; }
+
+        /* תיבת פרומפט עם ניאון */
+        .prompt-container { background: var(--card); border: 2px solid #14B8A6; border-radius: 24px; padding: 15px; box-shadow: 0 0 15px rgba(20, 184, 166, 0.2); position: relative; }
+        textarea { background: transparent; width: 100%; border: none; outline: none; resize: none; font-size: 14px; color: #fff; text-align: right; min-height: 70px; }
         
-        .pill { background: #1A1A1A; border-radius: 24px; padding: 10px 16px; font-size: 12px; font-weight: 600; display: flex; items: center; gap: 8px; border: 1px solid #333; }
+        .surprise-btn { background: #00E5FF; color: #000; border-radius: 20px; padding: 6px 15px; font-size: 12px; font-weight: 800; display: flex; items: center; gap: 5px; position: absolute; bottom: 12px; left: 12px; }
+
+        /* כפתורי העלאה ריבועיים */
+        .upload-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .upload-btn { background: #262C36; border-radius: 20px; height: 85px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; font-size: 12px; font-weight: 600; border: 1px solid #333; }
+        .upload-btn i { width: 28px; height: 28px; color: #00D1FF; }
+
+        /* כפתורי הורדה ושיתוף ענקיים */
+        .footer-row { display: grid; grid-template-columns: 1fr 1.2fr; gap: 12px; margin-top: auto; }
+        .btn-footer { border-radius: 20px; padding: 16px; font-weight: 800; font-size: 14px; display: flex; items: center; justify-content: center; gap: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+        .btn-share { background: var(--samsung-green); }
+        .btn-download { background: var(--samsung-blue); }
 
         /* מנדול */
-        .overlay { position: absolute; inset: 0; background: #000; z-index: 1000; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .pct { font-size: 5rem; font-weight: 900; color: #fff; letter-spacing: -3px; }
-        
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.98); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
-        
-        /* מפתח נסתר */
-        #key-box { display: none; }
+        .loader-overlay { position: absolute; inset: 0; background: #000; z-index: 1000; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .pct { font-size: 6rem; font-weight: 900; letter-spacing: -5px; }
+
+        #api-config { display: none; background: #000; padding: 10px; border-bottom: 1px solid #222; }
     </style>
 </head>
 <body>
 
-    <!-- אזור 1: הנגן -->
-    <div class="viewport">
-        <div id="loader" class="overlay">
-            <div id="p-label" class="pct">0%</div>
-            <div class="text-[10px] tracking-[0.4em] opacity-40 font-bold uppercase">Rendering AI Stems</div>
-        </div>
-
-        <!-- כפתור הגדרות נסתר -->
-        <button onclick="toggleKey()" class="absolute top-4 right-4 opacity-30 z-50"><i data-lucide="settings" class="w-5 h-5"></i></button>
-
-        <div id="placeholder" class="opacity-10 flex flex-col items-center">
-            <i data-lucide="clapperboard" class="w-16 h-16 mb-2"></i>
-            <span class="text-[10px] font-bold tracking-widest uppercase">Engine V6.1 Pro</span>
-        </div>
-
-        <img id="v-img" class="hidden w-full h-full object-contain">
-        <video id="v-vid" class="hidden w-full h-full object-contain" playsinline loop></video>
-        <div id="v-txt" class="hidden p-8 text-sm text-right overflow-y-auto max-h-full leading-relaxed"></div>
-
-        <div class="absolute bottom-0 w-full h-1 bg-zinc-900"><div id="t-bar" class="h-full bg-white w-0"></div></div>
+    <!-- חלק עליון נסתר להגדרות -->
+    <div id="api-config">
+        <input type="password" id="apiKey" placeholder="הכנס מפתח API של גוגל..." oninput="saveKey()" 
+               class="w-full bg-[#111] border border-zinc-800 rounded-xl p-3 text-xs text-left font-mono text-white outline-none">
     </div>
 
-    <!-- אזור 2: פס תחבורה סמסונג -->
-    <div class="transport">
-        <button onclick="vidCmd('back')" class="s-btn" title="-2ש'"><i data-lucide="rewind"></i></button>
-        <button onclick="toggleMedia()" class="s-btn s-btn-play shadow-2xl"><i data-lucide="play" id="playIcon" class="fill-current"></i></button>
-        <button onclick="vidCmd('forward')" class="s-btn" title="+2ש'"><i data-lucide="fast-forward"></i></button>
-        <button onclick="vidCmd('stop')" class="s-btn text-red-500 border-red-900/20"><i data-lucide="square" class="fill-current"></i></button>
+    <!-- אזור 1: הנגן המרכזי (30%) -->
+    <div class="player-viewport">
+        <!-- אייקון הגדרות -->
+        <button onclick="toggleKey()" class="absolute top-4 right-4 z-50 opacity-40"><i data-lucide="settings" class="w-6 h-6"></i></button>
+        
+        <div id="loader" class="loader-overlay">
+            <div id="p-label" class="pct">0%</div>
+            <div class="text-[10px] tracking-[0.3em] font-bold opacity-40 uppercase">Adapting Engine</div>
+        </div>
+
+        <!-- מידע רינדור בדיוק מהתמונה -->
+        <div class="render-info" id="r-info">
+            Rendering info: 360...<br>
+            Rendering time: 14:31 - 02:38:33
+        </div>
+
+        <img id="v-img" class="hidden w-full h-full object-cover">
+        <video id="v-vid" class="hidden w-full h-full object-cover" playsinline loop></video>
+        
+        <!-- סרגל ניווט תמונה -->
+        <div class="absolute bottom-0 w-full px-4 pb-2 z-30">
+            <div class="flex justify-between text-[9px] mb-1 opacity-60"><span>00:03</span><span>00:00</span></div>
+            <div class="h-1 w-full bg-white/20 rounded-full overflow-hidden">
+                <div id="t-bar" class="h-full bg-[#00D1FF] w-0"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- אזור 2: פס תחבורה סמסונג (זהה לתמונה) -->
+    <div class="transport-controls">
+        <button onclick="ctrl('start')" class="t-btn"><i data-lucide="skip-back"></i><span>התחל</span></button>
+        <button onclick="ctrl('back')" class="t-btn"><i data-lucide="rewind"></i><span>אחורה</span></button>
+        <button onclick="ctrl('stop')" class="t-btn text-zinc-400"><i data-lucide="square" class="fill-current"></i><span>עצור</span></button>
+        <button onclick="toggleMedia()" class="t-btn"><i data-lucide="pause" id="playIcon"></i><span>השהה</span></button>
+        <button onclick="ctrl('forward')" class="t-btn"><i data-lucide="fast-forward"></i><span>קדימה</span></button>
     </div>
 
     <!-- אזור 3: גוף נגלל -->
     <div class="main-scroll" dir="rtl">
         
-        <!-- מפתח API נסתר -->
-        <div id="key-box" class="mb-4">
-            <input type="password" id="apiKey" placeholder="הכנס מפתח API..." oninput="saveKey()" 
-                   class="w-full bg-[#111] border border-zinc-800 rounded-xl p-3 text-xs text-left font-mono">
-        </div>
-
-        <!-- כרטיס יצירה -->
-        <div class="samsung-card">
-            <div class="flex justify-between items-center mb-4">
-                <span class="text-[10px] font-black text-purple-500 uppercase tracking-widest">Master AI Engine</span>
-                <button onclick="surpriseMe()" class="pill !py-1 !px-4 text-[10px]">🎲 הפתע אותי</button>
-            </div>
-            <textarea id="prompt" placeholder="תאר את הויז'ן שלך כאן..." class="w-full bg-transparent border-none outline-none text-lg text-white text-right resize-none mb-6 min-h-[100px]"></textarea>
-            <div class="flex gap-3">
-                <button onclick="runMedia()" class="flex-1 bg-white text-black py-4 rounded-2xl font-bold active:scale-95 transition-all">צור יצירה</button>
-                <button onclick="runText()" class="flex-1 bg-[#1A1A1A] text-white py-4 rounded-2xl font-bold border border-zinc-700 active:scale-95 transition-all">שאל AI</button>
-            </div>
-        </div>
-
-        <!-- העלאה (מצלמה | סרטון | תמונה) -->
-        <div class="grid grid-cols-3 gap-2">
-            <button onclick="pick('image/*')" class="pill flex-col py-5 h-auto gap-2">
-                <i data-lucide="image" class="text-blue-500"></i><span>תמונה</span>
-            </button>
-            <button onclick="pick('video/*')" class="pill flex-col py-5 h-auto gap-2">
-                <i data-lucide="video" class="text-red-500"></i><span>סרטון</span>
-            </button>
-            <button onclick="openRealCam()" class="pill flex-col py-5 h-auto gap-2 border-purple-900/30">
-                <i data-lucide="camera" class="text-green-500"></i><span>מצלמה</span>
+        <!-- תיבת פרומפט מיוחדת -->
+        <div class="prompt-container">
+            <textarea id="prompt" placeholder="תאר את הסרטון שלך כאן... (למשל, אריה רץ בסוואנה בשעת השקיעה)"></textarea>
+            <button onclick="surpriseMe()" class="surprise-btn active:scale-90 transition-all">
+                <span>הפתע אותי</span><i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
             </button>
         </div>
 
-        <!-- פונקציות עריכה -->
-        <div class="space-y-3">
-            <button onclick="openModal('voice-modal')" class="w-full samsung-card !py-5 flex justify-between items-center active:scale-95">
-                <div class="flex items-center gap-4"><i data-lucide="mic" class="text-purple-500"></i><span class="text-sm font-bold">שיבוט קולי (Voice Clone)</span></div>
-                <i data-lucide="plus" class="w-4 h-4 opacity-20"></i>
+        <!-- כפתור "צור" ראשי -->
+        <button onclick="runMedia()" class="w-full bg-[#00D1FF] text-black py-4 rounded-3xl font-black text-lg active:scale-95 transition-all shadow-lg shadow-cyan-900/20">
+            צור סרטון AI
+        </button>
+
+        <!-- העלאת מדיה (מצלמה | סרטון | תמונה) -->
+        <div class="upload-row">
+            <button onclick="pick('image/*')" class="upload-btn active:bg-zinc-800">
+                <i data-lucide="image"></i><span>תמונה</span>
             </button>
-            <button onclick="alert('Filter Engine Ready')" class="w-full samsung-card !py-5 flex justify-between items-center active:scale-95">
-                <div class="flex items-center gap-4"><i data-lucide="palette" class="text-purple-500"></i><span class="text-sm font-bold">פיל
+            <button onclick="pick('video/*')" class="upload-btn active:bg-zinc-800">
+                <i data-lucide="video"></i><span>סרטון</span>
+            </button>
+            <button onclick="openRealCam()" class="upload-btn active:bg-zinc-800">
+                <i data-lucide="camera"></i><span>מצלמה</span>
+            </button>
+        </div>
+
+        <!-- פונקציות פרימיום (שיבוט וסנכרון) -->
+        <div class="flex gap-2">
+            <button onclick="alert('Voice Cloning Enabled')" class="flex-1 bg-[#151921] border border-zinc-800 py-4 rounded-2xl text-[11px] font-bold flex items-center justify-center gap-2">
+                <i data-lucide="mic" class="w-4 h-4 text-purple-500"></i> שיבוט קולי
+            </button>
+            <button onclick="alert('Persistence Engine Locked')" class="flex-1 bg-[#151921] border border-zinc-800 py-4 rounded-2xl text-[11px] font-bold flex items-center justify-center gap-2">
+                <i data-lucide="user-check" class="w-4 h-4 text-purple-500"></i> עקיבת דמות
+            </button>
+        </div>
+
+        <!-- כפתורי שיתוף והורדה (סוף הגלילה) -->
+        <div class="footer-row">
+            <button onclick="shareApp()" class="btn-footer btn-share">
+                <i data-lucide="share-2"></i><span>שיתוף</span>
+            </button>
+            <button onclick="download()" class="btn-footer btn-download">
+                <i data-lucide="download"></i><span>הורדה</span>
+            </button>
+        </div>
+    </div>
+
+    <input type="file" id="fInp" class="hidden" onchange="handleAsset(event)">
+    <input type="file" id="cInp" class="hidden" accept="image/*,video/*" capture="environment" onchange="handleAsset(event)">
+
+    <script>
+        lucide.createIcons();
+        const vImg = document.getElementById('v-img'), vVid = document.getElementById('v-vid');
+        const ldr = document.getElementById('loader'), plbl = document.getElementById('p-label');
+
+        window.onload = () => { 
+            const k = localStorage.getItem('master_api'); 
+            if(k) document.getElementById('apiKey').value = k; 
+        };
+        function saveKey() { localStorage.setItem('master_api', document.getElementById('apiKey').value); }
+        function toggleKey() { const b = document.getElementById('api-config'); b.style.display = b.style.display === 'block' ? 'none' : 'block'; }
+
+        function openRealCam() { document.getElementById('c-inp').click(); }
+        function pick(t) { const i = document.getElementById('fInp'); i.accept = t; i.click(); }
+        
+        function handleAsset(e) {
+            const f = e.target.files[0]; if(!f) return;
+            const u = URL.createObjectURL(f);
+            document.getElementById('r-info').style.display = 'none';
+            if(f.type.startsWith('image/')) { vImg.src = u; vImg.classList.remove('hidden'); vVid.classList.add('hidden'); }
+            else { vVid.src = u; vVid.classList.remove('hidden'); vImg.classList.add('hidden'); }
+        }
+
+        async function runMedia() {
+            const p = document.getElementById('prompt').value.trim();
+            if(!p) return alert("אנא הזן תיאור לסרטון");
+            ldr.style.display = 'flex';
+            let progress = 0;
+            const t = setInterval(() => {
+                progress += Math.floor(Math.random() * 15) + 2;
+                if(progress >= 100) {
+                    progress = 100; clearInterval(t); plbl.innerText = "100%";
+                    const u = `https://pollinations.ai/p/${encodeURIComponent(p)}?width=1280&height=720&seed=${Math.floor(Math.random()*9999)}&model=flux&nologo=true`;
+                    const test = new Image(); test.src = u;
+                    test.onload = () => {
+                        vImg.src = u; ldr.style.display = 'none'; plbl.innerText = "0%";
+                        vImg.classList.remove('hidden'); vVid.classList.add('hidden');
+                        document.getElementById('r-info').style.display = 'block';
+                    };
+                } else { plbl.innerText = progress + "%"; }
+            }, 250);
+        }
+
+        function toggleMedia() { 
+            if(!vVid.classList.contains('hidden')) {
+                vVid.paused ? vVid.play() : vVid.pause();
+                document.getElementById('playIcon').dataset.lucide = vVid.paused ? 'play' : 'pause';
+                lucide.createIcons();
+            }
+        }
+        function ctrl(cmd) {
+            if(cmd === 'stop') { vVid.pause(); vVid.currentTime = 0; }
+            else if(cmd === 'start') vVid.currentTime = 0;
+            else if(cmd === 'back') vVid.currentTime -= 2;
+            else if(cmd === 'forward') vVid.currentTime += 2;
+        }
+
+        vVid.ontimeupdate = () => { document.getElementById('t-bar').style.width = (vVid.currentTime/vVid.duration*100) + "%"; };
+        function surpriseMe() {
+            const list = ["Cinematic shot of astronaut in garden", "Neon car driving in Tokyo rain", "Epic dragon flying over frozen mountains", "Robot painting a masterpiece on Mars"];
+            document.getElementById('prompt').value = list[Math.floor(Math.random()*list.length)];
+        }
+        function download() { if(vImg.src) { const a = document.createElement('a'); a.href = vImg.src; a.download = `AI_Studio_${Date.now()}.png`; a.click(); } }
+        function shareApp() { window.open(`https://wa.me/?text=ראה מה יצרתי בסטודיו AI שלי: ${window.location.href}`, '_blank'); }
+    </script>
+</body>
+</html>
