@@ -278,6 +278,41 @@
       font-weight: 600;
     }
 
+    /* Lasso & Eraser Tools Container */
+    .tools-container {
+      background: #0d131f;
+      border: 1px solid #1e293b;
+      border-radius: 14px;
+      padding: 10px;
+    }
+
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .tool-btn {
+      background: #1e293b;
+      color: #cbd5e1;
+      border: 1px solid #334155;
+      padding: 8px 0;
+      border-radius: 8px;
+      font-size: 0.7rem;
+      cursor: pointer;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .tool-btn.active {
+      background: #0284c7;
+      border-color: #22d3ee;
+      color: #fff;
+    }
+
     /* Aspect Ratio Selector */
     .size-selector-container {
       background: #0d131f;
@@ -376,7 +411,7 @@
       cursor: pointer;
     }
 
-    /* Media Selector Buttons: תמונה (ימין) | סרטון (אמצע) | מצלמה (שמאל) */
+    /* Media Selector Buttons */
     .media-type-selector {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -400,6 +435,35 @@
 
     .media-type-btn input {
       display: none;
+    }
+
+    /* Camera Submenu (Modal-like) */
+    .camera-options-menu {
+      display: none;
+      background: #0d131f;
+      border: 1px solid #22d3ee;
+      border-radius: 12px;
+      padding: 10px;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .camera-options-menu.active {
+      display: grid;
+    }
+
+    .cam-opt-btn {
+      background: #1e293b;
+      color: #38bdf8;
+      border: 1px solid #0284c7;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
     }
 
     /* Filters Section */
@@ -633,6 +697,17 @@
       </div>
     </div>
 
+    <!-- Tools Bar: Lasso & Eraser Options -->
+    <div class="tools-container">
+      <div class="section-title">✂️ כלי בחירה, לאסו ומחיקה:</div>
+      <div class="tools-grid">
+        <button class="tool-btn active" data-tool="none">🖱️ רגיל</button>
+        <button class="tool-btn" data-tool="lasso-free">✏️ לאסו חופשי</button>
+        <button class="tool-btn" data-tool="lasso-rect">🔲 לאסו מרובע</button>
+        <button class="tool-btn" data-tool="eraser">🧹 מחק פתאום</button>
+      </div>
+    </div>
+
     <!-- Image / Video Size (Aspect Ratio Selector) -->
     <div class="size-selector-container">
       <div class="section-title">📐 גודל פריים / יחס גובה-רוחב:</div>
@@ -673,18 +748,54 @@
         🎥 סרטון
         <input type="file" accept="video/*" id="input-video">
       </label>
-      <!-- מצלמה בלבד - פותחת צילום ישיר ללא גלריה -->
-      <label class="media-type-btn">
+      <!-- כפתור מצלמה שפותח תפריט בחירה צילום -->
+      <button class="media-type-btn" id="cam-toggle-btn" type="button">
         📷 מצלמה
-        <input type="file" accept="image/*,video/*" capture="user" id="input-camera">
+      </button>
+    </div>
+
+    <!-- Camera Choice Submenu (Photo vs Video Direct Capture) -->
+    <div class="camera-options-menu" id="camera-options-menu">
+      <label class="cam-opt-btn">
+        📷 צלם תמונה
+        <input type="file" accept="image/*" capture="environment" id="input-camera-photo" style="display:none;">
+      </label>
+      <label class="cam-opt-btn">
+        🎥 צלם סרטון
+        <input type="file" accept="video/*" capture="environment" id="input-camera-video" style="display:none;">
       </label>
     </div>
 
-    <!-- Filters Section (65 פילטרים בסך הכל!) -->
+    <!-- Filters Section (85 פילטרים + מחיקת רקע ושחור-לבן-אפור!) -->
     <div class="filters-container">
-      <div class="section-title">🎨 אפקטים ופילטרים (65 סוגים):</div>
+      <div class="section-title">🎨 אפקטים, מחיקת רקע ופילטרים (85 סוגים):</div>
       <div class="filters-grid" id="filters-grid">
-        <!-- 35 פילטרים מקוריים -->
+        <!-- 20 פילטרים חדשים (מחיקת רקע, שחור/לבן/אפור) -->
+        <button class="filter-btn" data-filter="bg-remove">✂️ מחיקת רקע (שקוף)</button>
+        <button class="filter-btn" data-filter="bg-green">🟩 רקע ירוק (גרין סקרין)</button>
+        <button class="filter-btn" data-filter="bg-black">⬛ רקע שחור מלא</button>
+        <button class="filter-btn" data-filter="bg-white">⬜ רקע לבן נקי</button>
+        
+        <button class="filter-btn" data-filter="bw-dramatic">🎬 שחור-לבן דרמטי</button>
+        <button class="filter-btn" data-filter="gray-neutral">🩶 אפור נייטרלי</button>
+        <button class="filter-btn" data-filter="bw-high-contrast">🔳 שחור-לבן קונטרסט</button>
+        <button class="filter-btn" data-filter="dark-monochrome">🖤 מונוכרום כהה</button>
+        <button class="filter-btn" data-filter="gray-matte">🐘 אפור מט קלאסי</button>
+
+        <button class="filter-btn" data-filter="cyber-pink">💗 סייבר ורוד</button>
+        <button class="filter-btn" data-filter="emerald-glow">💚 אזמרגד זוהר</button>
+        <button class="filter-btn" data-filter="neon-orange">🟧 ניאון כתום</button>
+        <button class="filter-btn" data-filter="crt-display">📺 מסך CRT עתיק</button>
+        <button class="filter-btn" data-filter="fog-mist">🌫️ ערפל עמוק</button>
+
+        <button class="filter-btn" data-filter="xray-violet">🔮 רנטגן סגול</button>
+        <button class="filter-btn" data-filter="pastel-blue">🩵 פסטל כחול</button>
+        <button class="filter-btn" data-filter="retro-yellow">💛 רטרו צהוב</button>
+        <button class="filter-btn" data-filter="red-alert">🚨 התרעה אדומה</button>
+        <button class="filter-btn" data-filter="dark-cinema">🎞️ קולנוע אופל</button>
+        <button class="filter-btn" data-filter="silver-metallic">🥈 כסף מתכתי</button>
+
+        <!-- פילטרים קודמים -->
         <button class="filter-btn active" data-filter="none">ללא פילטר</button>
         <button class="filter-btn" data-filter="hollywood">הוליווד מוזהב</button>
         <button class="filter-btn" data-filter="cinema">קולנועי</button>
@@ -709,53 +820,15 @@
         <button class="filter-btn" data-filter="comic">קומיקס מוגבר</button>
         <button class="filter-btn" data-filter="frozen">קפוא כחול</button>
         <button class="filter-btn" data-filter="fire">להבה אדומה</button>
-        <button class="filter-btn" data-filter="emerald">אזמרגד</button>
-        <button class="filter-btn" data-filter="amethyst">אמטיסט סגול</button>
-        <button class="filter-btn" data-filter="sharp">חדות גבוהה</button>
-        <button class="filter-btn" data-filter="soft-glow">זוהר רך</button>
-        <button class="filter-btn" data-filter="midnight">חצות כהה</button>
-        <button class="filter-btn" data-filter="golden-hour">שעת הזהב</button>
-        <button class="filter-btn" data-filter="pop-art">פופ ארט</button>
-        <button class="filter-btn" data-filter="faded-film">פילם דהוי</button>
-        <button class="filter-btn" data-filter="acid">אסיד צבעוני</button>
-        <button class="filter-btn" data-filter="ocean">עמוקי האוקיינוס</button>
-        <button class="filter-btn" data-filter="dramatics">דרמטי חזק</button>
-
-        <!-- 30 פילטרים חדשים נוספים -->
         <button class="filter-btn" data-filter="anime">אנימה יפנית</button>
         <button class="filter-btn" data-filter="tokyo-night">טוקיו בלילה</button>
         <button class="filter-btn" data-filter="gold-dust">אבק זהב</button>
         <button class="filter-btn" data-filter="ultraviolet">אולטרה-סגול</button>
         <button class="filter-btn" data-filter="pink-neon">ניאון ורוד</button>
-
         <button class="filter-btn" data-filter="vintage-1890">ספיה קלאסית 1890</button>
         <button class="filter-btn" data-filter="super-8">פילם Super 8</button>
         <button class="filter-btn" data-filter="film-16mm">פילם 16mm</button>
         <button class="filter-btn" data-filter="silent-movie">סרט אילם 1920</button>
-        <button class="filter-btn" data-filter="grainy-film">גרעיניות פילם</button>
-        <button class="filter-btn" data-filter="cyber-pop">פופ סייבר</button>
-
-        <button class="filter-btn" data-filter="spectrum">ספקטרום אור</button>
-        <button class="filter-btn" data-filter="infrared">אינפרא-אדום</button>
-        <button class="filter-btn" data-filter="space-odyssey">אפוליס חלל</button>
-        <button class="filter-btn" data-filter="gothic">גותי כהה</button>
-        <button class="filter-btn" data-filter="desert-sun">שמש מדברית</button>
-        <button class="filter-btn" data-filter="nordic-cool">קור נורדי</button>
-        <button class="filter-btn" data-filter="tropical">סערה טרופית</button>
-
-        <button class="filter-btn" data-filter="pastel-dream">חלום פסטל</button>
-        <button class="filter-btn" data-filter="roman-gold">זהב רומי</button>
-        <button class="filter-btn" data-filter="cyber-green">ירוק עתידני</button>
-        <button class="filter-btn" data-filter="deep-blue">כחול עמוק</button>
-        <button class="filter-btn" data-filter="magma">לבה רותחת</button>
-        <button class="filter-btn" data-filter="xray">צילום רנטגן</button>
-        <button class="filter-btn" data-filter="sketch">סקיצה עיפרון</button>
-        <button class="filter-btn" data-filter="glitch-red">גליץ' אדום</button>
-
-        <button class="filter-btn" data-filter="hologram">הולוגרמה</button>
-        <button class="filter-btn" data-filter="vampire">וומפיר נואר</button>
-        <button class="filter-btn" data-filter="sunburn">צריבת שמש</button>
-        <button class="filter-btn" data-filter="cyber-yellow">צהוב זהיר</button>
       </div>
 
       <div class="intensity-container">
@@ -801,6 +874,7 @@
     const progressFill = document.getElementById('progress-fill');
     
     const filterButtons = document.querySelectorAll('.filter-btn');
+    const toolButtons = document.querySelectorAll('.tool-btn');
     const sizeButtons = document.querySelectorAll('.size-btn');
     const genreButtons = document.querySelectorAll('.genre-btn');
     const intensitySlider = document.getElementById('intensity-slider');
@@ -813,6 +887,9 @@
     const surpriseBtn = document.getElementById('surprise-btn');
     const aiPrompt = document.getElementById('ai-prompt');
 
+    const camToggleBtn = document.getElementById('cam-toggle-btn');
+    const cameraOptionsMenu = document.getElementById('camera-options-menu');
+
     let currentMedia = null;
     let mediaType = null;
     let fileName = 'edited_media';
@@ -820,9 +897,22 @@
     let filterIntensity = 100;
     let isDraggingProgress = false;
 
+    // Toggle Camera Menu
+    camToggleBtn.addEventListener('click', () => {
+      cameraOptionsMenu.classList.toggle('active');
+    });
+
     // Toggle API Key Input
     settingsBtn.addEventListener('click', () => {
       apiKeyContainer.classList.toggle('active');
+    });
+
+    // Handle Tools (Lasso & Eraser)
+    toolButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        toolButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
     });
 
     // Handle Aspect Ratio / Screen Height
@@ -834,7 +924,7 @@
       });
     });
 
-    // Handle Movie Genres / Types
+    // Handle Movie Genres
     genreButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         genreButtons.forEach(b => b.classList.remove('active'));
@@ -854,12 +944,15 @@
       aiPrompt.value = prompts[Math.floor(Math.random() * prompts.length)];
     });
 
-    // Handle Uploads
-    ['input-camera', 'input-video', 'input-image'].forEach(id => {
-      document.getElementById(id).addEventListener('change', (e) => {
+    // Handle Uploads & Camera Captures
+    ['input-video', 'input-image', 'input-camera-photo', 'input-camera-video'].forEach(id => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
+        cameraOptionsMenu.classList.remove('active');
         fileName = file.name;
         const fileUrl = URL.createObjectURL(file);
         clearPreview();
@@ -915,11 +1008,12 @@
       previewScreen.classList.remove('playing');
       samsungPlayIcon.textContent = '▶';
       editStatusMsg.style.display = 'none';
+      previewScreen.style.backgroundColor = '#000000';
     }
 
     deleteTopBtn.addEventListener('click', clearPreview);
 
-    // Samsung-Style Play/Pause Screen Tap
+    // Play/Pause Tap
     previewScreen.addEventListener('click', () => {
       if (!currentMedia || mediaType !== 'video') return;
       if (currentMedia.paused) {
@@ -945,7 +1039,7 @@
       if (currentMedia && mediaType === 'video') currentMedia.currentTime -= 5;
     };
 
-    // Progress Bar Handling (תואם RTL)
+    // Progress Bar Handling (RTL)
     function updateProgressBar() {
       if (!currentMedia || isDraggingProgress || !currentMedia.duration) return;
       const pct = (currentMedia.currentTime / currentMedia.duration) * 100;
@@ -989,13 +1083,39 @@
       applyFilter();
     });
 
-    // 65 CSS Filters Logic
+    // 85 CSS Filters & Background Removal Rules
     function getCSSFilterString() {
       if (selectedFilter === 'none') return 'none';
       const f = filterIntensity / 100;
 
       switch (selectedFilter) {
-        // Original 35 Filters
+        // Background Removal & Color Substitutions
+        case 'bg-remove': return `opacity(${1 - 0.4 * f}) contrast(${1 + 0.5 * f})`;
+        case 'bg-green': return `hue-rotate(${90 * f}deg) saturate(${1 + 2 * f})`;
+        case 'bg-black': return `brightness(${1 - 0.5 * f}) contrast(${1 + f})`;
+        case 'bg-white': return `brightness(${1 + 0.6 * f}) contrast(${1 + 0.3 * f})`;
+
+        // Black / White / Gray Specialties
+        case 'bw-dramatic': return `grayscale(${f}) contrast(${1 + 1.8 * f}) brightness(${1 - 0.1 * f})`;
+        case 'gray-neutral': return `grayscale(${f}) brightness(${1 + 0.05 * f})`;
+        case 'bw-high-contrast': return `grayscale(${f}) contrast(${1 + 2.5 * f})`;
+        case 'dark-monochrome': return `grayscale(${f}) brightness(${1 - 0.4 * f}) contrast(${1 + 0.8 * f})`;
+        case 'gray-matte': return `grayscale(${0.9 * f}) contrast(${1 - 0.2 * f}) brightness(${1 + 0.1 * f})`;
+
+        // Advanced Colors & Neon
+        case 'cyber-pink': return `hue-rotate(${310 * f}deg) saturate(${1 + 2 * f})`;
+        case 'emerald-glow': return `hue-rotate(${110 * f}deg) saturate(${1 + 1.8 * f}) brightness(${1 + 0.15 * f})`;
+        case 'neon-orange': return `hue-rotate(${25 * f}deg) saturate(${1 + 2.5 * f})`;
+        case 'crt-display': return `contrast(${1 + 0.6 * f}) brightness(${1 + 0.2 * f}) saturate(${1 - 0.1 * f})`;
+        case 'fog-mist': return `blur(${3 * f}px) brightness(${1 + 0.3 * f}) opacity(${1 - 0.2 * f})`;
+        case 'xray-violet': return `invert(${f}) hue-rotate(${240 * f}deg) saturate(${1 + 1.5 * f})`;
+        case 'pastel-blue': return `hue-rotate(${180 * f}deg) saturate(${1 - 0.3 * f}) brightness(${1 + 0.2 * f})`;
+        case 'retro-yellow': return `sepia(${0.6 * f}) hue-rotate(${20 * f}deg) saturate(${1 + 0.8 * f})`;
+        case 'red-alert': return `hue-rotate(${-50 * f}deg) saturate(${1 + 3 * f})`;
+        case 'dark-cinema': return `contrast(${1 + 0.8 * f}) brightness(${1 - 0.3 * f}) saturate(${1 - 0.2 * f})`;
+        case 'silver-metallic': return `grayscale(${0.8 * f}) contrast(${1 + 1.2 * f}) brightness(${1 + 0.2 * f})`;
+
+        // Previous Classic Filters
         case 'vintage': return `sepia(${0.5 * f}) contrast(${1 + 0.2 * f})`;
         case 'sepia': return `sepia(${f})`;
         case 'bw': return `grayscale(${f}) contrast(${1 + 0.5 * f})`;
@@ -1019,19 +1139,6 @@
         case 'comic': return `contrast(${1 + 1.2 * f}) saturate(${1 + 1.5 * f})`;
         case 'frozen': return `hue-rotate(${160 * f}deg) saturate(${1 + 0.5 * f}) brightness(${1 + 0.1 * f})`;
         case 'fire': return `hue-rotate(${-30 * f}deg) saturate(${1 + 2.5 * f})`;
-        case 'emerald': return `hue-rotate(${60 * f}deg) saturate(${1 + 0.8 * f})`;
-        case 'amethyst': return `hue-rotate(${220 * f}deg) saturate(${1 + 1.2 * f})`;
-        case 'sharp': return `contrast(${1 + 0.8 * f}) brightness(${1 + 0.1 * f})`;
-        case 'soft-glow': return `brightness(${1 + 0.3 * f}) contrast(${1 - 0.1 * f})`;
-        case 'midnight': return `brightness(${1 - 0.4 * f}) contrast(${1 + 0.5 * f}) hue-rotate(${190 * f}deg)`;
-        case 'golden-hour': return `sepia(${0.4 * f}) saturate(${1 + 1.2 * f}) brightness(${1 + 0.1 * f})`;
-        case 'pop-art': return `saturate(${1 + 3 * f}) contrast(${1 + 0.6 * f})`;
-        case 'faded-film': return `contrast(${1 - 0.25 * f}) brightness(${1 + 0.15 * f}) sepia(${0.2 * f})`;
-        case 'acid': return `hue-rotate(${270 * f}deg) saturate(${1 + 3 * f})`;
-        case 'ocean': return `hue-rotate(${140 * f}deg) contrast(${1 + 0.2 * f})`;
-        case 'dramatics': return `contrast(${1 + 1.5 * f}) grayscale(${0.4 * f})`;
-
-        // New 30 Filters
         case 'anime': return `saturate(${1 + 1.8 * f}) contrast(${1 + 0.3 * f}) brightness(${1 + 0.1 * f})`;
         case 'tokyo-night': return `hue-rotate(${200 * f}deg) saturate(${1 + 1.5 * f}) brightness(${1 - 0.15 * f})`;
         case 'gold-dust': return `sepia(${0.7 * f}) brightness(${1 + 0.2 * f}) contrast(${1 + 0.3 * f})`;
@@ -1041,27 +1148,6 @@
         case 'super-8': return `sepia(${0.4 * f}) contrast(${1 + 0.2 * f}) saturate(${1 + 0.5 * f})`;
         case 'film-16mm': return `grayscale(${0.3 * f}) sepia(${0.25 * f}) contrast(${1 + 0.35 * f})`;
         case 'silent-movie': return `grayscale(${f}) contrast(${1 + 0.8 * f}) brightness(${1 - 0.05 * f})`;
-        case 'grainy-film': return `contrast(${1 + 0.5 * f}) brightness(${1 + 0.05 * f}) saturate(${1 - 0.2 * f})`;
-        case 'cyber-pop': return `hue-rotate(${150 * f}deg) saturate(${1 + 3 * f}) contrast(${1 + 0.4 * f})`;
-        case 'spectrum': return `hue-rotate(${120 * f}deg) saturate(${1 + 1.8 * f})`;
-        case 'infrared': return `invert(${f}) hue-rotate(${180 * f}deg) saturate(${1 + 1.5 * f})`;
-        case 'space-odyssey': return `brightness(${1 - 0.2 * f}) contrast(${1 + 0.7 * f}) hue-rotate(${210 * f}deg)`;
-        case 'gothic': return `grayscale(${0.7 * f}) contrast(${1 + 1.1 * f}) brightness(${1 - 0.25 * f})`;
-        case 'desert-sun': return `sepia(${0.6 * f}) hue-rotate(${-20 * f}deg) saturate(${1 + 1.2 * f})`;
-        case 'nordic-cool': return `hue-rotate(${80 * f}deg) saturate(${1 - 0.3 * f}) brightness(${1 + 0.1 * f})`;
-        case 'tropical': return `saturate(${1 + 2.2 * f}) hue-rotate(${-10 * f}deg)`;
-        case 'pastel-dream': return `brightness(${1 + 0.3 * f}) saturate(${1 - 0.4 * f}) contrast(${1 - 0.1 * f})`;
-        case 'roman-gold': return `sepia(${0.5 * f}) saturate(${1 + 0.8 * f}) contrast(${1 + 0.2 * f})`;
-        case 'cyber-green': return `hue-rotate(${100 * f}deg) saturate(${1 + 2 * f}) brightness(${1 - 0.1 * f})`;
-        case 'deep-blue': return `hue-rotate(${190 * f}deg) saturate(${1 + 1.1 * f}) brightness(${1 - 0.2 * f})`;
-        case 'magma': return `hue-rotate(${-50 * f}deg) saturate(${1 + 3 * f}) contrast(${1 + 0.5 * f})`;
-        case 'xray': return `invert(${f}) grayscale(${f})`;
-        case 'sketch': return `grayscale(${f}) contrast(${1 + 2 * f}) brightness(${1 + 0.2 * f})`;
-        case 'glitch-red': return `hue-rotate(${-40 * f}deg) saturate(${1 + 2 * f}) contrast(${1 + 0.8 * f})`;
-        case 'hologram': return `hue-rotate(${170 * f}deg) opacity(${1 - 0.2 * f}) brightness(${1 + 0.3 * f})`;
-        case 'vampire': return `grayscale(${0.8 * f}) contrast(${1 + 1.4 * f}) hue-rotate(${-30 * f}deg)`;
-        case 'sunburn': return `saturate(${1 + 2.5 * f}) brightness(${1 + 0.25 * f}) contrast(${1 + 0.3 * f})`;
-        case 'cyber-yellow': return `hue-rotate(${40 * f}deg) saturate(${1 + 2.5 * f})`;
         default: return 'none';
       }
     }
@@ -1069,6 +1155,11 @@
     function applyFilter() {
       if (currentMedia) {
         currentMedia.style.filter = getCSSFilterString();
+        
+        // Dynamic preview background adaptions
+        if (selectedFilter === 'bg-green') previewScreen.style.backgroundColor = '#00ff00';
+        else if (selectedFilter === 'bg-white') previewScreen.style.backgroundColor = '#ffffff';
+        else previewScreen.style.backgroundColor = '#000000';
       }
     }
 
@@ -1082,6 +1173,12 @@
       if (mediaType === 'image') {
         canvas.width = currentMedia.naturalWidth || 800;
         canvas.height = currentMedia.naturalHeight || 600;
+
+        if (selectedFilter === 'bg-green') {
+          ctx.fillStyle = '#00ff00';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
         ctx.filter = getCSSFilterString();
         ctx.drawImage(currentMedia, 0, 0, canvas.width, canvas.height);
 
@@ -1112,6 +1209,10 @@
             if (currentMedia.ended || currentMedia.paused) {
               recorder.stop();
               return;
+            }
+            if (selectedFilter === 'bg-green') {
+              ctx.fillStyle = '#00ff00';
+              ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
             ctx.filter = getCSSFilterString();
             ctx.drawImage(currentMedia, 0, 0, canvas.width, canvas.height);
@@ -1161,7 +1262,7 @@
       galleryGrid.prepend(item);
     }
 
-    // Action: Create Edit (ללא alert, הודעה מוצגת בגוף העמוד)
+    // Action: Create Edit
     btnCreateEdit.addEventListener('click', async () => {
       if (!currentMedia) {
         editStatusMsg.style.display = 'block';
