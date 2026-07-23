@@ -788,8 +788,8 @@
 
       <!-- Image Options Modal -->
       <div class="create-options-modal" id="create-options-modal">
-        <button class="create-option-btn" id="opt-image-to-video">🎥 צור וידאו ב-AI (10 שניות)</button>
-        <button class="create-option-btn" id="opt-edit-image">🖼️ ערוך תמונה ב-AI</button>
+        <button class="create-option-btn" id="opt-text-to-video">🎥 צור וידאו ב-AI</button>
+        <button class="create-option-btn" id="opt-text-to-image">🖼️ צור תמונה ב-AI</button>
       </div>
     </div>
 
@@ -829,7 +829,11 @@
       <div class="section-title">🎨 פילטרים ואפקטים:</div>
       <div class="filters-grid" id="filters-grid">
         <button class="filter-btn active" data-filter="none">ללא פילטר</button>
-        <button class="filter-btn" data-filter="natural-reflection">🪞 שיקוף אמיתי (צבע עור טבעי)</button>
+        <button class="filter-btn" data-filter="natural-reflection">🪞 שיקוף אמיתי (שקיפות גוף)</button>
+        <button class="filter-btn" data-filter="weather-rain">🌧️ אפקט גשם</button>
+        <button class="filter-btn" data-filter="weather-sun">☀️ שמש זוהרת</button>
+        <button class="filter-btn" data-filter="weather-hail">❄️ אפקט ברד</button>
+        <button class="filter-btn" data-filter="weather-rainbow">🌈 אפקט קשת</button>
         <button class="filter-btn" data-filter="body-scan">🔬 שיקוף סורק</button>
         <button class="filter-btn" data-filter="glow">🌟 זוהר</button>
         <button class="filter-btn" data-filter="blinding-glow">💫 זוהר מסנוור</button>
@@ -893,8 +897,8 @@
     const btnCreateEdit = document.getElementById('btn-create-edit');
     const btnExtendVideo = document.getElementById('btn-extend-video');
     const createOptionsModal = document.getElementById('create-options-modal');
-    const optImageToVideo = document.getElementById('opt-image-to-video');
-    const optEditImage = document.getElementById('opt-edit-image');
+    const optTextToVideo = document.getElementById('opt-text-to-video');
+    const optTextToImage = document.getElementById('opt-text-to-image');
     
     const editStatusMsg = document.getElementById('edit-status-msg');
     const galleryGrid = document.getElementById('gallery-grid');
@@ -1127,7 +1131,15 @@
 
       switch (selectedFilter) {
         case 'natural-reflection':
-          return `contrast(${1 + 0.08 * f}) brightness(${1 + 0.05 * f}) saturate(${1 + 0.1 * f})`;
+          return `opacity(${0.65 + 0.35 * (1 - f*0.3)}) contrast(${1 + 0.25 * f}) brightness(${1 + 0.15 * f}) saturate(${1 + 0.3 * f})`;
+        case 'weather-rain':
+          return `brightness(${1 - 0.15 * f}) contrast(${1 + 0.2 * f}) saturate(${1 - 0.2 * f}) hue-rotate(${10 * f}deg)`;
+        case 'weather-sun':
+          return `brightness(${1 + 0.35 * f}) saturate(${1 + 0.5 * f}) sepia(${0.3 * f})`;
+        case 'weather-hail':
+          return `brightness(${1 + 0.2 * f}) contrast(${1 + 0.4 * f}) grayscale(${0.3 * f}) saturate(${1 - 0.3 * f})`;
+        case 'weather-rainbow':
+          return `saturate(${1 + 1.5 * f}) hue-rotate(${45 * f}deg) brightness(${1 + 0.1 * f})`;
         case 'body-scan':
           return `invert(${0.9 * f}) hue-rotate(${140 * f}deg) saturate(${1 + 4 * f}) contrast(${1 + 3 * f}) brightness(${1.1 * f})`;
         case 'glow': 
@@ -1167,22 +1179,17 @@
     }
 
     btnCreateEdit.addEventListener('click', () => {
-      if (mediaType === 'image') {
-        createOptionsModal.classList.toggle('active');
-      } else {
-        createOptionsModal.classList.remove('active');
-        runAIGeneration(mediaType === 'video' ? 'video-edit' : 'text-to-video');
-      }
+      createOptionsModal.classList.toggle('active');
     });
 
-    optImageToVideo.addEventListener('click', () => {
+    optTextToVideo.addEventListener('click', () => {
       createOptionsModal.classList.remove('active');
-      runAIGeneration('image-to-video');
+      runAIGeneration('text-to-video');
     });
 
-    optEditImage.addEventListener('click', () => {
+    optTextToImage.addEventListener('click', () => {
       createOptionsModal.classList.remove('active');
-      runAIGeneration('image-edit');
+      runAIGeneration('text-to-image');
     });
 
     btnExtendVideo.addEventListener('click', async () => {
@@ -1203,12 +1210,12 @@
 
       let statusMsg = "המערכת מייצרת תוכן AI תואם...";
       if (mode === 'extend-video') statusMsg = `מאריך וידאו ל-${videoDurationSeconds} שניות...`;
-      else if (mode === 'image-to-video') statusMsg = `יוצר וידאו מושלם מתיאור התמונה...`;
-      else if (mode === 'image-edit') statusMsg = `עורך תמונה ב-AI בסינכרון מלא...`;
+      else if (mode === 'text-to-video') statusMsg = `יוצר וידאו ב-AI לפי תיאור...`;
+      else if (mode === 'text-to-image') statusMsg = `יוצר תמונה ב-AI לפי תיאור...`;
 
       await simulateScreenRender(0, 100, 2200, statusMsg);
 
-      if (mode === 'image-edit') {
+      if (mode === 'text-to-image') {
         const canvas = document.createElement('canvas');
         canvas.width = 1080; canvas.height = 1080;
         const ctx = canvas.getContext('2d');
@@ -1225,10 +1232,10 @@
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 36px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(promptText || "עובד ע\"י Studio AI ב-100%", canvas.width/2, canvas.height/2);
+        ctx.fillText(promptText || "נוצר ע\"י Studio AI ב-100%", canvas.width/2, canvas.height/2);
 
         canvas.toBlob((blob) => {
-          rawFile = new File([blob], `studio_edited_${Date.now()}.png`, { type: 'image/png' });
+          rawFile = new File([blob], `studio_image_${Date.now()}.png`, { type: 'image/png' });
           setMediaImage(URL.createObjectURL(blob));
         }, 'image/png');
       } else {
