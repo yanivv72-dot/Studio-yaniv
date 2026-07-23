@@ -19,36 +19,36 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 16px;
+      padding: 20px;
     }
 
     header {
       text-align: center;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
     }
 
     header h1 {
-      font-size: 1.8rem;
+      font-size: 2rem;
       color: #38bdf8;
-      margin-bottom: 4px;
+      margin-bottom: 8px;
     }
 
     .container {
       width: 100%;
-      max-width: 800px;
+      max-width: 900px;
       background-color: #1e293b;
       border-radius: 16px;
-      padding: 20px;
+      padding: 24px;
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 20px;
     }
 
     .upload-section {
       border: 2px dashed #475569;
       border-radius: 12px;
-      padding: 20px;
+      padding: 30px;
       text-align: center;
       cursor: pointer;
       transition: border-color 0.2s, background-color 0.2s;
@@ -65,7 +65,8 @@
 
     .preview-container {
       width: 100%;
-      height: 300px;
+      min-height: 350px;
+      max-height: 550px;
       background-color: #020617;
       border-radius: 12px;
       overflow: hidden;
@@ -78,7 +79,7 @@
     .preview-container img,
     .preview-container video {
       max-width: 100%;
-      max-height: 100%;
+      max-height: 550px;
       object-fit: contain;
       transition: filter 0.1s ease;
     }
@@ -90,15 +91,16 @@
     .controls {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 16px;
     }
 
-    /* תיבת פילטרים נגללת בגובה מוגבל שלא מסתירה את המסך */
+    /* גלילה אופקית לפילטרים בשורה אחת/שתיים קומפקטיות כדי לא להסתיר את התצוגה המקדימה */
     .filters-grid {
       display: flex;
-      gap: 8px;
+      flex-wrap: nowrap;
       overflow-x: auto;
-      padding-bottom: 8px;
+      gap: 10px;
+      padding: 5px 0 10px 0;
       scroll-behavior: smooth;
     }
 
@@ -106,12 +108,13 @@
       background-color: #334155;
       color: #f1f5f9;
       border: 2px solid transparent;
-      padding: 8px 14px;
+      padding: 10px 16px;
       border-radius: 8px;
       cursor: pointer;
       font-size: 0.85rem;
-      white-space: nowrap;
       transition: all 0.2s;
+      text-align: center;
+      white-space: nowrap;
       flex-shrink: 0;
     }
 
@@ -127,16 +130,16 @@
     .intensity-container {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 8px;
       background-color: #0f172a;
-      padding: 10px 14px;
+      padding: 12px 16px;
       border-radius: 8px;
     }
 
     .intensity-header {
       display: flex;
       justify-content: space-between;
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       color: #cbd5e1;
     }
 
@@ -148,20 +151,18 @@
 
     .actions {
       display: flex;
-      gap: 10px;
+      gap: 12px;
       justify-content: flex-end;
+      margin-top: 10px;
     }
 
     .btn {
-      padding: 10px 20px;
+      padding: 12px 24px;
       border-radius: 8px;
       border: none;
       font-weight: 600;
       cursor: pointer;
       transition: opacity 0.2s;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
     }
 
     .btn:hover {
@@ -178,53 +179,53 @@
       color: #ffffff;
     }
 
-    /* גלריית קבצים מעובדים בתחתית העמוד */
+    /* תיקיית מדיה ערוכה בתחתית */
     .gallery-section {
-      margin-top: 10px;
-      border-top: 1px solid #334155;
-      padding-top: 16px;
+      margin-top: 20px;
+      border-top: 2px solid #334155;
+      padding-top: 20px;
     }
 
     .gallery-section h3 {
-      font-size: 1.1rem;
-      margin-bottom: 12px;
+      font-size: 1.2rem;
       color: #38bdf8;
+      margin-bottom: 16px;
     }
 
     .gallery-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
     }
 
     .gallery-item {
       background-color: #0f172a;
-      border-radius: 8px;
+      border-radius: 10px;
       padding: 10px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
       align-items: center;
     }
 
     .gallery-item img,
     .gallery-item video {
       width: 100%;
-      height: 120px;
+      height: 130px;
       object-fit: cover;
-      border-radius: 6px;
+      border-radius: 8px;
     }
 
     .gallery-actions {
       display: flex;
-      gap: 6px;
+      gap: 8px;
       width: 100%;
     }
 
-    .btn-small {
+    .btn-action {
       flex: 1;
-      padding: 6px;
-      font-size: 0.8rem;
+      padding: 8px;
+      font-size: 0.85rem;
       border-radius: 6px;
       border: none;
       cursor: pointer;
@@ -232,14 +233,14 @@
       text-align: center;
     }
 
-    .btn-small-download {
+    .btn-action-download {
       background-color: #10b981;
-      color: #fff;
+      color: #ffffff;
     }
 
-    .btn-small-delete {
+    .btn-action-delete {
       background-color: #ef4444;
-      color: #fff;
+      color: #ffffff;
     }
 
     /* custom scrollbar */
@@ -256,12 +257,12 @@
 
   <header>
     <h1>עורך מדיה AI</h1>
-    <p>העלאת תמונות וסרטונים והחלת פילטרים בזמן אמת</p>
+    <p>העלאת כל סוגי התמונות והסרטונים והחלת פילטרים בזמן אמת</p>
   </header>
 
   <div class="container">
     <label class="upload-section" for="file-input">
-      <span>לחץ כאן להעלאת תמונה או סרטון</span>
+      <span>לחץ כאן להעלאת תמונה או סרטון (כל הפורמטים נתמכים)</span>
       <input type="file" id="file-input" accept="image/*, video/*">
     </label>
 
@@ -270,29 +271,30 @@
     </div>
 
     <div class="controls">
-      <h3>בחר פילטר:</h3>
+      <h3>בחר פילטר (20 סוגים):</h3>
       <div class="filters-grid" id="filters-grid">
+        <!-- 20 פילטרים מקוריים -->
         <button class="filter-btn active" data-filter="none">ללא פילטר</button>
         <button class="filter-btn" data-filter="vintage">וינטג'</button>
         <button class="filter-btn" data-filter="sepia">ספיה קלאסי</button>
-        <button class="filter-btn" data-filter="bw">שחור-לבן</button>
+        <button class="filter-btn" data-filter="bw">שחור-לבן דרמטי</button>
         <button class="filter-btn" data-filter="cyberpunk">סייברפאנק</button>
         <button class="filter-btn" data-filter="warm">חם</button>
         <button class="filter-btn" data-filter="cool">קר</button>
-        <button class="filter-btn" data-filter="invert">אינוורס</button>
+        <button class="filter-btn" data-filter="invert">אינוורס (נגטיב)</button>
         <button class="filter-btn" data-filter="hue-shift">שינוי גוון</button>
-        <button class="filter-btn" data-filter="blur">טשטוש</button>
-        <button class="filter-btn" data-filter="high-contrast">קונטרסט</button>
-        <button class="filter-btn" data-filter="pastel">פסטל</button>
-        <button class="filter-btn" data-filter="neon">ניאון</button>
+        <button class="filter-btn" data-filter="blur">טשטוש עמוק</button>
+        <button class="filter-btn" data-filter="high-contrast">קונטרסט גבוה</button>
+        <button class="filter-btn" data-filter="pastel">פסטל רך</button>
+        <button class="filter-btn" data-filter="neon">ניאון זוהר</button>
         <button class="filter-btn" data-filter="cinema">קולנועי</button>
-        <button class="filter-btn" data-filter="sunset">שקיעה</button>
+        <button class="filter-btn" data-filter="sunset">שקיעה רומנטית</button>
         <button class="filter-btn" data-filter="noir">פילם נואר</button>
-        <button class="filter-btn" data-filter="retro-green">ירוק רפאים</button>
+        <button class="filter-btn" data-filter="retro-green">רפאים ירוק</button>
         <button class="filter-btn" data-filter="golden-hour">שעת הזהב</button>
-        <button class="filter-btn" data-filter="hdr">HDR</button>
+        <button class="filter-btn" data-filter="hdr">אפקט HDR</button>
         <button class="filter-btn" data-filter="pop-art">פופ ארט</button>
-        <button class="filter-btn" data-filter="faded">דהוי</button>
+        <button class="filter-btn" data-filter="faded">דהוי וינטג'</button>
       </div>
 
       <div class="intensity-container">
@@ -305,15 +307,15 @@
     </div>
 
     <div class="actions">
-      <button class="btn btn-share" id="share-btn">שתף תמונה</button>
-      <button class="btn btn-download" id="download-btn">שמור / הורד</button>
+      <button class="btn btn-share" id="share-btn">שתף מדיה</button>
+      <button class="btn btn-download" id="download-btn">הורד מדיה</button>
     </div>
 
-    <!-- גלריית מדיה ערוכה -->
+    <!-- תיקיית מדיה ערוכה -->
     <div class="gallery-section">
       <h3>תיקיית מדיה ערוכה</h3>
       <div class="gallery-grid" id="gallery-grid">
-        <!-- פריטים שמורים יופיעו כאן -->
+        <!-- קבצים שנשמרו יופיעו כאן -->
       </div>
     </div>
   </div>
@@ -328,13 +330,14 @@
     const shareBtn = document.getElementById('share-btn');
     const galleryGrid = document.getElementById('gallery-grid');
 
-    let currentMedia = null;
-    let mediaType = null;
+    let currentMedia = null; // אלמנט Image או Video
+    let mediaType = null;   // 'image' או 'video'
     let fileUrl = null;
-    let fileName = 'edited_media';
+    let fileName = 'download';
     let selectedFilter = 'none';
-    let filterIntensity = 100;
+    let filterIntensity = 100; // 1-100
 
+    // הגדרת מאפייני הפילטרים ב-CSS Filter (המקורי)
     const filterDefinitions = {
       'none': '',
       'vintage': 'sepia(0.5) contrast(1.2) brightness(0.9)',
@@ -359,6 +362,7 @@
       'faded': 'contrast(0.8) brightness(1.2) sepia(0.2)'
     };
 
+    // טיפול בהעלאת קובץ
     fileInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -387,6 +391,7 @@
       }
     });
 
+    // בחירת פילטר
     filterButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         filterButtons.forEach(b => b.classList.remove('active'));
@@ -396,12 +401,14 @@
       });
     });
 
+    // שינוי עוצמת הפילטר (1 - 100)
     intensitySlider.addEventListener('input', (e) => {
       filterIntensity = e.target.value;
       intensityValue.textContent = `${filterIntensity}%`;
       applyFilter();
     });
 
+    // החלת הפילטר המשולב עם העוצמה (פועל גם על תמונה וגם על סרטון)
     function applyFilter() {
       if (!currentMedia) return;
 
@@ -412,6 +419,7 @@
 
       const factor = filterIntensity / 100;
 
+      // חישוב פילטר מורכב לפי עוצמה יחסית
       if (selectedFilter === 'blur') {
         currentMedia.style.filter = `blur(${5 * factor}px)`;
       } else if (selectedFilter === 'sepia') {
@@ -421,12 +429,13 @@
       } else if (selectedFilter === 'invert') {
         currentMedia.style.filter = `invert(${factor})`;
       } else {
+        // ערבוב עוצמה עבור פילטרים כלליים באמצעות opacity/saturate/opacity
         currentMedia.style.filter = `${filterDefinitions[selectedFilter]} opacity(${0.3 + 0.7 * factor})`;
       }
     }
 
-    // יצירת קובץ Blob אמיתי מהמדיה עם הפילטר המוחל
-    async function processMediaBlob() {
+    // יצירת קובץ Blob פיזי מעובד (עובד בנייד ובמחשב)
+    async function createProcessedBlob() {
       if (!currentMedia) return null;
 
       const canvas = document.createElement('canvas');
@@ -441,7 +450,7 @@
 
         return new Promise(resolve => {
           canvas.toBlob(blob => {
-            resolve({ blob, type: 'image', mime: 'image/png', ext: 'png' });
+            resolve({ blob, type: 'image', extension: 'png', mime: 'image/png' });
           }, 'image/png');
         });
       } else if (mediaType === 'video') {
@@ -453,47 +462,46 @@
         const chunks = [];
 
         recorder.ondataavailable = e => chunks.push(e.data);
-        
+
         return new Promise(resolve => {
           recorder.onstop = () => {
             const blob = new Blob(chunks, { type: 'video/webm' });
-            resolve({ blob, type: 'video', mime: 'video/webm', ext: 'webm' });
+            resolve({ blob, type: 'video', extension: 'webm', mime: 'video/webm' });
           };
 
           currentMedia.currentTime = 0;
           currentMedia.play();
           recorder.start();
 
-          const drawFrame = () => {
+          const renderFrame = () => {
             if (currentMedia.ended || currentMedia.paused) {
               recorder.stop();
               return;
             }
             ctx.filter = getComputedStyle(currentMedia).filter;
             ctx.drawImage(currentMedia, 0, 0, canvas.width, canvas.height);
-            requestAnimationFrame(drawFrame);
+            requestAnimationFrame(renderFrame);
           };
-          drawFrame();
+          renderFrame();
 
-          // עצירת ההקלטה בסוף הסרטון
           currentMedia.onended = () => recorder.stop();
         });
       }
     }
 
-    // הוספה לגלריית המדיה בתחתית
-    function addToGallery(blobData) {
-      const blobUrl = URL.createObjectURL(blobData.blob);
+    // הוספת פריט לתיקיית המדיה בתחתית
+    function addItemToFolder(blobData) {
+      const url = URL.createObjectURL(blobData.blob);
       const item = document.createElement('div');
       item.className = 'gallery-item';
 
       let mediaEl;
       if (blobData.type === 'image') {
         mediaEl = document.createElement('img');
-        mediaEl.src = blobUrl;
+        mediaEl.src = url;
       } else {
         mediaEl = document.createElement('video');
-        mediaEl.src = blobUrl;
+        mediaEl.src = url;
         mediaEl.controls = true;
       }
 
@@ -501,16 +509,16 @@
       actions.className = 'gallery-actions';
 
       const downloadBtnSmall = document.createElement('button');
-      downloadBtnSmall.className = 'btn-small btn-small-download';
+      downloadBtnSmall.className = 'btn-action btn-action-download';
       downloadBtnSmall.textContent = 'הורד';
-      downloadBtnSmall.onclick = () => triggerDownload(blobData.blob, `edited_${Date.now()}.${blobData.ext}`);
+      downloadBtnSmall.onclick = () => saveFileToDevice(blobData.blob, `edited_${Date.now()}.${blobData.extension}`);
 
       const deleteBtnSmall = document.createElement('button');
-      deleteBtnSmall.className = 'btn-small btn-small-delete';
+      deleteBtnSmall.className = 'btn-action btn-action-delete';
       deleteBtnSmall.textContent = 'מחק';
       deleteBtnSmall.onclick = () => {
         item.remove();
-        URL.revokeObjectURL(blobUrl);
+        URL.revokeObjectURL(url);
       };
 
       actions.appendChild(downloadBtnSmall);
@@ -521,7 +529,8 @@
       galleryGrid.prepend(item);
     }
 
-    function triggerDownload(blob, filename) {
+    // שמירת קובץ למכשיר
+    function saveFileToDevice(blob, filename) {
       const a = document.createElement('a');
       const url = URL.createObjectURL(blob);
       a.href = url;
@@ -532,7 +541,7 @@
       setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
 
-    // לחצן שמירה/הורדה
+    // הורדת מדיה (גם שומר למכשיר וגם מוסיף לתיקייה בתחתית)
     downloadBtn.addEventListener('click', async () => {
       if (!currentMedia) {
         alert('אנא העלה תמונה או סרטון תחילה.');
@@ -542,28 +551,28 @@
       downloadBtn.disabled = true;
       downloadBtn.textContent = 'מעבד...';
 
-      const processed = await processMediaBlob();
+      const processed = await createProcessedBlob();
       if (processed) {
-        const name = `edited_${Date.now()}.${processed.ext}`;
-        triggerDownload(processed.blob, name);
-        addToGallery(processed);
+        const outputName = `edited_${fileName.split('.')[0]}.${processed.extension}`;
+        saveFileToDevice(processed.blob, outputName);
+        addItemToFolder(processed);
       }
 
       downloadBtn.disabled = false;
-      downloadBtn.textContent = 'שמור / הורד';
+      downloadBtn.textContent = 'הורד מדיה';
     });
 
-    // לחצן שיתוף קובץ (Web Share API)
+    // שיתוף הקובץ עצמו לנייד
     shareBtn.addEventListener('click', async () => {
       if (!currentMedia) {
         alert('אנא העלה תמונה או סרטון תחילה.');
         return;
       }
 
-      const processed = await processMediaBlob();
+      const processed = await createProcessedBlob();
       if (!processed) return;
 
-      const file = new File([processed.blob], `edited_media.${processed.ext}`, { type: processed.mime });
+      const file = new File([processed.blob], `edited_${fileName.split('.')[0]}.${processed.extension}`, { type: processed.mime });
 
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
@@ -572,11 +581,11 @@
             files: [file]
           });
         } catch (err) {
-          if (err.name !== 'AbortError') console.error('שגיאה בשיתוף:', err);
+          if (err.name !== 'AbortError') console.error(err);
         }
       } else {
-        alert('שיתוף קבצים אינו נתמך בדפדפן זה. הקובץ יורד במקום.');
-        triggerDownload(processed.blob, file.name);
+        alert('שיתוף קבצים אינו נתמך בדפדפן זה. הקובץ יורד למכשיר.');
+        saveFileToDevice(processed.blob, file.name);
       }
     });
   </script>
