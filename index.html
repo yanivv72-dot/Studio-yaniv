@@ -1,41 +1,8 @@
-import express from 'express';
-import http from 'http';
-import { Server } from 'socket.io';
-
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: '*' } });
-
-app.use(express.json());
-
-// WebSocket לתקשורת בזמן אמת עבור אחוזי הרינדור (1-100%)
-io.on('connection', (socket) => {
-  console.log('Client connected:', socket.id);
-
-  socket.on('start_render', (data) => {
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += 10;
-      socket.emit('render_progress', { progress });
-
-      if (progress >= 100) {
-        clearInterval(interval);
-        socket.emit('render_complete', {
-          videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-        });
-      }
-    }, 500); // סימולטור עיבוד בענן
-  });
-
-  socket.on('disconnect', () => console.log('Client disconnected'));
-});
-
-server.listen(5000, () => console.log('Backend Cloud Server running on port 5000'));
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Play, Pause, Square, SkipBack, SkipForward, RotateCcw, RotateCw, 
   Download, Share2, Sparkles, Image as ImageIcon, Video as VideoIcon, 
-  Camera, Volume2, Mic, Palette, Trash2, MoreVertical, PlusCircle 
+  Camera, Mic, Palette, Trash2, MoreVertical, PlusCircle 
 } from 'lucide-react';
 import io from 'socket.io-client';
 
@@ -48,7 +15,7 @@ interface MediaItem {
 }
 
 export default function App() {
-  // states
+  // Application State
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
@@ -62,7 +29,7 @@ export default function App() {
 
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // סנכרון בזמן אמת מול השרת
+  // Real-time WebSocket listener
   useEffect(() => {
     socket.on('render_progress', (data: { progress: number }) => {
       setRenderPercent(data.progress);
@@ -83,7 +50,7 @@ export default function App() {
     };
   }, []);
 
-  // ניהול ניגון
+  // Video Player Controls
   const togglePlay = () => {
     if (videoRef.current) {
       if (isPlaying) {
@@ -116,22 +83,22 @@ export default function App() {
   };
 
   const handleDelete = (id: string) => {
-    if (window.confirm('אתה בטוח?')) {
+    if (window.confirm('Are you sure you want to delete this file?')) {
       setLibrary((prev) => prev.filter((item) => item.id !== id));
       setActiveMenuId(null);
     }
   };
 
   return (
-    <div dir="rtl" className="min-h-screen bg-[#0A0A0B] text-white flex flex-col font-sans">
+    <div className="min-h-screen bg-[#0A0A0B] text-white flex flex-col font-sans">
       
-      {/* Header קבוע */}
+      {/* Top Header */}
       <header className="p-4 bg-[#1A1A1D] border-b border-gray-800 flex justify-between items-center z-50">
         <h1 className="text-xl font-bold text-purple-500">AI-Media Studio Yaniv</h1>
-        <span className="text-xs text-green-400 bg-green-950/60 px-2 py-1 rounded">שמור אוטומטית</span>
+        <span className="text-xs text-green-400 bg-green-950/60 px-2 py-1 rounded">Auto-Saved</span>
       </header>
 
-      {/* 1. נגן וידאו מרכזי צף ומקובע בחלק העליון (Sticky) */}
+      {/* 1. Sticky Top Fixed Video Player */}
       <div className="sticky top-0 z-40 bg-black border-b border-purple-900/50 shadow-2xl">
         <div className="relative w-full h-[30vh] md:h-[50vh] flex items-center justify-center overflow-hidden">
           <video
@@ -148,7 +115,7 @@ export default function App() {
             }}
           />
 
-          {/* overlay פקדים צפים עליונים */}
+          {/* Quick Action Overlay Buttons */}
           <div className="absolute top-2 right-2 flex gap-2">
             <button className="bg-black/60 p-2 rounded-full hover:bg-purple-600 transition">
               <RotateCcw size={16} />
@@ -159,7 +126,7 @@ export default function App() {
           </div>
         </div>
 
-        {/* סרגל זמן (Scrubbing Bar) */}
+        {/* Timeline Scrubbing Bar */}
         <input
           type="range"
           min="0"
@@ -176,10 +143,10 @@ export default function App() {
         />
       </div>
 
-      {/* שאר חלקי המסך נגללים בלבד */}
+      {/* Scrollable Main Area */}
       <main className="flex-1 p-4 space-y-6 max-w-4xl mx-auto w-full">
 
-        {/* 2. פס תחבורה */}
+        {/* 2. Transport Control Bar */}
         <div className="flex justify-center items-center gap-4 bg-[#1A1A1D] p-3 rounded-xl border border-gray-800">
           <button onClick={() => skipTime(-2)} className="p-2 hover:bg-gray-800 rounded">
             <SkipBack size={20} />
@@ -195,7 +162,7 @@ export default function App() {
           </button>
         </div>
 
-        {/* 3. אזור יצירה והארכה */}
+        {/* 3. Generation & Actions */}
         <div className="flex flex-col md:flex-row gap-3">
           <button
             onClick={handleGenerate}
@@ -203,10 +170,10 @@ export default function App() {
             className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 disabled:opacity-50"
           >
             {isGenerating ? (
-              <span className="animate-pulse">{renderPercent}% מעבד...</span>
+              <span className="animate-pulse">{renderPercent}% Rendering...</span>
             ) : (
               <>
-                <Sparkles size={20} /> צור וידאו
+                <Sparkles size={20} /> Generate Video
               </>
             )}
           </button>
@@ -214,74 +181,74 @@ export default function App() {
             onClick={handleGenerate} 
             className="bg-[#1A1A1D] px-4 py-3 rounded-xl border border-gray-700 font-semibold hover:bg-gray-800 flex items-center justify-center gap-2"
           >
-            <PlusCircle size={18} /> הארכה (+10 ש')
+            <PlusCircle size={18} /> Extend (+10s)
           </button>
           <button className="bg-[#1A1A1D] px-4 py-3 rounded-xl border border-gray-700 font-semibold hover:bg-gray-800 flex items-center justify-center gap-2">
-            🎲 הפתע אותי AI
+            🎲 Surprise Me AI
           </button>
         </div>
 
-        {/* 4. העלאת מדיה */}
+        {/* 4. Media Import */}
         <div className="grid grid-cols-3 gap-3">
           <label className="bg-[#1A1A1D] p-3 rounded-xl border border-gray-800 flex flex-col items-center gap-2 cursor-pointer hover:border-purple-500">
             <ImageIcon className="text-purple-400" />
-            <span className="text-xs">תמונה בלבד</span>
+            <span className="text-xs">Images Only</span>
             <input type="file" accept="image/*" className="hidden" />
           </label>
           <label className="bg-[#1A1A1D] p-3 rounded-xl border border-gray-800 flex flex-col items-center gap-2 cursor-pointer hover:border-purple-500">
             <VideoIcon className="text-purple-400" />
-            <span className="text-xs">וידאו בלבד</span>
+            <span className="text-xs">Videos Only</span>
             <input type="file" accept="video/*" className="hidden" />
           </label>
           <label className="bg-[#1A1A1D] p-3 rounded-xl border border-gray-800 flex flex-col items-center gap-2 cursor-pointer hover:border-purple-500">
             <Camera className="text-purple-400" />
-            <span className="text-xs">מצלמה</span>
+            <span className="text-xs">Camera</span>
             <input type="file" accept="image/*,video/*" capture="environment" className="hidden" />
           </label>
         </div>
 
-        {/* 5. 6 מנועי ליבה + שיבוט קולי */}
+        {/* 5. Core AI Engines & Voice Clone */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {['Inpainting', 'Image-to-Video', 'Text-to-Video', 'Video-to-Video', 'Lip-Sync'].map((engine) => (
-            <button key={engine} className="bg-[#1A1A1D] p-3 rounded-xl border border-gray-800 text-sm hover:border-purple-500 text-right">
+            <button key={engine} className="bg-[#1A1A1D] p-3 rounded-xl border border-gray-800 text-sm hover:border-purple-500 text-left">
               ⚡ {engine}
             </button>
           ))}
           <button className="bg-[#1A1A1D] p-3 rounded-xl border border-gray-800 text-sm hover:border-purple-500 flex items-center gap-2 col-span-2 md:col-span-1">
-            <Mic size={16} className="text-red-400" /> שיבוט קולי (5 ש')
+            <Mic size={16} className="text-red-400" /> Voice Clone (5s)
           </button>
         </div>
 
-        {/* 6. פילטרים וצבעים */}
+        {/* 6. Color Grade & Filters */}
         <div className="bg-[#1A1A1D] p-4 rounded-xl border border-gray-800 space-y-2">
           <div className="flex items-center gap-2 font-semibold">
-            <Palette size={18} className="text-purple-400" /> עריכת צבעים ופילטרים
+            <Palette size={18} className="text-purple-400" /> Color Grade & Filters
           </div>
           <div className="flex gap-2">
-            <button onClick={() => setFilter('none')} className="px-3 py-1 bg-gray-800 rounded text-xs">רגיל</button>
-            <button onClick={() => setFilter('grayscale(100%)')} className="px-3 py-1 bg-gray-800 rounded text-xs">שחור לבן</button>
-            <button onClick={() => setFilter('saturate(200%)')} className="px-3 py-1 bg-gray-800 rounded text-xs">צבעוני חי</button>
-            <button onClick={() => setFilter('hue-rotate(90deg)')} className="px-3 py-1 bg-gray-800 rounded text-xs">מניפה / עשיר</button>
+            <button onClick={() => setFilter('none')} className="px-3 py-1 bg-gray-800 rounded text-xs">Normal</button>
+            <button onClick={() => setFilter('grayscale(100%)')} className="px-3 py-1 bg-gray-800 rounded text-xs">Black & White</button>
+            <button onClick={() => setFilter('saturate(200%)')} className="px-3 py-1 bg-gray-800 rounded text-xs">Vivid Color</button>
+            <button onClick={() => setFilter('hue-rotate(90deg)')} className="px-3 py-1 bg-gray-800 rounded text-xs">Multi-Color Palette</button>
           </div>
         </div>
 
-        {/* 7. ייצוא ושיתוף */}
+        {/* 7. Export & Share */}
         <div className="flex gap-3">
           <a
             href={currentMedia}
             download="rendered-video.mp4"
             className="flex-1 bg-gray-800 py-3 rounded-xl border border-gray-700 font-semibold flex items-center justify-center gap-2 hover:bg-gray-700"
           >
-            <Download size={18} /> הורדה למכשיר
+            <Download size={18} /> Download
           </a>
           <button className="flex-1 bg-green-700 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-green-600">
-            <Share2 size={18} /> שתף בוואטסאפ
+            <Share2 size={18} /> Share to WhatsApp
           </button>
         </div>
 
-        {/* 8. ספרייה אישית */}
+        {/* 8. Media Library */}
         <div className="space-y-3 pt-4">
-          <h2 className="text-lg font-bold">ספרייה אישית</h2>
+          <h2 className="text-lg font-bold">Personal Library</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {library.map((item) => (
               <div key={item.id} className="relative group bg-[#1A1A1D] rounded-xl overflow-hidden border border-gray-800">
@@ -293,11 +260,11 @@ export default function App() {
                   <MoreVertical size={14} />
                 </button>
 
-                {/* תפריט מחיקה / הורדה / שיתוף */}
+                {/* Dropdown Options */}
                 {activeMenuId === item.id && (
                   <div className="absolute top-8 left-1 bg-black/90 border border-gray-700 rounded-lg p-2 space-y-1 text-xs z-10 shadow-lg">
-                    <button onClick={() => handleDelete(item.id)} className="flex items-center gap-1 text-red-400 w-full text-right p-1 hover:bg-gray-800 rounded">
-                      <Trash2 size={12} /> מחיקה
+                    <button onClick={() => handleDelete(item.id)} className="flex items-center gap-1 text-red-400 w-full text-left p-1 hover:bg-gray-800 rounded">
+                      <Trash2 size={12} /> Delete
                     </button>
                   </div>
                 )}
@@ -308,9 +275,42 @@ export default function App() {
 
       </main>
     </div>
-  );
+  );import express from 'express';
+import http from 'http';
+import { Server } from 'socket.io';
+
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: '*' } });
+
+app.use(express.json());
+
+// Real-time Cloud Rendering Simulation
+io.on('connection', (socket) => {
+  console.log('Client connected:', socket.id);
+
+  socket.on('start_render', (data) => {
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 10;
+      socket.emit('render_progress', { progress });
+
+      if (progress >= 100) {
+        clearInterval(interval);
+        socket.emit('render_complete', {
+          videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+        });
+      }
+    }, 500);
+  });
+
+  socket.on('disconnect', () => console.log('Client disconnected'));
+});
+
+server.listen(5000, () => console.log('Backend Cloud Server running on port 5000'));
+
 }{
-  "short_name": "Studio Yaniv",
+  "short_name": "StudioYaniv",
   "name": "AI-Media Studio Yaniv",
   "icons": [
     {
