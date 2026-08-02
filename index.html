@@ -1,1451 +1,328 @@
-<!DOCTYPE html>
-<html lang="he" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Samsung Studio AI</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Secular One', -apple-system, BlinkMacSystemFont, 'SamsungOne', 'Segoe UI', Roboto, sans-serif;
-      -webkit-tap-highlight-color: transparent;
+import express from 'express';
+import http from 'http';
+import { Server } from 'socket.io';
+
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: '*' } });
+
+app.use(express.json());
+
+// WebSocket לתקשורת בזמן אמת עבור אחוזי הרינדור (1-100%)
+io.on('connection', (socket) => {
+  console.log('Client connected:', socket.id);
+
+  socket.on('start_render', (data) => {
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 10;
+      socket.emit('render_progress', { progress });
+
+      if (progress >= 100) {
+        clearInterval(interval);
+        socket.emit('render_complete', {
+          videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+        });
+      }
+    }, 500); // סימולטור עיבוד בענן
+  });
+
+  socket.on('disconnect', () => console.log('Client disconnected'));
+});
+
+server.listen(5000, () => console.log('Backend Cloud Server running on port 5000'));
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  Play, Pause, Square, SkipBack, SkipForward, RotateCcw, RotateCw, 
+  Download, Share2, Sparkles, Image as ImageIcon, Video as VideoIcon, 
+  Camera, Volume2, Mic, Palette, Trash2, MoreVertical, PlusCircle 
+} from 'lucide-react';
+import io from 'socket.io-client';
+
+const socket = io('http://localhost:5000');
+
+interface MediaItem {
+  id: string;
+  type: 'image' | 'video';
+  url: string;
+}
+
+export default function App() {
+  // states
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [progress, setProgress] = useState<number>(0);
+  const [isGenerating, setIsGenerating] = useState<boolean>(false);
+  const [renderPercent, setRenderPercent] = useState<number>(0);
+  const [currentMedia, setCurrentMedia] = useState<string>(
+    'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
+  );
+  const [filter, setFilter] = useState<string>('none');
+  const [library, setLibrary] = useState<MediaItem[]>([]);
+  const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  // סנכרון בזמן אמת מול השרת
+  useEffect(() => {
+    socket.on('render_progress', (data: { progress: number }) => {
+      setRenderPercent(data.progress);
+    });
+
+    socket.on('render_complete', (data: { videoUrl: string }) => {
+      setIsGenerating(false);
+      setCurrentMedia(data.videoUrl);
+      setLibrary((prev) => [
+        { id: Date.now().toString(), type: 'video', url: data.videoUrl },
+        ...prev,
+      ]);
+    });
+
+    return () => {
+      socket.off('render_progress');
+      socket.off('render_complete');
+    };
+  }, []);
+
+  // ניהול ניגון
+  const togglePlay = () => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const handleStop = () => {
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+      setIsPlaying(false);
     }
+  };
 
-    body {
-      background-color: #000000;
-      color: #f4f4f5;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 12px;
-      overflow-x: hidden;
+  const skipTime = (seconds: number) => {
+    if (videoRef.current) {
+      videoRef.current.currentTime += seconds;
     }
+  };
 
-    /* App Container */
-    .app-container {
-      width: 100%;
-      max-width: 440px;
-      background-color: #0f0f11;
-      border: 1px solid #27272a;
-      border-radius: 36px;
-      padding: 20px;
-      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.9);
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-      max-height: 96vh;
-      overflow-y: auto;
-      position: relative;
-    }
-
-    /* Samsung One UI Header */
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 4px 8px;
-    }
-
-    .samsung-title-badge {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .user-profile {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: #27272a;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.1rem;
-      border: 1px solid #3f3f46;
-    }
-
-    header h1 {
-      font-size: 1.3rem;
-      color: #ffffff;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-    }
-
-    .settings-btn {
-      color: #a1a1aa;
-      font-size: 1.4rem;
-      cursor: pointer;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: #18181b;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-    }
-
-    .settings-btn:hover {
-      color: #38bdf8;
-      background: #27272a;
-    }
-
-    /* Universal API Key Section */
-    .api-key-container {
-      display: none;
-      background: #18181b;
-      border: 1px solid #3b82f6;
-      border-radius: 20px;
-      padding: 12px 16px;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .api-key-container.active {
-      display: flex;
-    }
-
-    .api-key-container label {
-      font-size: 0.8rem;
-      color: #60a5fa;
-      font-weight: 600;
-    }
-
-    .api-key-container input, .api-key-container select {
-      width: 100%;
-      background: #09090b;
-      border: 1px solid #27272a;
-      color: #fff;
-      padding: 10px 14px;
-      border-radius: 12px;
-      font-size: 0.85rem;
-      outline: none;
-    }
-
-    /* Preview Card Container */
-    .preview-card {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: #141417;
-      border: 1px solid #27272a;
-      border-radius: 24px;
-      padding: 12px;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .preview-header-actions {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 4px;
-    }
-
-    .preview-tag {
-      font-size: 0.75rem;
-      color: #a1a1aa;
-      font-weight: 600;
-      background: #27272a;
-      padding: 4px 10px;
-      border-radius: 20px;
-    }
-
-    .delete-media-btn {
-      background: rgba(239, 68, 68, 0.15);
-      color: #f87171;
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      border-radius: 20px;
-      padding: 4px 12px;
-      font-size: 0.75rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      transition: all 0.2s;
-    }
-
-    .delete-media-btn:hover {
-      background: #ef4444;
-      color: #fff;
-    }
-
-    /* Preview Screen - Fixed 21:9 Aspect Ratio */
-    .preview-screen {
-      width: 100%;
-      height: 220px;
-      background-color: #000000;
-      border-radius: 18px;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      cursor: pointer;
-      border: 1px solid #18181b;
-    }
-
-    .preview-screen.screen-editing {
-      animation: screenPulseMove 1.8s infinite ease-in-out;
-    }
-
-    @keyframes screenPulseMove {
-      0% { transform: scale(1) translateY(0); filter: blur(4px) brightness(0.8); }
-      50% { transform: scale(0.985) translateY(-3px); filter: blur(8px) brightness(1.1); }
-      100% { transform: scale(1) translateY(0); filter: blur(4px) brightness(0.8); }
-    }
-
-    .preview-screen img,
-    .preview-screen video {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: filter 0.3s, transform 0.3s;
-    }
-
-    /* AI Rendering Overlay inside Screen Only */
-    .ai-loading-overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(10, 10, 12, 0.88);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      z-index: 30;
-      border-radius: 18px;
-    }
-
-    .ai-loading-overlay.active {
-      display: flex;
-    }
-
-    .ai-spinner {
-      width: 46px;
-      height: 46px;
-      border: 4px solid rgba(59, 130, 246, 0.2);
-      border-top-color: #3b82f6;
-      border-radius: 50%;
-      animation: spinAnim 0.8s linear infinite;
-    }
-
-    @keyframes spinAnim {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    .ai-render-percent {
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: #38bdf8;
-      text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
-    }
-
-    .ai-loading-text {
-      color: #ffffff;
-      font-size: 0.85rem;
-      font-weight: 600;
-      text-align: center;
-      padding: 0 15px;
-    }
-
-    /* Samsung Play Button overlay */
-    .samsung-play-btn {
-      position: absolute;
-      width: 56px;
-      height: 56px;
-      background: rgba(24, 24, 27, 0.85);
-      border: 1.5px solid rgba(255, 255, 255, 0.2);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #ffffff;
-      font-size: 1.4rem;
-      backdrop-filter: blur(6px);
-      transition: opacity 0.3s, transform 0.2s;
-      z-index: 10;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .samsung-play-btn.visible {
-      opacity: 1;
-    }
-
-    .placeholder-text {
-      color: #52525b;
-      font-size: 0.95rem;
-    }
-
-    /* Progress Bar */
-    .progress-container {
-      width: 100%;
-      padding: 6px 0;
-      cursor: pointer;
-      touch-action: none;
-    }
-
-    .progress-bar-thick {
-      width: 100%;
-      height: 8px;
-      background: #27272a;
-      border-radius: 4px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      width: 0%;
-      height: 100%;
-      background: #3b82f6;
-      border-radius: 4px;
-      transition: width 0.1s linear;
-    }
-
-    /* Player Controls Container */
-    .player-controls {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      transition: opacity 0.3s, max-height 0.3s;
-      overflow: hidden;
-      opacity: 0;
-      max-height: 0;
-      pointer-events: none;
-    }
-
-    .player-controls.visible {
-      opacity: 1;
-      max-height: 100px;
-      pointer-events: auto;
-    }
-
-    .control-buttons {
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      direction: rtl;
-    }
-
-    .ctrl-btn {
-      background: none;
-      border: none;
-      color: #a1a1aa;
-      font-size: 0.75rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 3px;
-      cursor: pointer;
-      transition: color 0.2s;
-    }
-
-    .ctrl-btn span.icon {
-      font-size: 1.1rem;
-    }
-
-    .ctrl-btn:hover {
-      color: #3b82f6;
-    }
-
-    .section-title {
-      font-size: 0.85rem;
-      color: #9ca3af;
-      margin-bottom: 8px;
-      font-weight: 600;
-    }
-
-    /* Samsung AI Prompt Box */
-    .prompt-box {
-      background: #141417;
-      border: 1px solid #27272a;
-      border-radius: 20px;
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .prompt-box textarea {
-      width: 100%;
-      height: 65px;
-      background: transparent;
-      border: none;
-      color: #f4f4f5;
-      resize: none;
-      outline: none;
-      font-size: 0.9rem;
-    }
-
-    .surprise-btn {
-      align-self: flex-end;
-      background: #27272a;
-      color: #38bdf8;
-      border: 1px solid #38bdf8;
-      padding: 6px 16px;
-      border-radius: 20px;
-      font-weight: 600;
-      font-size: 0.8rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .surprise-btn:hover {
-      background: #38bdf8;
-      color: #000;
-    }
-
-    /* Dynamic Create Section */
-    .action-create-row {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      position: relative;
-    }
-
-    .btn-create-edit {
-      flex: 2;
-      background: #3b82f6;
-      color: #ffffff;
-      padding: 14px 10px;
-      border-radius: 18px;
-      border: none;
-      font-weight: 700;
-      font-size: 0.95rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
-      transition: all 0.2s;
-    }
-
-    .btn-create-edit:active {
-      transform: scale(0.98);
-    }
-
-    .btn-extend-video {
-      flex: 1;
-      background: #18181b;
-      color: #38bdf8;
-      border: 1px solid #38bdf8;
-      padding: 14px 8px;
-      border-radius: 18px;
-      font-weight: 700;
-      font-size: 0.8rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      white-space: nowrap;
-      transition: all 0.2s;
-    }
-
-    .btn-extend-video:hover {
-      background: #38bdf8;
-      color: #000;
-    }
-
-    /* Image AI Modal Options */
-    .create-options-modal {
-      display: none;
-      position: absolute;
-      top: 110%;
-      left: 0;
-      right: 0;
-      background: #18181b;
-      border: 1px solid #3b82f6;
-      border-radius: 20px;
-      padding: 12px;
-      gap: 10px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.8);
-      z-index: 150;
-    }
-
-    .create-options-modal.active {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .create-option-btn {
-      background: #27272a;
-      color: #fff;
-      border: none;
-      padding: 12px;
-      border-radius: 14px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .create-option-btn:hover {
-      background: #3b82f6;
-    }
-
-    .edit-status-msg {
-      display: none;
-      font-size: 0.85rem;
-      color: #4ade80;
-      background: rgba(74, 222, 128, 0.1);
-      border: 1px solid #22c55e;
-      padding: 10px;
-      border-radius: 14px;
-      text-align: center;
-      font-weight: 600;
-    }
-
-    /* Media Upload Options */
-    .media-type-selector {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      direction: rtl;
-    }
-
-    .media-type-btn {
-      background: #141417;
-      border: 1px solid #27272a;
-      border-radius: 16px;
-      padding: 12px;
-      color: #e4e4e7;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
-
-    .media-type-btn input {
-      display: none;
-    }
-
-    /* Camera Submenu */
-    .camera-options-menu {
-      display: none;
-      background: #141417;
-      border: 1px solid #3b82f6;
-      border-radius: 16px;
-      padding: 10px;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-
-    .camera-options-menu.active {
-      display: grid;
-    }
-
-    .cam-opt-btn {
-      background: #27272a;
-      color: #60a5fa;
-      border: none;
-      padding: 10px;
-      border-radius: 12px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
+  const handleGenerate = () => {
+    setIsGenerating(true);
+    setRenderPercent(0);
+    socket.emit('start_render', { action: 'generate' });
+  };
 
-    /* Filters Section */
-    .filters-container {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      background: #141417;
-      padding: 14px;
-      border-radius: 20px;
-      border: 1px solid #27272a;
+  const handleDelete = (id: string) => {
+    if (window.confirm('אתה בטוח?')) {
+      setLibrary((prev) => prev.filter((item) => item.id !== id));
+      setActiveMenuId(null);
     }
-
-    .filters-grid {
-      display: flex;
-      overflow-x: auto;
-      gap: 8px;
-      padding-bottom: 6px;
-    }
-
-    .filter-btn {
-      background-color: #27272a;
-      color: #e4e4e7;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 20px;
-      cursor: pointer;
-      font-size: 0.8rem;
-      font-weight: 600;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    .filter-btn.active {
-      background-color: #3b82f6;
-      color: #fff;
-    }
-
-    .intensity-container {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .intensity-header {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.8rem;
-      color: #a1a1aa;
-    }
-
-    .intensity-slider {
-      width: 100%;
-      accent-color: #3b82f6;
-      cursor: pointer;
-    }
-
-    /* Action Buttons */
-    .action-buttons {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .btn-main {
-      padding: 14px;
-      border-radius: 18px;
-      border: none;
-      font-weight: 700;
-      font-size: 0.95rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-
-    .btn-download-main {
-      background: #27272a;
-      color: #ffffff;
-      border: 1px solid #3f3f46;
-    }
-
-    .btn-share-main {
-      background: #27272a;
-      color: #38bdf8;
-      border: 1px solid #38bdf8;
-    }
-
-    /* Gallery Section */
-    .gallery-section {
-      margin-top: 10px;
-      border-top: 1px solid #27272a;
-      padding-top: 14px;
-    }
-
-    .gallery-section h3 {
-      font-size: 0.9rem;
-      color: #a1a1aa;
-      margin-bottom: 12px;
-    }
-
-    .gallery-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-    }
-
-    .gallery-item {
-      background-color: #141417;
-      border-radius: 16px;
-      padding: 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      border: 1px solid #27272a;
-    }
-
-    .gallery-item img,
-    .gallery-item video {
-      width: 100%;
-      height: 100px;
-      object-fit: cover;
-      border-radius: 10px;
-      background-color: #000;
-    }
-
-    .gallery-actions {
-      display: flex;
-      gap: 4px;
-    }
-
-    .btn-action {
-      flex: 1;
-      padding: 6px;
-      font-size: 0.75rem;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    .btn-action-download { background-color: #3b82f6; color: #fff; }
-    .btn-action-delete { background-color: #ef4444; color: #fff; }
-
-    .filters-grid::-webkit-scrollbar { height: 4px; }
-    .filters-grid::-webkit-scrollbar-thumb { background: #3f3f46; border-radius: 2px; }
-  </style>
-</head>
-<body>
-
-  <div class="app-container" id="app-container">
-    <!-- Samsung Header -->
-    <header>
-      <div class="samsung-title-badge">
-        <div class="user-profile">⚙️</div>
-        <h1>Samsung Studio AI</h1>
-      </div>
-      <div class="settings-btn" id="settings-btn">🔑</div>
-    </header>
-
-    <!-- Universal API Key Config -->
-    <div class="api-key-container" id="api-key-container">
-      <label for="ai-model-provider">ספק AI בסינכרון מלא:</label>
-      <select id="ai-model-provider">
-        <option value="studio-ai">Samsung Studio AI Engine</option>
-        <option value="openai">OpenAI (DALL-E 3 / Sora API)</option>
-        <option value="gemini">Google Gemini / Imagen</option>
-      </select>
-      <label for="api-key">מפתח API לפעולת המערכת:</label>
-      <input type="password" id="api-key" placeholder="ai-key-xxxxxxxxxxxxxxxxxxxxxxxx">
-    </div>
-
-    <!-- Enhanced Preview Card Container -->
-    <div class="preview-card" id="preview-card">
-      <div class="preview-header-actions">
-        <span class="preview-tag" id="preview-tag-label">תצוגה ראשית (21:9)</span>
-        <button class="delete-media-btn" id="delete-top-btn">🗑️ מחק מדיה</button>
-      </div>
-
-      <!-- Preview Screen - 21:9 Fixed -->
-      <div class="preview-screen" id="preview-screen">
-        <div class="ai-loading-overlay" id="ai-loading-overlay">
-          <div class="ai-spinner"></div>
-          <div class="ai-render-percent" id="ai-render-percent">0%</div>
-          <div class="ai-loading-text" id="ai-loading-text">מעבד ומקודד ב-AI...</div>
-        </div>
+  };
 
-        <div class="samsung-play-icon samsung-play-btn" id="samsung-play-icon">▶</div>
-        <span class="placeholder-text" id="placeholder-text">אין מדיה מוצגת</span>
-      </div>
+  return (
+    <div dir="rtl" className="min-h-screen bg-[#0A0A0B] text-white flex flex-col font-sans">
       
-      <!-- Video Player Controls -->
-      <div class="player-controls" id="player-controls">
-        <div class="progress-container" id="progress-container">
-          <div class="progress-bar-thick">
-            <div class="progress-fill" id="progress-fill"></div>
+      {/* Header קבוע */}
+      <header className="p-4 bg-[#1A1A1D] border-b border-gray-800 flex justify-between items-center z-50">
+        <h1 className="text-xl font-bold text-purple-500">AI-Media Studio Yaniv</h1>
+        <span className="text-xs text-green-400 bg-green-950/60 px-2 py-1 rounded">שמור אוטומטית</span>
+      </header>
+
+      {/* 1. נגן וידאו מרכזי צף ומקובע בחלק העליון (Sticky) */}
+      <div className="sticky top-0 z-40 bg-black border-b border-purple-900/50 shadow-2xl">
+        <div className="relative w-full h-[30vh] md:h-[50vh] flex items-center justify-center overflow-hidden">
+          <video
+            ref={videoRef}
+            src={currentMedia}
+            style={{ filter }}
+            className="w-full h-full object-contain"
+            onTimeUpdate={() => {
+              if (videoRef.current) {
+                setProgress(
+                  (videoRef.current.currentTime / videoRef.current.duration) * 100
+                );
+              }
+            }}
+          />
+
+          {/* overlay פקדים צפים עליונים */}
+          <div className="absolute top-2 right-2 flex gap-2">
+            <button className="bg-black/60 p-2 rounded-full hover:bg-purple-600 transition">
+              <RotateCcw size={16} />
+            </button>
+            <button className="bg-black/60 p-2 rounded-full hover:bg-purple-600 transition">
+              <RotateCw size={16} />
+            </button>
           </div>
         </div>
 
-        <div class="control-buttons">
-          <button class="ctrl-btn" id="btn-forward"><span class="icon">►►</span>קדימה</button>
-          <button class="ctrl-btn" id="btn-play"><span class="icon">▶</span>התחל</button>
-          <button class="ctrl-btn" id="btn-pause"><span class="icon">❚❚</span>השהה</button>
-          <button class="ctrl-btn" id="btn-stop"><span class="icon">◼</span>עצור</button>
-          <button class="ctrl-btn" id="btn-rewind"><span class="icon">◄◄</span>אחורה</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- AI Prompt Section -->
-    <div class="prompt-box">
-      <textarea id="ai-prompt" placeholder="תאר מה ליצור או לערוך ב-AI עבור התמונה/הסרטון..."></textarea>
-      <button class="surprise-btn" id="surprise-btn">הפתע אותי 🪄</button>
-    </div>
-
-    <!-- Create & Extend Buttons -->
-    <div class="action-create-row">
-      <button class="btn-create-edit" id="btn-create-edit">✨ צור ב-AI (10 שניות)</button>
-      <button class="btn-extend-video" id="btn-extend-video">➕ 10 ש' נוספות</button>
-
-      <!-- Image Options Modal -->
-      <div class="create-options-modal" id="create-options-modal">
-        <button class="create-option-btn" id="opt-text-to-video">🎥 צור וידאו ב-AI</button>
-        <button class="create-option-btn" id="opt-text-to-image">🖼️ צור תמונה ב-AI</button>
-      </div>
-    </div>
-
-    <div class="edit-status-msg" id="edit-status-msg">
-      התוכן שודרג ועובד בהצלחה ב-100%! ✅
-    </div>
-
-    <!-- Universal Media Upload Selector -->
-    <div class="media-type-selector">
-      <label class="media-type-btn">
-        🖼️ תמונה
-        <input type="file" accept="image/*,image/heic,image/heif,image/webp,image/svg+xml,image/bmp,image/gif,image/tiff,image/avif,.heic,.heif,.webp,.png,.jpg,.jpeg,.gif,.bmp" id="input-image">
-      </label>
-      <label class="media-type-btn">
-        🎥 סרטון
-        <input type="file" accept="video/*,video/mp4,video/webm,video/ogg,video/quicktime,.mp4,.webm,.mov,.avi" id="input-video">
-      </label>
-      <button class="media-type-btn" id="cam-toggle-btn" type="button">
-        📷 מצלמה
-      </button>
-    </div>
-
-    <!-- Camera Submenu -->
-    <div class="camera-options-menu" id="camera-options-menu">
-      <label class="cam-opt-btn">
-        📷 צלם תמונה
-        <input type="file" accept="image/*" capture="environment" id="input-camera-photo" style="display:none;">
-      </label>
-      <label class="cam-opt-btn">
-        🎥 צלם סרטון
-        <input type="file" accept="video/*" capture="environment" id="input-camera-video" style="display:none;">
-      </label>
-    </div>
-
-    <!-- Filters Section -->
-    <div class="filters-container">
-      <div class="section-title">🎨 פילטרים ואפקטים:</div>
-      <div class="filters-grid" id="filters-grid">
-        <button class="filter-btn active" data-filter="none">ללא פילטר</button>
-        <button class="filter-btn" data-filter="weather-rain">🌧️ אפקט גשם</button>
-        <button class="filter-btn" data-filter="weather-sun">☀️ שמש זוהרת</button>
-        <button class="filter-btn" data-filter="weather-hail">❄️ אפקט ברד</button>
-        <button class="filter-btn" data-filter="weather-rainbow">🌈 אפקט קשת</button>
-        <button class="filter-btn" data-filter="body-scan">🔬 שיקוף סורק</button>
-        <button class="filter-btn" data-filter="glow">🌟 זוהר</button>
-        <button class="filter-btn" data-filter="blinding-glow">💫 זוהר מסנוור</button>
-        <button class="filter-btn" data-filter="night-vision">🟢 ראיית לילה</button>
-        <button class="filter-btn" data-filter="xray">🩻 רנטגן</button>
-        <button class="filter-btn" data-filter="xray-electric">⚡ רנטגן חשמלי</button>
-        <button class="filter-btn" data-filter="golden-hour">🌅 שעת הזהב</button>
-        <button class="filter-btn" data-filter="bw-dramatic">🎬 שחור-לבן</button>
-        <button class="filter-btn" data-filter="cyberpunk">⚡ סייברפאנק</button>
-        <button class="filter-btn" data-filter="emerald-night">🌃 ליל אזמרגד</button>
-        <button class="filter-btn" data-filter="vintage">📜 וינטג'</button>
-        <button class="filter-btn" data-filter="blur">🌫️ טשטוש</button>
-        <button class="filter-btn" data-filter="high-contrast">🌓 קונטרסט</button>
-      </div>
-
-      <div class="intensity-container">
-        <div class="intensity-header">
-          <span>עוצמת הפילטר:</span>
-          <span id="intensity-value">100%</span>
-        </div>
-        <input type="range" id="intensity-slider" class="intensity-slider" min="1" max="100" value="100">
-      </div>
-    </div>
-
-    <!-- Actions -->
-    <div class="action-buttons">
-      <button class="btn-main btn-download-main" id="download-btn">⬇ הורדה</button>
-      <button class="btn-main btn-share-main" id="share-btn">🔗 שיתוף</button>
-    </div>
-
-    <!-- Gallery -->
-    <div class="gallery-section">
-      <h3>ספרית מדיה</h3>
-      <div class="gallery-grid" id="gallery-grid"></div>
-    </div>
-  </div>
-
-  <script>
-    const settingsBtn = document.getElementById('settings-btn');
-    const apiKeyContainer = document.getElementById('api-key-container');
-    const apiKeyInput = document.getElementById('api-key');
-    const aiModelProvider = document.getElementById('ai-model-provider');
-    const previewCard = document.getElementById('preview-card');
-    const previewScreen = document.getElementById('preview-screen');
-    const samsungPlayIcon = document.getElementById('samsung-play-icon');
-    const placeholderText = document.getElementById('placeholder-text');
-    const deleteTopBtn = document.getElementById('delete-top-btn');
-    const aiLoadingOverlay = document.getElementById('ai-loading-overlay');
-    const aiRenderPercent = document.getElementById('ai-render-percent');
-    const aiLoadingText = document.getElementById('ai-loading-text');
-    
-    const playerControls = document.getElementById('player-controls');
-    const progressContainer = document.getElementById('progress-container');
-    const progressFill = document.getElementById('progress-fill');
-    
-    const filterButtons = document.querySelectorAll('.filter-btn');
-    const intensitySlider = document.getElementById('intensity-slider');
-    const intensityValue = document.getElementById('intensity-value');
-    const downloadBtn = document.getElementById('download-btn');
-    const shareBtn = document.getElementById('share-btn');
-    
-    const btnCreateEdit = document.getElementById('btn-create-edit');
-    const btnExtendVideo = document.getElementById('btn-extend-video');
-    const createOptionsModal = document.getElementById('create-options-modal');
-    const optTextToVideo = document.getElementById('opt-text-to-video');
-    const optTextToImage = document.getElementById('opt-text-to-image');
-    
-    const editStatusMsg = document.getElementById('edit-status-msg');
-    const galleryGrid = document.getElementById('gallery-grid');
-    const surpriseBtn = document.getElementById('surprise-btn');
-    const aiPrompt = document.getElementById('ai-prompt');
-
-    const camToggleBtn = document.getElementById('cam-toggle-btn');
-    const cameraOptionsMenu = document.getElementById('camera-options-menu');
-
-    let currentMedia = null;
-    let mediaType = null;
-    let rawFile = null;
-    let selectedFilter = 'none';
-    let filterIntensity = 100;
-    let isDraggingProgress = false;
-    let videoDurationSeconds = 10;
-    let areControlsVisible = false;
-
-    camToggleBtn.addEventListener('click', () => cameraOptionsMenu.classList.toggle('active'));
-    settingsBtn.addEventListener('click', () => apiKeyContainer.classList.toggle('active'));
-
-    const prompts = [
-      "אריה רץ בסוואנה בשעת השקיעה עם אפקטים של ניאון מתקדמים",
-      "עיר עתידנית בלילה עם מכוניות מעופפות ואורות זוהרים",
-      "חללית חוצה גלקסיה צבעונית בסגנון היפר-ריאליסטי מהמם",
-      "נוף מושלג באלפים בשעת זריחה מוזהבת"
-    ];
-
-    surpriseBtn.addEventListener('click', () => {
-      aiPrompt.value = prompts[Math.floor(Math.random() * prompts.length)];
-    });
-
-    function hideScreenControls() {
-      areControlsVisible = false;
-      playerControls.classList.remove('visible');
-      samsungPlayIcon.classList.remove('visible');
-    }
-
-    function toggleScreenControls() {
-      if (!currentMedia) return;
-      areControlsVisible = !areControlsVisible;
-      if (areControlsVisible) {
-        playerControls.classList.add('visible');
-        samsungPlayIcon.classList.add('visible');
-      } else {
-        hideScreenControls();
-      }
-    }
-
-    ['input-video', 'input-image', 'input-camera-photo', 'input-camera-video'].forEach(id => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.addEventListener('change', async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        cameraOptionsMenu.classList.remove('active');
-        rawFile = file;
-
-        await simulateScreenRender(0, 100, 1200, "טוען ומעבד קובץ מדיה...");
-
-        const fileUrl = URL.createObjectURL(file);
-        if (file.type.startsWith('image/')) {
-          setMediaImage(fileUrl);
-        } else if (file.type.startsWith('video/')) {
-          setMediaVideo(fileUrl);
-        } else {
-          setMediaImage(fileUrl);
-        }
-      });
-    });
-
-    function simulateScreenRender(fromPct, toPct, durationMs, textLabel) {
-      return new Promise(resolve => {
-        previewScreen.classList.add('screen-editing');
-        aiLoadingOverlay.classList.add('active');
-        aiLoadingText.textContent = textLabel || "מעבד ומקודד...";
-
-        let startTime = null;
-        function step(timestamp) {
-          if (!startTime) startTime = timestamp;
-          const progress = Math.min((timestamp - startTime) / durationMs, 1);
-          const currentPct = Math.floor(fromPct + progress * (toPct - fromPct));
-          
-          aiRenderPercent.textContent = `${currentPct}%`;
-
-          if (progress < 1) {
-            requestAnimationFrame(step);
-          } else {
-            aiRenderPercent.textContent = `100%`;
-            setTimeout(() => {
-              previewScreen.classList.remove('screen-editing');
-              aiLoadingOverlay.classList.remove('active');
-              resolve();
-            }, 180);
-          }
-        }
-        requestAnimationFrame(step);
-      });
-    }
-
-    function setMediaImage(url) {
-      clearPreview();
-      mediaType = 'image';
-      currentMedia = document.createElement('img');
-      currentMedia.crossOrigin = "anonymous";
-      currentMedia.src = url;
-      placeholderText.style.display = 'none';
-      previewScreen.appendChild(currentMedia);
-      applyFilter();
-      hideScreenControls();
-    }
-
-    function setMediaVideo(url) {
-      clearPreview();
-      mediaType = 'video';
-      currentMedia = document.createElement('video');
-      currentMedia.crossOrigin = "anonymous";
-      currentMedia.src = url;
-      currentMedia.controls = false;
-      currentMedia.autoplay = true;
-      currentMedia.loop = true;
-      currentMedia.playsInline = true;
-
-      currentMedia.addEventListener('timeupdate', updateProgressBar);
-      currentMedia.addEventListener('play', () => { samsungPlayIcon.textContent = '❚❚'; });
-      currentMedia.addEventListener('pause', () => { samsungPlayIcon.textContent = '▶'; });
-
-      placeholderText.style.display = 'none';
-      previewScreen.appendChild(currentMedia);
-      applyFilter();
-      hideScreenControls();
-    }
-
-    function clearPreview() {
-      if (currentMedia) {
-        if (mediaType === 'video') {
-          currentMedia.pause();
-          currentMedia.removeAttribute('src');
-          currentMedia.load();
-        }
-        currentMedia.remove();
-        currentMedia = null;
-      }
-      previewScreen.innerHTML = '';
-      previewScreen.appendChild(aiLoadingOverlay);
-      previewScreen.appendChild(samsungPlayIcon);
-      previewScreen.appendChild(placeholderText);
-      placeholderText.style.display = 'block';
-      progressFill.style.width = '0%';
-      samsungPlayIcon.textContent = '▶';
-      editStatusMsg.style.display = 'none';
-      hideScreenControls();
-      rawFile = null;
-    }
-
-    deleteTopBtn.addEventListener('click', clearPreview);
-
-    previewScreen.addEventListener('click', (e) => {
-      if (e.target === deleteTopBtn || e.target.closest('.delete-media-btn')) return;
-      if (!currentMedia) return;
-
-      toggleScreenControls();
-
-      if (mediaType === 'video') {
-        if (currentMedia.paused) {
-          currentMedia.play();
-        } else {
-          currentMedia.pause();
-        }
-      }
-    });
-
-    document.getElementById('btn-play').onclick = () => currentMedia && currentMedia.play && currentMedia.play();
-    document.getElementById('btn-pause').onclick = () => currentMedia && currentMedia.pause && currentMedia.pause();
-    document.getElementById('btn-stop').onclick = () => {
-      if (currentMedia && currentMedia.pause) {
-        currentMedia.pause();
-        currentMedia.currentTime = 0;
-      }
-    };
-    document.getElementById('btn-forward').onclick = () => {
-      if (currentMedia && mediaType === 'video') currentMedia.currentTime += 5;
-    };
-    document.getElementById('btn-rewind').onclick = () => {
-      if (currentMedia && mediaType === 'video') currentMedia.currentTime -= 5;
-    };
-
-    function updateProgressBar() {
-      if (!currentMedia || isDraggingProgress || !currentMedia.duration) return;
-      const pct = (currentMedia.currentTime / currentMedia.duration) * 100;
-      progressFill.style.width = `${pct}%`;
-    }
-
-    function seekMedia(e) {
-      if (!currentMedia || mediaType !== 'video' || !currentMedia.duration) return;
-      const rect = progressContainer.getBoundingClientRect();
-      const clickX = e.clientX || (e.touches && e.touches[0].clientX);
-      
-      let posX = rect.right - clickX;
-      posX = Math.max(0, Math.min(posX, rect.width));
-      const percentage = posX / rect.width;
-      
-      currentMedia.currentTime = percentage * currentMedia.duration;
-      progressFill.style.width = `${percentage * 100}%`;
-    }
-
-    progressContainer.addEventListener('mousedown', (e) => { isDraggingProgress = true; seekMedia(e); });
-    window.addEventListener('mousemove', (e) => { if (isDraggingProgress) seekMedia(e); });
-    window.addEventListener('mouseup', () => { isDraggingProgress = false; });
-
-    filterButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        filterButtons.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        selectedFilter = btn.dataset.filter;
-        applyFilter();
-      });
-    });
-
-    intensitySlider.addEventListener('input', (e) => {
-      filterIntensity = e.target.value;
-      intensityValue.textContent = `${filterIntensity}%`;
-      applyFilter();
-    });
-
-    function getCSSFilterString() {
-      if (selectedFilter === 'none') return 'none';
-      const f = filterIntensity / 100;
-
-      switch (selectedFilter) {
-        case 'weather-rain':
-          return `brightness(${1 - 0.15 * f}) contrast(${1 + 0.2 * f}) saturate(${1 - 0.2 * f}) hue-rotate(${10 * f}deg)`;
-        case 'weather-sun':
-          return `brightness(${1 + 0.35 * f}) saturate(${1 + 0.5 * f}) sepia(${0.3 * f})`;
-        case 'weather-hail':
-          return `brightness(${1 + 0.2 * f}) contrast(${1 + 0.4 * f}) grayscale(${0.3 * f}) saturate(${1 - 0.3 * f})`;
-        case 'weather-rainbow':
-          return `saturate(${1 + 1.5 * f}) hue-rotate(${45 * f}deg) brightness(${1 + 0.1 * f})`;
-        case 'body-scan':
-          return `invert(${0.9 * f}) hue-rotate(${140 * f}deg) saturate(${1 + 4 * f}) contrast(${1 + 3 * f}) brightness(${1.1 * f})`;
-        case 'glow': 
-          return `brightness(${1 + 0.3 * f}) drop-shadow(0 0 ${12 * f}px rgba(255,255,255,0.8)) saturate(${1 + 0.2 * f})`;
-        case 'blinding-glow': 
-          return `brightness(${1 + 1.2 * f}) contrast(${1 + 0.8 * f}) drop-shadow(0 0 ${25 * f}px #ffffff)`;
-        case 'night-vision': 
-          return `hue-rotate(${90 * f}deg) saturate(${1 + 3 * f}) brightness(${1 + 0.4 * f}) contrast(${1 + 0.5 * f})`;
-        case 'xray': 
-          return `invert(${f}) grayscale(${f}) contrast(${1 + 2 * f}) brightness(${1 - 0.1 * f})`;
-        case 'xray-electric': 
-          return `invert(${f}) hue-rotate(${190 * f}deg) saturate(${1 + 4 * f}) contrast(${1 + 2.5 * f})`;
-        case 'golden-hour': 
-          return `sepia(${0.5 * f}) saturate(${1 + 0.8 * f}) brightness(${1 + 0.1 * f})`;
-        case 'bw-dramatic': 
-          return `grayscale(${f}) contrast(${1 + 1.5 * f})`;
-        case 'cyberpunk': 
-          return `hue-rotate(${180 * f}deg) saturate(${1 + 2 * f})`;
-        case 'emerald-night': 
-          return `hue-rotate(${100 * f}deg) saturate(${1 + 1.2 * f}) brightness(${1 - 0.2 * f})`;
-        case 'vintage': 
-          return `sepia(${0.6 * f}) contrast(${1 - 0.1 * f})`;
-        case 'blur': 
-          return `blur(${4 * f}px)`;
-        case 'high-contrast': 
-          return `contrast(${1 + f})`;
-        default: 
-          return 'none';
-      }
-    }
-
-    function applyFilter() {
-      if (currentMedia) {
-        currentMedia.style.filter = getCSSFilterString();
-        currentMedia.style.transform = 'scaleX(1)';
-      }
-    }
-
-    btnCreateEdit.addEventListener('click', () => {
-      createOptionsModal.classList.toggle('active');
-    });
-
-    optTextToVideo.addEventListener('click', () => {
-      createOptionsModal.classList.remove('active');
-      runAIGeneration('text-to-video');
-    });
-
-    optTextToImage.addEventListener('click', () => {
-      createOptionsModal.classList.remove('active');
-      runAIGeneration('text-to-image');
-    });
-
-    btnExtendVideo.addEventListener('click', async () => {
-      if (!currentMedia || mediaType !== 'video') {
-        alert('אנא בחר או צור סרטון תחילה כדי להאריך אותו.');
-        return;
-      }
-      videoDurationSeconds += 10;
-      runAIGeneration('extend-video');
-    });
-
-    async function runAIGeneration(mode) {
-      const promptText = aiPrompt.value.trim();
-      const activeProvider = aiModelProvider.value;
-      const apiKeyVal = apiKeyInput.value.trim();
-
-      if (mediaType === 'video' && currentMedia && typeof currentMedia.pause === 'function') {
-        currentMedia.pause();
-      }
-
-      let statusMsg = `מעבד באמצעות מנוע ${activeProvider}...`;
-      if (mode === 'extend-video') statusMsg = `מאריך וידאו ל-${videoDurationSeconds} שניות (${activeProvider})...`;
-      else if (mode === 'text-to-video') statusMsg = `יוצר וידאו ב-AI מנוע ${activeProvider}...`;
-      else if (mode === 'text-to-image') statusMsg = `יוצר תמונה ב-AI מנוע ${activeProvider}...`;
-
-      await simulateScreenRender(0, 100, 2200, statusMsg);
-
-      if (mode === 'text-to-image') {
-        const canvas = document.createElement('canvas');
-        canvas.width = 1080; canvas.height = 1080;
-        const ctx = canvas.getContext('2d');
-        
-        ctx.fillStyle = '#09090b';
-        ctx.fillRect(0,0,canvas.width,canvas.height);
-
-        const grad = ctx.createLinearGradient(0,0,canvas.width,canvas.height);
-        grad.addColorStop(0, '#0f172a');
-        grad.addColorStop(1, '#38bdf8');
-        ctx.fillStyle = grad;
-        ctx.fillRect(40,40,canvas.width-80,canvas.height-80);
-
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 36px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(promptText || `נוצר ע"י ${activeProvider}`, canvas.width/2, canvas.height/2);
-
-        canvas.toBlob((blob) => {
-          rawFile = new File([blob], `studio_image_${Date.now()}.png`, { type: 'image/png' });
-          setMediaImage(URL.createObjectURL(blob));
-        }, 'image/png');
-      } else {
-        const canvas = document.createElement('canvas');
-        canvas.width = 854; canvas.height = 480;
-        const ctx = canvas.getContext('2d');
-        const stream = canvas.captureStream(30);
-        const recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
-        const chunks = [];
-
-        recorder.ondataavailable = e => chunks.push(e.data);
-        const videoDonePromise = new Promise(resolve => {
-          recorder.onstop = () => {
-            const blob = new Blob(chunks, { type: 'video/webm' });
-            resolve(blob);
-          };
-        });
-
-        recorder.start();
-        let frame = 0;
-        const maxFrames = 30 * Math.min(videoDurationSeconds, 30);
-
-        function drawAnimatedFrame() {
-          ctx.fillStyle = '#050507';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-          
-          ctx.beginPath();
-          ctx.strokeStyle = '#38bdf8';
-          ctx.lineWidth = 5;
-          for (let x = 0; x < canvas.width; x += 10) {
-            let y = canvas.height/2 + Math.sin((x + frame * 6) * 0.02) * 50;
-            if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-          }
-          ctx.stroke();
-
-          ctx.fillStyle = '#ffffff';
-          ctx.font = 'bold 24px sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText(`AI Video (${activeProvider}): ${promptText || 'תואם לבקשה'}`, canvas.width/2, 80);
-
-          frame++;
-          if (frame < maxFrames) {
-            requestAnimationFrame(drawAnimatedFrame);
-          } else {
-            recorder.stop();
-          }
-        }
-
-        drawAnimatedFrame();
-        const generatedBlob = await videoDonePromise;
-        rawFile = new File([generatedBlob], `studio_video_${Date.now()}.webm`, { type: 'video/webm' });
-        setMediaVideo(URL.createObjectURL(generatedBlob));
-      }
-
-      editStatusMsg.style.display = 'block';
-      editStatusMsg.textContent = `התוכן עובד בהצלחה דרך ${activeProvider} והוחזר למסך! ✅`;
-    }
-
-    async function getExportableFile() {
-      if (!currentMedia) return null;
-
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-
-      if (mediaType === 'image') {
-        canvas.width = currentMedia.naturalWidth || 1080;
-        canvas.height = currentMedia.naturalHeight || 1080;
-
-        ctx.save();
-        ctx.filter = getCSSFilterString();
-        ctx.drawImage(currentMedia, 0, 0, canvas.width, canvas.height);
-        ctx.restore();
-
-        return new Promise(resolve => {
-          canvas.toBlob(blob => {
-            if (!blob) return resolve(null);
-            const file = new File([blob], `image_${Date.now()}.png`, { type: 'image/png' });
-            resolve({ blob, file, type: 'image', ext: 'png' });
-          }, 'image/png');
-        });
-      } else if (mediaType === 'video') {
-        if (rawFile && selectedFilter === 'none') {
-          return { blob: rawFile, file: rawFile, type: 'video', ext: 'webm' };
-        }
-
-        canvas.width = currentMedia.videoWidth || 854;
-        canvas.height = currentMedia.videoHeight || 480;
-
-        const stream = canvas.captureStream(30);
-        const recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
-        const chunks = [];
-
-        recorder.ondataavailable = e => chunks.push(e.data);
-
-        return new Promise(resolve => {
-          recorder.onstop = () => {
-            const blob = new Blob(chunks, { type: 'video/webm' });
-            const file = new File([blob], `video_${Date.now()}.webm`, { type: 'video/webm' });
-            resolve({ blob, file, type: 'video', ext: 'webm' });
-          };
-
-          currentMedia.currentTime = 0;
-          currentMedia.play();
-          recorder.start();
-
-          const renderFrame = () => {
-            if (currentMedia.ended || currentMedia.paused) {
-              recorder.stop();
-              return;
+        {/* סרגל זמן (Scrubbing Bar) */}
+        <input
+          type="range"
+          min="0"
+          max="100"
+          value={progress || 0}
+          onChange={(e) => {
+            if (videoRef.current) {
+              const newTime = (Number(e.target.value) / 100) * videoRef.current.duration;
+              videoRef.current.currentTime = newTime;
+              setProgress(Number(e.target.value));
             }
-            ctx.save();
-            ctx.filter = getCSSFilterString();
-            ctx.drawImage(currentMedia, 0, 0, canvas.width, canvas.height);
-            ctx.restore();
-            requestAnimationFrame(renderFrame);
-          };
-          renderFrame();
-        });
-      }
+          }}
+          className="w-full accent-purple-600 h-1 bg-gray-700 cursor-pointer block"
+        />
+      </div>
+
+      {/* שאר חלקי המסך נגללים בלבד */}
+      <main className="flex-1 p-4 space-y-6 max-w-4xl mx-auto w-full">
+
+        {/* 2. פס תחבורה */}
+        <div className="flex justify-center items-center gap-4 bg-[#1A1A1D] p-3 rounded-xl border border-gray-800">
+          <button onClick={() => skipTime(-2)} className="p-2 hover:bg-gray-800 rounded">
+            <SkipBack size={20} />
+          </button>
+          <button onClick={togglePlay} className="p-3 bg-purple-600 rounded-full hover:bg-purple-500">
+            {isPlaying ? <Pause size={24} /> : <Play size={24} />}
+          </button>
+          <button onClick={handleStop} className="p-2 hover:bg-gray-800 rounded">
+            <Square size={20} />
+          </button>
+          <button onClick={() => skipTime(2)} className="p-2 hover:bg-gray-800 rounded">
+            <SkipForward size={20} />
+          </button>
+        </div>
+
+        {/* 3. אזור יצירה והארכה */}
+        <div className="flex flex-col md:flex-row gap-3">
+          <button
+            onClick={handleGenerate}
+            disabled={isGenerating}
+            className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 disabled:opacity-50"
+          >
+            {isGenerating ? (
+              <span className="animate-pulse">{renderPercent}% מעבד...</span>
+            ) : (
+              <>
+                <Sparkles size={20} /> צור וידאו
+              </>
+            )}
+          </button>
+          <button 
+            onClick={handleGenerate} 
+            className="bg-[#1A1A1D] px-4 py-3 rounded-xl border border-gray-700 font-semibold hover:bg-gray-800 flex items-center justify-center gap-2"
+          >
+            <PlusCircle size={18} /> הארכה (+10 ש')
+          </button>
+          <button className="bg-[#1A1A1D] px-4 py-3 rounded-xl border border-gray-700 font-semibold hover:bg-gray-800 flex items-center justify-center gap-2">
+            🎲 הפתע אותי AI
+          </button>
+        </div>
+
+        {/* 4. העלאת מדיה */}
+        <div className="grid grid-cols-3 gap-3">
+          <label className="bg-[#1A1A1D] p-3 rounded-xl border border-gray-800 flex flex-col items-center gap-2 cursor-pointer hover:border-purple-500">
+            <ImageIcon className="text-purple-400" />
+            <span className="text-xs">תמונה בלבד</span>
+            <input type="file" accept="image/*" className="hidden" />
+          </label>
+          <label className="bg-[#1A1A1D] p-3 rounded-xl border border-gray-800 flex flex-col items-center gap-2 cursor-pointer hover:border-purple-500">
+            <VideoIcon className="text-purple-400" />
+            <span className="text-xs">וידאו בלבד</span>
+            <input type="file" accept="video/*" className="hidden" />
+          </label>
+          <label className="bg-[#1A1A1D] p-3 rounded-xl border border-gray-800 flex flex-col items-center gap-2 cursor-pointer hover:border-purple-500">
+            <Camera className="text-purple-400" />
+            <span className="text-xs">מצלמה</span>
+            <input type="file" accept="image/*,video/*" capture="environment" className="hidden" />
+          </label>
+        </div>
+
+        {/* 5. 6 מנועי ליבה + שיבוט קולי */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {['Inpainting', 'Image-to-Video', 'Text-to-Video', 'Video-to-Video', 'Lip-Sync'].map((engine) => (
+            <button key={engine} className="bg-[#1A1A1D] p-3 rounded-xl border border-gray-800 text-sm hover:border-purple-500 text-right">
+              ⚡ {engine}
+            </button>
+          ))}
+          <button className="bg-[#1A1A1D] p-3 rounded-xl border border-gray-800 text-sm hover:border-purple-500 flex items-center gap-2 col-span-2 md:col-span-1">
+            <Mic size={16} className="text-red-400" /> שיבוט קולי (5 ש')
+          </button>
+        </div>
+
+        {/* 6. פילטרים וצבעים */}
+        <div className="bg-[#1A1A1D] p-4 rounded-xl border border-gray-800 space-y-2">
+          <div className="flex items-center gap-2 font-semibold">
+            <Palette size={18} className="text-purple-400" /> עריכת צבעים ופילטרים
+          </div>
+          <div className="flex gap-2">
+            <button onClick={() => setFilter('none')} className="px-3 py-1 bg-gray-800 rounded text-xs">רגיל</button>
+            <button onClick={() => setFilter('grayscale(100%)')} className="px-3 py-1 bg-gray-800 rounded text-xs">שחור לבן</button>
+            <button onClick={() => setFilter('saturate(200%)')} className="px-3 py-1 bg-gray-800 rounded text-xs">צבעוני חי</button>
+            <button onClick={() => setFilter('hue-rotate(90deg)')} className="px-3 py-1 bg-gray-800 rounded text-xs">מניפה / עשיר</button>
+          </div>
+        </div>
+
+        {/* 7. ייצוא ושיתוף */}
+        <div className="flex gap-3">
+          <a
+            href={currentMedia}
+            download="rendered-video.mp4"
+            className="flex-1 bg-gray-800 py-3 rounded-xl border border-gray-700 font-semibold flex items-center justify-center gap-2 hover:bg-gray-700"
+          >
+            <Download size={18} /> הורדה למכשיר
+          </a>
+          <button className="flex-1 bg-green-700 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-green-600">
+            <Share2 size={18} /> שתף בוואטסאפ
+          </button>
+        </div>
+
+        {/* 8. ספרייה אישית */}
+        <div className="space-y-3 pt-4">
+          <h2 className="text-lg font-bold">ספרייה אישית</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {library.map((item) => (
+              <div key={item.id} className="relative group bg-[#1A1A1D] rounded-xl overflow-hidden border border-gray-800">
+                <video src={item.url} className="w-full h-24 object-cover" />
+                <button
+                  onClick={() => setActiveMenuId(activeMenuId === item.id ? null : item.id)}
+                  className="absolute top-1 left-1 bg-black/70 p-1 rounded-full text-white"
+                >
+                  <MoreVertical size={14} />
+                </button>
+
+                {/* תפריט מחיקה / הורדה / שיתוף */}
+                {activeMenuId === item.id && (
+                  <div className="absolute top-8 left-1 bg-black/90 border border-gray-700 rounded-lg p-2 space-y-1 text-xs z-10 shadow-lg">
+                    <button onClick={() => handleDelete(item.id)} className="flex items-center gap-1 text-red-400 w-full text-right p-1 hover:bg-gray-800 rounded">
+                      <Trash2 size={12} /> מחיקה
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+      </main>
+    </div>
+  );
+}{
+  "short_name": "Studio Yaniv",
+  "name": "AI-Media Studio Yaniv",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
     }
+  ],
+  "start_url": "/",
+  "background_color": "#0A0A0B",
+  "theme_color": "#7C3AED",
+  "display": "standalone",
+  "orientation": "portrait"
+}
 
-    function triggerDeviceDownload(blob, filename) {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => {
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }, 100);
-    }
-
-    function addToGallery(exportData) {
-      const url = URL.createObjectURL(exportData.blob);
-      const item = document.createElement('div');
-      item.className = 'gallery-item';
-
-      const mediaEl = exportData.type === 'image' ? document.createElement('img') : document.createElement('video');
-      mediaEl.src = url;
-      if (exportData.type === 'video') mediaEl.controls = true;
-
-      const actions = document.createElement('div');
-      actions.className = 'gallery-actions';
-
-      const downloadBtnSmall = document.createElement('button');
-      downloadBtnSmall.className = 'btn-action btn-action-download';
-      downloadBtnSmall.textContent = 'הורד';
-      downloadBtnSmall.onclick = () => triggerDeviceDownload(exportData.blob, `samsung_studio_${Date.now()}.${exportData.ext}`);
-
-      const deleteBtnSmall = document.createElement('button');
-      deleteBtnSmall.className = 'btn-action btn-action-delete';
-      deleteBtnSmall.textContent = 'מחק';
-      deleteBtnSmall.onclick = () => item.remove();
-
-      actions.appendChild(downloadBtnSmall);
-      actions.appendChild(deleteBtnSmall);
-      item.appendChild(mediaEl);
-      item.appendChild(actions);
-      galleryGrid.prepend(item);
-    }
-
-    downloadBtn.addEventListener('click', async () => {
-      if (!currentMedia) {
-        alert('אין מדיה להורדה.');
-        return;
-      }
-
-      await simulateScreenRender(0, 100, 1000, "מכין קובץ להורדה...");
-      
-      try {
-        const exportData = await getExportableFile();
-        if (exportData) {
-          triggerDeviceDownload(exportData.blob, `samsung_studio_${Date.now()}.${exportData.ext}`);
-          addToGallery(exportData);
-        }
-      } catch (err) {
-        console.error(err);
-        alert('אירעה שגיאה בזמן יצירת הקובץ להורדה.');
-      }
-    });
-
-    shareBtn.addEventListener('click', async () => {
-      if (!currentMedia) {
-        alert('אין מדיה לשיתוף.');
-        return;
-      }
-
-      await simulateScreenRender(0, 100, 1000, "מכין קובץ לשיתוף...");
-
-      try {
-        const exportData = await getExportableFile();
-        if (exportData && exportData.file) {
-          if (navigator.canShare && navigator.canShare({ files: [exportData.file] })) {
-            await navigator.share({
-              title: 'Samsung Studio AI',
-              text: 'שתף מתוך Samsung Studio AI',
-              files: [exportData.file]
-            });
-          } else {
-            triggerDeviceDownload(exportData.blob, exportData.file.name);
-          }
-        }
-      } catch (err) {
-        console.error(err);
-        alert('שיתוף קבצים אינו נתמך בדפדפן זה, הקובץ יורד למכשיר.');
-      }
-    });
-  </script>
-</body>
-</html>
