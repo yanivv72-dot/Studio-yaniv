@@ -1,1150 +1,613 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="he" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Studio Yaniv</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='15%25' y1='10%25' x2='85%25' y2='95%25'%3E%3Cstop offset='0%25' stop-color='%23c4e4ff'/%3E%3Cstop offset='50%25' stop-color='%2368b6f3'/%3E%3Cstop offset='100%25' stop-color='%232b84db'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='4' y='4' width='112' height='112' rx='28' fill='url(%23g)'/%3E%3Cpath d='M24 53 C42 56 52 70 55 104 C62 76 75 54 92 24 C85 52 70 74 55 104 C53 78 40 62 24 53Z' fill='%230a78e6'/%3E%3Ctext x='53' y='57' text-anchor='middle' font-family='Arial' font-weight='900' font-size='42' fill='%230a78e6'%3ES%3C/text%3E%3Ccircle cx='77' cy='36' r='6' fill='%230a78e6'/%3E%3C/svg%3E" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://js.puter.com/v2/" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js" defer></script>
-  <style>
-    :root{--bg:#070a12;--card:#101624;--elevated:#172034;--border:rgba(255,255,255,.1);--accent:#38bdf8;--primary:linear-gradient(135deg,#2563eb,#0ea5e9);--vid:linear-gradient(135deg,#7c3aed,#2563eb);--text:#f8fafc;--muted:#94a3b8;--radius:16px}
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'Heebo',system-ui,-apple-system,sans-serif;background:radial-gradient(circle at top,#0d162a 0%,var(--bg) 60%);color:var(--text);min-height:100dvh;padding-bottom:20px}
-    .topbar{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:rgba(7,10,18,.9);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);gap:8px;flex-wrap:wrap}
-    .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.06rem}
-    .brand-logo{width:38px;height:38px;flex-shrink:0;filter:drop-shadow(0 2px 8px rgba(56,189,248,.35))}
-    .top-controls{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-    .ratio-pills{display:flex;gap:2px;background:var(--card);border:1px solid var(--border);padding:3px;border-radius:999px}
-    .ratio-btn{background:transparent;border:none;color:var(--muted);padding:3px 8px;border-radius:999px;font-family:inherit;font-size:.72rem;cursor:pointer}
-    .ratio-btn.active{background:var(--primary);color:#fff;font-weight:700}
-    .top-pill-btn{background:var(--card);border:1px solid var(--border);color:var(--text);padding:6px 11px;border-radius:999px;font-family:inherit;font-size:.78rem;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
-    .top-pill-btn.dl-pill{background:#fff;color:#09090b;border-color:#fff}
-    .studio-wrap{width:100%;max-width:860px;margin:10px auto 0;padding:0 12px;display:flex;flex-direction:column;gap:10px}
-    .mask-bar{display:none;align-items:center;justify-content:center;gap:6px;background:var(--card);border:1px solid var(--border);padding:6px 10px;border-radius:12px;flex-wrap:wrap}
-    .mask-bar.visible{display:flex}
-    .tool-chip{background:var(--elevated);border:1px solid var(--border);color:var(--text);padding:4px 10px;border-radius:999px;font-family:inherit;font-size:.75rem;cursor:pointer}
-    .tool-chip.active{background:#fff;color:#09090b;font-weight:700}
-    .viewport{position:relative;width:100%;background:#03050a;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;display:flex;align-items:center;justify-content:center;aspect-ratio:16/9;max-height:48dvh;margin:0 auto;user-select:none}
-    .viewport.ratio-9-16{aspect-ratio:9/16;max-width:270px;max-height:52dvh}
-    .viewport.ratio-1-1{aspect-ratio:1/1;max-width:360px;max-height:48dvh}
-    #mainVideo,#mainImage{width:100%;height:100%;object-fit:contain;display:none}
-    #maskCanvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;display:none;z-index:12;touch-action:none}
-    .empty-icon{width:54px;height:54px;border-radius:50%;background:rgba(56,189,248,.14);border:1px solid rgba(56,189,248,.35);display:flex;align-items:center;justify-content:center;color:#38bdf8}
-    .center-play{position:absolute;z-index:15;width:58px;height:58px;border-radius:50%;background:rgba(0,0,0,.55);border:1.5px solid rgba(255,255,255,.88);display:none;align-items:center;justify-content:center;cursor:pointer}
-    .center-play.visible{display:flex}
-    .center-play svg{fill:#fff;margin-left:3px}
-    .timeline-overlay{position:absolute;bottom:0;left:0;right:0;padding:18px 10px 7px;background:linear-gradient(to top,rgba(0,0,0,.9),transparent);z-index:20;display:none;transition:opacity .25s}
-    .timeline-overlay.active{display:block}
-    .timeline-overlay.auto-hidden{opacity:0;pointer-events:none}
-    .scrubber-row{display:flex;align-items:center;gap:8px;direction:ltr}
-    #timelineSlider{flex:1;accent-color:var(--accent);cursor:pointer;height:4px}
-    .time-badge{font-size:.72rem;color:#e2e8f0;font-variant-numeric:tabular-nums;min-width:88px;text-align:center}
-    .render-overlay,.quota-overlay{position:absolute;inset:0;background:rgba(5,7,12,.92);backdrop-filter:blur(8px);display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;z-index:30;padding:16px;text-align:center}
-    .render-overlay.active,.quota-overlay.active{display:flex}
-    .quota-actions{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:420px}
-    .q-btn{background:var(--elevated);border:1px solid var(--border);color:var(--text);padding:7px 12px;border-radius:10px;font-family:inherit;font-size:.78rem;font-weight:700;cursor:pointer;text-decoration:none}
-    .q-btn.primary{background:var(--primary);border:none;color:#fff}
-    .progress-ring-wrap{position:relative;width:76px;height:76px;display:flex;align-items:center;justify-content:center}
-    .progress-ring-wrap svg{transform:rotate(-90deg)}
-    .ring-bg{fill:none;stroke:rgba(255,255,255,.1);stroke-width:6}
-    .ring-fill{fill:none;stroke:#38bdf8;stroke-width:6;stroke-linecap:round;stroke-dasharray:201;stroke-dashoffset:201}
-    .progress-pct{position:absolute;font-size:1.05rem;font-weight:800;font-variant-numeric:tabular-nums;color:#fff}
-    .progress-bar-track{width:min(210px,76%);height:4px;background:rgba(255,255,255,.1);border-radius:999px;overflow:hidden}
-    .progress-bar-fill{height:100%;width:1%;background:var(--primary)}
-    .playback-bar{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--border);border-radius:13px;padding:6px 8px;gap:6px;flex-wrap:wrap}
-    .transport{display:flex;align-items:center;gap:5px;direction:ltr}
-    .ctrl-btn{background:var(--elevated);border:1px solid var(--border);color:var(--text);width:38px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.9rem}
-    .ctrl-btn:disabled{opacity:.3;cursor:not-allowed}
-    .ctrl-btn.play-main{background:var(--primary);border-color:transparent}
-    .eraser-controls{display:flex;align-items:center;gap:5px}
-    .btn-eraser{background:var(--elevated);border:1px solid var(--border);color:var(--text);padding:6px 10px;border-radius:9px;font-family:inherit;font-size:.77rem;font-weight:600;cursor:pointer}
-    .btn-eraser.active{background:#fff;color:#09090b}
-    .btn-eraser.danger{background:rgba(239,68,68,.14);border-color:rgba(239,68,68,.38);color:#fca5a5}
-    .btn-eraser:disabled{opacity:.32;cursor:not-allowed}
-    .prompt-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:11px;display:flex;flex-direction:column;gap:9px}
-    .text-input-row{position:relative;display:flex;align-items:flex-start;background:#06080f;border:1px solid var(--border);border-radius:12px;padding:4px 4px 4px 40px}
-    #promptInput{flex:1;background:transparent;border:none;color:var(--text);padding:8px 10px;font-family:inherit;font-size:.94rem;resize:none;min-height:52px;outline:none}
-    .clear-text-btn{position:absolute;left:8px;top:8px;width:28px;height:28px;border-radius:8px;background:var(--elevated);border:1px solid var(--border);color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.85rem}
-    .clear-text-btn:hover{color:#fca5a5;border-color:rgba(239,68,68,.45)}
-    .quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-    .act-btn{border:1px solid var(--border);border-radius:11px;padding:11px 8px;font-family:inherit;font-size:.87rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
-    .act-btn:disabled{opacity:.4;cursor:not-allowed}
-    .btn-vid{background:var(--vid);color:#fff;border:none}
-    .btn-img{background:var(--primary);color:#fff;border:none}
-    .btn-ext{background:rgba(16,185,129,.16);color:#6ee7b7;border-color:rgba(16,185,129,.35)}
-    .btn-surp{background:var(--elevated);color:var(--text)}
-    .upload-suite{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-    .upload-wrap{position:relative}
-    .upload-btn{width:100%;background:var(--card);border:1px solid var(--border);color:var(--text);padding:11px;border-radius:12px;font-family:inherit;font-size:.88rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px}
-    .dropdown-menu{position:absolute;bottom:calc(100% + 6px);left:0;right:0;background:var(--elevated);border:1px solid var(--accent);border-radius:12px;box-shadow:0 14px 32px rgba(0,0,0,.85);display:none;flex-direction:column;overflow:hidden;z-index:35}
-    .dropdown-menu.open{display:flex}
-    .dropdown-item{background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.06);color:var(--text);padding:11px 13px;font-family:inherit;font-size:.86rem;cursor:pointer;display:flex;align-items:center;gap:8px;text-align:right}
-    .dropdown-item:hover{background:rgba(56,189,248,.2)}
-    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:100;padding:12px}
-    .modal-backdrop.open{display:flex}
-    .modal{background:var(--card);border:1px solid var(--border);border-radius:16px;width:100%;max-width:600px;padding:16px;max-height:88dvh;overflow-y:auto;display:flex;flex-direction:column;gap:11px}
-    .modal h2{font-size:1rem;display:flex;justify-content:space-between;align-items:center}
-    .close-pill{background:var(--elevated);border:1px solid var(--border);color:var(--text);padding:4px 10px;border-radius:999px;font-family:inherit;font-size:.78rem;cursor:pointer}
-    .dl-list{display:flex;flex-direction:column;gap:10px}
-    .dl-card{background:#080b12;border:1px solid var(--border);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px}
-    .dl-media-box{width:100%;max-height:240px;background:#000;border-radius:9px;overflow:hidden;display:flex;align-items:center;justify-content:center}
-    .dl-media-box video,.dl-media-box img{width:100%;max-height:240px;object-fit:contain}
-    .dl-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-    .dl-btn{border-radius:9px;padding:9px;font-family:inherit;font-size:.85rem;font-weight:700;cursor:pointer;border:1px solid var(--border)}
-    .dl-btn-save{background:#fff;color:#09090b;border-color:#fff}
-    .dl-btn-del{background:rgba(239,68,68,.16);color:#fca5a5;border-color:rgba(239,68,68,.4)}
-    .provider-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-    .field-group{display:flex;flex-direction:column;gap:3px}
-    .field-group label{font-size:.73rem;color:var(--muted)}
-    .field-group input{background:#06080e;border:1px solid var(--border);color:var(--text);padding:7px 9px;border-radius:8px;font-size:.78rem;direction:ltr}
-    .field-group input:focus{border-color:var(--accent);outline:none}
-    #cameraPreview{width:100%;border-radius:10px;background:#000;max-height:260px}
-    @media (max-width:600px){.provider-grid{grid-template-columns:1fr}}
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0" />
+<title>Studio Yaniv — סטודיו AI מקצועי</title>
+<style>
+  :root{--bg:#06080f;--card:#0b101b;--card2:#141c2f;--bd:rgba(255,255,255,.08);--sky:#38bdf8;--blue:#2563eb;--txt:#f8fafc;--mut:#94a3b8;--red:#ef4444}
+  *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+  body{background:var(--bg);color:var(--txt);min-height:100dvh;display:flex;flex-direction:column}
+  header{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px;background:rgba(7,10,18,.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--bd);box-shadow:0 4px 20px rgba(0,0,0,.45)}
+  .brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:17px}
+  .row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .seg{display:flex;gap:3px;padding:3px;background:#0c111d;border:1px solid var(--bd);border-radius:10px}
+  button{border:none;cursor:pointer;color:inherit;background:none;font:inherit;transition:.15s}
+  .btn-pill{padding:5px 10px;border-radius:8px;font-size:11px;font-weight:700;color:var(--mut)}
+  .btn-pill.on{background:linear-gradient(135deg,var(--blue),var(--sky));color:#fff}
+  .btn-white{background:#fff;color:#020617;padding:7px 12px;border-radius:10px;font-size:12px;font-weight:800}
+  .btn-dark{background:#0c111d;border:1px solid var(--bd);padding:7px 11px;border-radius:10px;font-size:12px;font-weight:600}
+  main{width:100%;max-width:880px;margin:0 auto;padding:14px;display:flex;flex-direction:column;gap:12px;flex:1}
+  .stage{position:relative;width:100%;margin:0 auto;aspect-ratio:16/9;max-height:48dvh;background:#03050a;border:1px solid var(--bd);border-radius:16px;overflow:hidden;display:flex;align-items:center;justify-content:center;box-shadow:0 14px 40px rgba(0,0,0,.65)}
+  .stage.r916{aspect-ratio:9/16;max-width:270px;max-height:52dvh}
+  .stage.r11{aspect-ratio:1/1;max-width:380px;max-height:48dvh}
+  video,img{width:100%;height:100%;object-fit:contain;display:block}
+  .hide{display:none!important}
+  .bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:8px 10px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+  .icbtn{height:36px;padding:0 12px;border-radius:9px;background:var(--card2);border:1px solid var(--bd);font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:5px}
+  .icbtn.muted-on{background:rgba(245,158,11,.18);border-color:rgba(245,158,11,.5);color:#fcd34d}
+  .icbtn.danger{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.4);color:#fca5a5}
+  .card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:13px;display:flex;flex-direction:column;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+  .pwrap{position:relative;background:#060911;border:1px solid var(--bd);border-radius:12px;padding:4px 4px 4px 40px}
+  .pwrap:focus-within{border-color:rgba(56,189,248,.6)}
+  textarea{width:100%;background:transparent;border:none;color:#fff;padding:7px 9px;font-size:14px;resize:none;outline:none}
+  .ideaMini{position:absolute;left:7px;top:7px;width:28px;height:28px;border-radius:8px;background:var(--card2);border:1px solid var(--bd);color:#38bdf8;font-size:14px;display:flex;align-items:center;justify-content:center}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  @media(max-width:560px){.grid3{grid-template-columns:1fr}}
+  .act{padding:11px 12px;border-radius:12px;font-size:13px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+  .act.v{background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff}
+  .act.b{background:linear-gradient(135deg,#2563eb,#0ea5e9);color:#fff}
+  .act.e{background:linear-gradient(135deg,#059669,#14b8a6);color:#fff}
+  .act.n{background:var(--card2);border:1px solid var(--bd)}
+  .act:disabled{opacity:.35;cursor:not-allowed}
+  .err{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#fecaca;padding:9px 12px;border-radius:12px;font-size:12px;display:flex;justify-content:space-between;align-items:center}
+  #renderOverlay{position:absolute;inset:0;z-index:30;background:rgba(5,7,12,.95);backdrop-filter:blur(8px);display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px}
+  #renderOverlay.on{display:flex}
+  .ringWrap{position:relative;width:76px;height:76px;display:flex;align-items:center;justify-content:center}
+  .ringPct{position:absolute;font-size:14px;font-weight:900;font-variant-numeric:tabular-nums}
+  .pbar{width:176px;max-width:75%;height:6px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden}
+  .pbar>i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--blue),var(--sky));transition:width .16s ease-out}
+  .stopBtn{width:38px;height:38px;border-radius:50%;background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.55);color:#fecaca;display:flex;align-items:center;justify-content:center;font-size:14px}
+  .modal{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;padding:12px}
+  .modal.on{display:flex}
+  .mbox{background:var(--card);border:1px solid var(--bd);border-radius:16px;width:100%;max-width:540px;height:86dvh;max-height:86dvh;display:flex;flex-direction:column;overflow:hidden}
+  .mhead{flex-shrink:0;display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--bd);font-weight:800}
+  .mbody{flex:1;min-height:0;padding:12px;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:8px}
+  .srvRow{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#080c16;border:1px solid var(--bd);padding:8px 10px;border-radius:10px;font-size:12px}
+</style>
 </head>
 <body>
-  <header class="topbar">
-    <div class="brand">
-      <svg class="brand-logo" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-label="Studio Yaniv Logo">
-        <defs>
-          <linearGradient id="skySquircle" x1="15%" y1="10%" x2="85%" y2="95%"><stop offset="0%" stop-color="#c4e4ff"/><stop offset="50%" stop-color="#68b6f3"/><stop offset="100%" stop-color="#2b84db"/></linearGradient>
-          <linearGradient id="metalAzure" x1="10%" y1="0%" x2="90%" y2="100%"><stop offset="0%" stop-color="#7ecaff"/><stop offset="45%" stop-color="#0a78e6"/><stop offset="100%" stop-color="#05419c"/></linearGradient>
-        </defs>
-        <rect x="4" y="4" width="112" height="112" rx="28" fill="url(#skySquircle)" stroke="#1b6bc2" stroke-width="2.5"/>
-        <rect x="7" y="7" width="106" height="106" rx="25" fill="none" stroke="rgba(255,255,255,0.65)" stroke-width="1.4"/>
-        <path d="M24 53 C42 56,52 70,55 104 C62 76,75 54,92 24 C85 52,70 74,55 104 C53 78,40 62,24 53 Z" fill="url(#metalAzure)" stroke="#cbeaff" stroke-width="1.2" stroke-linejoin="round"/>
-        <text x="53" y="57" text-anchor="middle" font-family="Heebo,Arial,sans-serif" font-weight="900" font-size="42" fill="url(#metalAzure)" stroke="#dff2ff" stroke-width="1.3">S</text>
-        <circle cx="77" cy="36" r="6" fill="url(#metalAzure)" stroke="#dff2ff" stroke-width="1.1"/>
-      </svg>
-      <span>Studio Yaniv</span>
+<header>
+  <div class="brand"><span>Studio Yaniv</span></div>
+  <div class="row">
+    <div class="seg" id="ratioSeg">
+      <button class="btn-pill on" data-r="16:9">16:9</button>
+      <button class="btn-pill" data-r="9:16">9:16</button>
+      <button class="btn-pill" data-r="1:1">1:1</button>
     </div>
-    <div class="top-controls">
-      <div class="ratio-pills">
-        <button class="ratio-btn active" data-ratio="16:9">16:9</button>
-        <button class="ratio-btn" data-ratio="9:16">9:16</button>
-        <button class="ratio-btn" data-ratio="1:1">1:1</button>
-      </div>
-      <button class="top-pill-btn dl-pill" id="openDownloadsBtn">⬇ (<span id="vaultCount">0</span>)</button>
-      <button class="top-pill-btn" id="openSettingsBtn" title="הגדרות">⚙</button>
-    </div>
-  </header>
-
-  <main class="studio-wrap">
-    <div class="mask-bar" id="maskBar">
-      <button class="tool-chip active" id="toolBrushBtn">🖌 סמן</button>
-      <button class="tool-chip" id="toolEraserBtn">🧽 מחק מסכה</button>
-      <input type="range" id="brushSize" min="8" max="64" value="28" style="width:64px;">
-      <button class="tool-chip" id="clearMaskBtn">נקה</button>
-    </div>
-
-    <section class="viewport" id="viewportWrapper">
-      <div class="empty-icon" id="emptyStage"><svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="7 4 20 12 7 20 7 4"/></svg></div>
-      <video id="mainVideo" playsinline></video>
-      <img id="mainImage" alt="" />
-      <canvas id="maskCanvas"></canvas>
-      <button class="center-play" id="centerPlayBtn" aria-label="נגן"><svg width="22" height="22" viewBox="0 0 24 24"><polygon points="6 4 20 12 6 20 6 4"/></svg></button>
-      <div class="timeline-overlay" id="timelineOverlay">
-        <div class="scrubber-row"><span class="time-badge" id="timeDisplay">00:00 / 00:00</span><input type="range" id="timelineSlider" min="0" max="100" step="0.01" value="0" /></div>
-      </div>
-      <div class="render-overlay" id="renderOverlay">
-        <div class="progress-ring-wrap">
-          <svg width="76" height="76" viewBox="0 0 76 76"><circle class="ring-bg" cx="38" cy="38" r="32"></circle><circle class="ring-fill" id="ringFill" cx="38" cy="38" r="32"></circle></svg>
-          <span class="progress-pct" id="progressPct">1%</span>
-        </div>
-        <div class="progress-bar-track"><div class="progress-bar-fill" id="progressBarFill"></div></div>
-        <div id="renderSub" style="font-size:.76rem;color:var(--muted);"></div>
-      </div>
-      <div class="quota-overlay" id="quotaOverlay">
-        <div id="quotaMsg" style="font-size:.88rem;line-height:1.5;max-width:380px;"></div>
-        <div class="quota-actions">
-          <button class="q-btn primary" id="qMakeImgBtn">🎨 צור תמונה במקום</button>
-          <button class="q-btn" id="qOpenSetBtn">⚙ הוסף מפתח חינמי מתחדש</button>
-          <a class="q-btn" href="https://create.wan.video" target="_blank" rel="noopener">🎬 Wan חינם</a>
-          <a class="q-btn" href="https://klingai.com" target="_blank" rel="noopener">🎬 Kling חינם</a>
-          <a class="q-btn" href="https://hailuoai.video" target="_blank" rel="noopener">🎬 Hailuo חינם</a>
-          <button class="q-btn" id="qCloseBtn">✕ סגור</button>
-        </div>
-      </div>
-    </section>
-
-    <section class="playback-bar">
-      <div class="transport">
-        <button class="ctrl-btn" id="btnSkipBack" disabled>⏮</button>
-        <button class="ctrl-btn play-main" id="btnPlay" disabled>▶</button>
-        <button class="ctrl-btn" id="btnPause" disabled>⏸</button>
-        <button class="ctrl-btn" id="btnStop" disabled>■</button>
-        <button class="ctrl-btn" id="btnSkipFwd" disabled>⏭</button>
-      </div>
-      <div class="eraser-controls">
-        <button class="btn-eraser" id="toggleMaskBtn" disabled>🖌 מסכה</button>
-        <button class="btn-eraser" id="btnUndoSegment" disabled>↩ מקטע</button>
-        <button class="btn-eraser danger" id="btnClearMediaBelow" disabled>🧽 מחק</button>
-      </div>
-    </section>
-
-    <section class="prompt-card">
-      <div class="text-input-row">
-        <textarea id="promptInput" rows="2" placeholder="כתוב תיאור, שינוי על תמונה, או טקסט לדיבור / מוזיקה..."></textarea>
-        <button class="clear-text-btn" id="btnClearPrompt" title="מחק טקסט">✕</button>
-      </div>
-      <div class="quick-actions">
-        <button class="act-btn btn-vid" id="btnCreateVideo">🎬 יצירת וידאו</button>
-        <button class="act-btn btn-img" id="btnCreateImage">🎨 יצירת תמונה</button>
-        <button class="act-btn btn-ext" id="btnExtend">⏩ הארך +6s</button>
-        <button class="act-btn btn-surp" id="btnSurprise">🎲 הפתע</button>
-      </div>
-    </section>
-
-    <section class="upload-suite">
-      <div class="upload-wrap">
-        <button class="upload-btn" id="btnUploadVideoMenu">🎥 העלאת סרטון ▾</button>
-        <div class="dropdown-menu" id="videoDropdown">
-          <button class="dropdown-item" id="optVideoGallery">📁 גלריה</button>
-          <button class="dropdown-item" id="optVideoCamera">📷 מצלמה</button>
-        </div>
-        <input type="file" id="inputVideoGallery" accept="video/*,.mp4,.mov,.webm,.3gp,.mkv" hidden />
-        <input type="file" id="inputVideoCameraNative" accept="video/*" capture="environment" hidden />
-      </div>
-      <div class="upload-wrap">
-        <button class="upload-btn" id="btnUploadImageMenu">🖼 העלאת תמונה ▾</button>
-        <div class="dropdown-menu" id="imageDropdown">
-          <button class="dropdown-item" id="optImageGallery">📁 גלריה</button>
-          <button class="dropdown-item" id="optImageCamera">📷 מצלמה</button>
-        </div>
-        <input type="file" id="inputImageGallery" accept="image/*,.heic,.heif,.png,.jpg,.jpeg,.webp,.bmp" hidden />
-        <input type="file" id="inputImageCameraNative" accept="image/*" capture="environment" hidden />
-      </div>
-    </section>
-  </main>
-
-  <div class="modal-backdrop" id="downloadsModal">
-    <div class="modal">
-      <h2><span>📁 תיקיית הורדות</span><button class="close-pill" id="closeDownloadsBtn">✕</button></h2>
-      <div id="downloadsList" class="dl-list"></div>
-    </div>
+    <button class="btn-dark" id="btnCopyHtml" title="העתק קוד HTML">העתק</button>
+    <button class="btn-white" id="btnVault">שמורים (<span id="vCnt">0</span>)</button>
+    <button class="btn-dark" id="btnSrvs">שרתים (<span id="sCnt">0</span>)</button>
   </div>
+</header>
 
-  <!-- Only 100% Free & Renewing Servers -->
-  <div class="modal-backdrop" id="settingsModal">
-    <div class="modal">
-      <h2><span>⚙ שרתים חינמיים מתחדשים</span><button class="close-pill" id="closeSettingsBtn">✕</button></h2>
-      <div id="localFileWarn" style="display:none;font-size:.76rem;color:#fcd34d;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35);padding:7px 10px;border-radius:9px;">
-        ⚠ הקובץ רץ מקומית (content:// / file://). לחיבור יציב ללא חסימות מומלץ לפתוח מכתובת https.
+<main>
+  <section class="stage" id="stageBox">
+    <div id="emptyPlay" style="width:56px;height:56px;border-radius:50%;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.35);display:flex;align-items:center;justify-content:center;color:#38bdf8;font-size:22px">&#9654;</div>
+    <img id="imgView" class="hide" alt="" />
+    <video id="vidView" class="hide" playsinline controls></video>
+    <div id="renderOverlay">
+      <div class="ringWrap">
+        <svg width="76" height="76" viewBox="0 0 76 76" style="transform:rotate(-90deg)">
+          <circle cx="38" cy="38" r="30" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="5.5"></circle>
+          <circle id="ringArc" cx="38" cy="38" r="30" fill="none" stroke="#38bdf8" stroke-width="5.5" stroke-linecap="round" stroke-dasharray="188.5" stroke-dashoffset="188.5"></circle>
+        </svg>
+        <span class="ringPct" id="pctTxt">5%</span>
       </div>
-      <div style="display:grid;grid-template-columns:1fr auto;gap:8px;">
-        <button class="act-btn btn-surp" id="puterConnectBtn" style="padding:8px;">⚡ <span id="puterStatusTxt">חיבור חשבון חינמי</span></button>
-        <button class="act-btn btn-ext" id="resetCooldownsBtn" style="padding:8px 12px;">↻ רענן</button>
-      </div>
-      <div class="provider-grid">
-        <div class="field-group"><label>LLM7.io (חינמי • 250/שעה • וידאו ותמונות)</label><input data-sync-key="1" type="password" id="keyLLM7" placeholder="הדבק מפתח למילוי כולן..." /></div>
-        <div class="field-group"><label>Api.Airforce (1,000/יום מתחדש)</label><input data-sync-key="1" type="password" id="keyAirforce" placeholder="הדבק מפתח למילוי כולן..." /></div>
-        <div class="field-group"><label>Hugging Face (ZeroGPU מתחדש יומי)</label><input data-sync-key="1" type="password" id="keyHF" placeholder="הדבק מפתח למילוי כולן..." /></div>
-        <div class="field-group"><label>Cloudflare Token (~173 FLUX/יום)</label><input data-sync-key="1" type="password" id="keyCfToken" placeholder="הדבק מפתח למילוי כולן..." /></div>
-        <div class="field-group"><label>Cloudflare Account ID</label><input type="text" id="keyCfAccount" placeholder="Account ID" /></div>
-        <div class="field-group"><label>Google Gemini (יומי מתחדש)</label><input data-sync-key="1" type="password" id="keyGemini" placeholder="הדבק מפתח למילוי כולן..." /></div>
-        <div class="field-group"><label>NVIDIA NIM (מכסה חינמית קבועה)</label><input data-sync-key="1" type="password" id="keyNvidia" placeholder="הדבק מפתח למילוי כולן..." /></div>
-        <div class="field-group"><label>ImageRouter (:free מודלים מתחדשים)</label><input data-sync-key="1" type="password" id="keyImageRouter" placeholder="הדבק מפתח למילוי כולן..." /></div>
-        <div class="field-group"><label>Pollinations (Pollen יומי מתחדש)</label><input data-sync-key="1" type="password" id="keyPollinations" placeholder="הדבק מפתח למילוי כולן..." /></div>
-        <div class="field-group"><label>Groq (יומי מתחדש חינם)</label><input data-sync-key="1" type="password" id="keyGroq" placeholder="הדבק מפתח למילוי כולן..." /></div>
-        <div class="field-group"><label>Cerebras (1M טוקנים/יום מתחדש)</label><input data-sync-key="1" type="password" id="keyCerebras" placeholder="הדבק מפתח למילוי כולן..." /></div>
-        <div class="field-group"><label>OpenRouter (:free יומי מתחדש)</label><input data-sync-key="1" type="password" id="keyOpenRouter" placeholder="הדבק מפתח למילוי כולן..." /></div>
-        <div class="field-group"><label>AI Horde (ללא הגבלה • 0000000000)</label><input data-sync-key="1" type="text" id="keyHorde" placeholder="0000000000" /></div>
-        <div class="field-group"><label>Ollama / שרת מקומי (URL)</label><input type="url" id="keyOllama" placeholder="http://localhost:8020/v1/chat/completions" /></div>
-      </div>
-      <button class="act-btn btn-img" id="saveSettingsBtn">שמור</button>
+      <div class="pbar"><i id="pBarFill"></i></div>
+      <button class="stopBtn" id="btnStopAll" aria-label="הפסק מחק" title="הפסק מחק">&#9632;</button>
     </div>
-  </div>
+  </section>
 
-  <div class="modal-backdrop" id="cameraModal">
-    <div class="modal">
-      <h2><span id="cameraModalTitle">📷 מצלמה</span><button class="close-pill" id="closeCameraBtn">✕</button></h2>
-      <video id="cameraPreview" autoplay muted playsinline></video>
-      <div style="display:flex;gap:8px;">
-        <button class="act-btn btn-img" id="capturePhotoBtn" style="display:none;flex:1;">📸 צלם</button>
-        <button class="act-btn btn-ext" id="startRecBtn" style="display:none;flex:1;">⏺ הקלט</button>
-        <button class="act-btn btn-surp" id="stopRecBtn" style="display:none;flex:1;">⏹ עצור</button>
-      </div>
+  <section class="bar">
+    <div class="row">
+      <button class="icbtn" id="btnMute" title="השתק שמע להורדה ללא סאונד">&#128266; השתק שמע</button>
+      <button class="icbtn" id="btnDlNow" disabled>&#11015; הורד</button>
     </div>
+    <div class="row">
+      <button class="icbtn danger" id="btnClear" disabled>מחק</button>
+    </div>
+  </section>
+
+  <div id="errBox" class="err hide"><span id="errTxt"></span><button onclick="this.parentElement.classList.add('hide')">&#10005;</button></div>
+
+  <section class="card">
+    <div class="pwrap">
+      <textarea id="promptBox" rows="2" placeholder="כתוב תיאור ליצירת וידאו (מתמונה וטקסט / מטקסט / מתמונה), עריכת תמונה או עריכת וידאו..."></textarea>
+      <button class="ideaMini" id="btnIdea" title="רעיון מפתיע">&#127922;</button>
+    </div>
+    <div class="grid3">
+      <button class="act v" id="btnVid">יצירת וידאו</button>
+      <button class="act b" id="btnImgEdit">עריכת תמונה</button>
+      <button class="act e" id="btnVidEdit">עריכת וידאו</button>
+    </div>
+  </section>
+
+  <section class="grid2">
+    <button class="act n" onclick="document.getElementById('inVid').click()">העלאת סרטון</button>
+    <button class="act n" onclick="document.getElementById('inImg').click()">העלאת תמונה</button>
+    <input type="file" id="inVid" accept="video/*" hidden />
+    <input type="file" id="inImg" accept="image/*" hidden />
+  </section>
+</main>
+
+<div class="modal" id="srvModal" onclick="this.classList.remove('on')">
+  <div class="mbox" onclick="event.stopPropagation()">
+    <div class="mhead"><span>שרתי AI חינמיים (מעבר אוטומטי)</span><button onclick="document.getElementById('srvModal').classList.remove('on')">&#10005;</button></div>
+    <div class="mbody" id="srvList"></div>
   </div>
+</div>
+
+<div class="modal" id="vaultModal" onclick="this.classList.remove('on')">
+  <div class="mbox" onclick="event.stopPropagation()">
+    <div class="mhead"><span>תיקיית הורדות</span><button onclick="document.getElementById('vaultModal').classList.remove('on')">&#10005;</button></div>
+    <div class="mbody" id="vaultList"></div>
+  </div>
+</div>
 
 <script>
-(() => {
-  const state = {
-    ratio:'16:9', mediaType:null, currentImageSrc:null, videoSegments:[], activeSegmentIndex:0,
-    autoHideTimer:null, maskMode:false, maskTool:'brush', isDrawing:false, hasMask:false,
-    cameraStream:null, mediaRecorder:null, recordedChunks:[], vaultItems:[], serverCooldowns:{},
-    llm7Models:null, airforceModels:null,
-    keys: JSON.parse(localStorage.getItem('studio_yaniv_v20_keys') || '{}')
-  };
-  const $ = id => document.getElementById(id);
-  const el = {
-    viewport:$('viewportWrapper'), emptyStage:$('emptyStage'), video:$('mainVideo'), image:$('mainImage'),
-    maskCanvas:$('maskCanvas'), maskBar:$('maskBar'), toggleMaskBtn:$('toggleMaskBtn'),
-    toolBrushBtn:$('toolBrushBtn'), toolEraserBtn:$('toolEraserBtn'), brushSize:$('brushSize'), clearMaskBtn:$('clearMaskBtn'),
-    centerPlayBtn:$('centerPlayBtn'), timelineOverlay:$('timelineOverlay'), timelineSlider:$('timelineSlider'), timeDisplay:$('timeDisplay'),
-    renderOverlay:$('renderOverlay'), ringFill:$('ringFill'), progressPct:$('progressPct'), progressBarFill:$('progressBarFill'), renderSub:$('renderSub'),
-    quotaOverlay:$('quotaOverlay'), quotaMsg:$('quotaMsg'), qMakeImgBtn:$('qMakeImgBtn'), qOpenSetBtn:$('qOpenSetBtn'), qCloseBtn:$('qCloseBtn'),
-    btnSkipBack:$('btnSkipBack'), btnPlay:$('btnPlay'), btnPause:$('btnPause'), btnStop:$('btnStop'), btnSkipFwd:$('btnSkipFwd'),
-    btnUndoSegment:$('btnUndoSegment'), btnClearMediaBelow:$('btnClearMediaBelow'),
-    promptInput:$('promptInput'), btnClearPrompt:$('btnClearPrompt'), btnCreateVideo:$('btnCreateVideo'), btnCreateImage:$('btnCreateImage'), btnExtend:$('btnExtend'), btnSurprise:$('btnSurprise'),
-    puterConnectBtn:$('puterConnectBtn'), puterStatusTxt:$('puterStatusTxt'), resetCooldownsBtn:$('resetCooldownsBtn'), localFileWarn:$('localFileWarn'),
-    openDownloadsBtn:$('openDownloadsBtn'), vaultCount:$('vaultCount'), downloadsModal:$('downloadsModal'), closeDownloadsBtn:$('closeDownloadsBtn'), downloadsList:$('downloadsList'),
-    btnUploadVideoMenu:$('btnUploadVideoMenu'), videoDropdown:$('videoDropdown'), optVideoGallery:$('optVideoGallery'), optVideoCamera:$('optVideoCamera'),
-    inputVideoGallery:$('inputVideoGallery'), inputVideoCameraNative:$('inputVideoCameraNative'),
-    btnUploadImageMenu:$('btnUploadImageMenu'), imageDropdown:$('imageDropdown'), optImageGallery:$('optImageGallery'), optImageCamera:$('optImageCamera'),
-    inputImageGallery:$('inputImageGallery'), inputImageCameraNative:$('inputImageCameraNative'),
-    settingsModal:$('settingsModal'), openSettingsBtn:$('openSettingsBtn'), closeSettingsBtn:$('closeSettingsBtn'), saveSettingsBtn:$('saveSettingsBtn'),
-    cameraModal:$('cameraModal'), closeCameraBtn:$('closeCameraBtn'), cameraPreview:$('cameraPreview'),
-    capturePhotoBtn:$('capturePhotoBtn'), startRecBtn:$('startRecBtn'), stopRecBtn:$('stopRecBtn')
-  };
+const SERVERS = [{"id":"ed-kontext","name":"FLUX.1 Kontext Dev","host":"black-forest-labs-flux-1-kontext-dev.hf.space","cat":"edit","ep":"infer","spd":6,"ref":180},{"id":"ed-flux2-bfl","name":"Official BFL FLUX.2 Dev","host":"black-forest-labs-flux-2-dev.hf.space","cat":"edit","ep":"infer","spd":6,"ref":180},{"id":"ed-qwen-fast","name":"Qwen Image Edit Fast","host":"multimodalart-qwen-image-edit-fast.hf.space","cat":"edit","ep":"infer","spd":4,"ref":180},{"id":"ed-omni","name":"Omni Image Editor","host":"selfit-camera-omni-image-editor.hf.space","cat":"edit","ep":"edit_image_interface","spd":5,"ref":180},{"id":"ed-nag-kontext","name":"NAG FLUX.1 Kontext","host":"chendy-nag-flux-1-kontext-dev.hf.space","cat":"edit","ep":"sample","spd":5,"ref":180},{"id":"ed-firered-fast","name":"FireRed Edit 1.0 Fast","host":"multimodalart-firered-image-edit-1-0-fast.hf.space","cat":"edit","ep":"infer","spd":4,"ref":180},{"id":"ed-firered-gece","name":"FireRed Fast Mirror","host":"geceff1-firered-image-edit-1-0-fast.hf.space","cat":"edit","ep":"edit_image","spd":4,"ref":180},{"id":"ed-firered-svn","name":"FireRed Fast S2","host":"svngoku-firered-image-edit-1-0-fast.hf.space","cat":"edit","ep":"infer","spd":5,"ref":180},{"id":"ed-firered-11","name":"FireRed Image Edit 1.1","host":"fireredteam-firered-image-edit-1-1.hf.space","cat":"edit","ep":"infer","spd":6,"ref":180},{"id":"ed-qwen-2511","name":"Qwen Image Edit 2511","host":"qwen-qwen-image-edit-2511.hf.space","cat":"edit","ep":"infer","spd":6,"ref":180},{"id":"ed-qwen-2509","name":"Official Qwen Image Edit 2509","host":"qwen-qwen-image-edit-2509.hf.space","cat":"edit","ep":"infer","spd":6,"ref":180},{"id":"ed-qwen-linoy-fast","name":"Linoy Qwen Edit 2511 Fast","host":"linoyts-qwen-image-edit-2511-fast.hf.space","cat":"edit","ep":"infer","spd":5,"ref":180},{"id":"ed-qwen-inpaint","name":"Qwen Edit Inpaint","host":"linoyts-qwen-image-edit-inpaint.hf.space","cat":"edit","ep":"infer","spd":5,"ref":180},{"id":"ed-qwen-obj","name":"Qwen Object Manipulator","host":"prithivmlmods-qwen-image-edit-object-manipulator.hf.space","cat":"edit","ep":"edit_image","spd":6,"ref":180},{"id":"ed-qwen-anypose","name":"Qwen Edit AnyPose","host":"linoyts-qwen-image-edit-2511-anypose.hf.space","cat":"edit","ep":"infer","spd":6,"ref":180},{"id":"ed-qwen-angles","name":"Qwen Angles 3D Edit","host":"linoyts-qwen-image-edit-angles.hf.space","cat":"edit","ep":"maybe_infer","spd":6,"ref":180},{"id":"ed-qwen-orig","name":"Qwen Image Edit Core","host":"qwen-qwen-image-edit.hf.space","cat":"edit","ep":"infer","spd":6,"ref":180},{"id":"ed-flux2-turbo","name":"FLUX.2 Dev Turbo","host":"multimodalart-flux-2-dev-turbo.hf.space","cat":"edit","ep":"infer","spd":5,"ref":180},{"id":"ed-kontext-mate","name":"Kontext Photo Mate v2","host":"prithivmlmods-flux-1-kontext-photo-mate-v2.hf.space","cat":"edit","ep":"infer","spd":6,"ref":180},{"id":"ed-kulkas-qwen","name":"Qwen Edit Studio","host":"kulkas2pintu-qwen-edit-image.hf.space","cat":"edit","ep":"edit","spd":6,"ref":180},{"id":"ed-flux1-img2img","name":"FLUX.1 Schnell Img2Img","host":"akjava-flux1-schnell-img2img.hf.space","cat":"edit","ep":"process_images","spd":4,"ref":180},{"id":"ed-firered-prithiv","name":"FireRed Edit 1.0 Node B","host":"prithivmlmods-firered-image-edit-1-0-fast.hf.space","cat":"edit","ep":"edit_image","spd":5,"ref":180},{"id":"ed-firered-jp","name":"FireRed Edit Node C","host":"someone-in-the-world-firered-imageedit-japanese.hf.space","cat":"edit","ep":"infer","spd":5,"ref":180},{"id":"ed-firered-exp","name":"FireRed Experimental Edit","host":"someone-in-the-world-firered-experimental-turbo.hf.space","cat":"edit","ep":"infer","spd":5,"ref":180},{"id":"ed-dreamlite","name":"DreamLite High-Detail Editor","host":"carlofkl-dreamlite.hf.space","cat":"edit","ep":"generate_image","spd":5,"ref":180},{"id":"ed-noct-q","name":"Noct-Q Studio Editor","host":"acloudguy-noct-q-studio.hf.space","cat":"edit","ep":"generate","spd":6,"ref":180},{"id":"ed-horde-img2img","name":"AI Horde Fast Img2Img (Deliberate/ICBINP)","host":"aihorde.net","cat":"edit","ep":"","spd":7,"ref":1},{"id":"ed-horde-sdxl-edit","name":"AI Horde SDXL Realism Img2Img","host":"aihorde.net","cat":"edit","ep":"","spd":11,"ref":1},{"id":"t2i-flux1","name":"FLUX.1 Schnell (1.4s)","host":"black-forest-labs-flux-1-schnell.hf.space","cat":"image","ep":"infer","spd":2,"ref":180},{"id":"t2i-flux2-dev","name":"Official BFL FLUX.2 Dev","host":"black-forest-labs-flux-2-dev.hf.space","cat":"image","ep":"infer","spd":5,"ref":180},{"id":"t2i-flux1-dev","name":"Official BFL FLUX.1 Dev","host":"black-forest-labs-flux-1-dev.hf.space","cat":"image","ep":"infer","spd":6,"ref":180},{"id":"t2i-flux-abid","name":"FLUX.1 Schnell Node B","host":"abidlabs-black-forest-labs-flux-1-schnell.hf.space","cat":"image","ep":"predict","spd":3,"ref":180},{"id":"t2i-flux-merged","name":"FLUX.1 Merged Studio","host":"multimodalart-flux-1-merged.hf.space","cat":"image","ep":"infer","spd":4,"ref":180},{"id":"t2i-sdxl-hysts","name":"SDXL High-Quota Pool","host":"hysts-sdxl.hf.space","cat":"image","ep":"predict","spd":4,"ref":120},{"id":"t2i-tongyi-z","name":"Tongyi-MAI Z-Image Official","host":"tongyi-mai-z-image-turbo.hf.space","cat":"image","ep":"generate","spd":3,"ref":180},{"id":"t2i-sd35-turbo","name":"Stability SD 3.5 Large Turbo","host":"stabilityai-stable-diffusion-3-5-large-turbo.hf.space","cat":"image","ep":"infer","spd":4,"ref":180},{"id":"t2i-sd35-large","name":"Stability SD 3.5 Large","host":"stabilityai-stable-diffusion-3-5-large.hf.space","cat":"image","ep":"infer","spd":6,"ref":180},{"id":"t2i-qwen-official","name":"Official Qwen Image","host":"qwen-qwen-image.hf.space","cat":"image","ep":"infer","spd":5,"ref":180},{"id":"t2i-z-mr","name":"Z-Image Turbo (3.8s)","host":"mrfakename-z-image-turbo.hf.space","cat":"image","ep":"generate_image","spd":4,"ref":180},{"id":"t2i-omni","name":"Omni Text2Image","host":"selfit-camera-omni-image-editor.hf.space","cat":"image","ep":"text_to_image_interface","spd":4,"ref":180},{"id":"t2i-z-akhaliq","name":"Z-Image Turbo Akhaliq","host":"akhaliq-z-image-turbo.hf.space","cat":"image","ep":"generate_image","spd":3,"ref":180},{"id":"t2i-z-victor","name":"Z-Image Turbo Victor","host":"victor-z-image-turbo-mcp.hf.space","cat":"image","ep":"generate_image","spd":3,"ref":180},{"id":"t2i-z-rahul","name":"Z-Image Turbo Rahul","host":"rahul7star-z-image-turbo.hf.space","cat":"image","ep":"generate_image","spd":3,"ref":180},{"id":"t2i-z-master","name":"Z-Image Realism Node B","host":"masterp3000-z-image-turbo-realism.hf.space","cat":"image","ep":"generate_image","spd":4,"ref":180},{"id":"t2i-z-cpuai","name":"Z-Image Unlimited CPU","host":"cpuai-z-image-turbo-cpu.hf.space","cat":"image","ep":"generate_image","spd":7,"ref":5},{"id":"t2i-z-any","name":"Z-Image Anycoder","host":"anycoderapps-z-image-turbo.hf.space","cat":"image","ep":"generate_image","spd":4,"ref":180},{"id":"t2i-z-lar","name":"Z-Image Laruss","host":"laruss5-z-image-turbo.hf.space","cat":"image","ep":"generate_image","spd":4,"ref":180},{"id":"t2i-z-real","name":"Z-Image Realism","host":"linoyts-z-image-turbo-realism.hf.space","cat":"image","ep":"generate_image","spd":4,"ref":180},{"id":"t2i-z-mcp","name":"Z-Image MCP","host":"mcp-tools-z-image-turbo.hf.space","cat":"image","ep":"generate","spd":5,"ref":180},{"id":"t2i-eval-flux","name":"FLUX.1 Schnell Mirror","host":"evalstate-flux1-schnell.hf.space","cat":"image","ep":"infer","spd":3,"ref":180},{"id":"t2i-minimax-h3","name":"MiniMax H3 Image","host":"minimaxai-minimax-h3-image.hf.space","cat":"image","ep":"","spd":5,"ref":180},{"id":"t2i-pruna-h3","name":"Pruna P-H3 Image","host":"prunaai-p-h3-image.hf.space","cat":"image","ep":"","spd":4,"ref":180},{"id":"t2i-qwen-21","name":"Qwen Image 2.1","host":"qwen-qwen-image-2-1.hf.space","cat":"image","ep":"","spd":6,"ref":180},{"id":"t2i-firered-exp","name":"FireRed Experimental Studio","host":"someone-in-the-world-firered-experimental-turbo.hf.space","cat":"image","ep":"infer","spd":4,"ref":180},{"id":"t2i-dreamlite","name":"DreamLite T2I Studio","host":"carlofkl-dreamlite.hf.space","cat":"image","ep":"generate_image","spd":4,"ref":180},{"id":"t2i-minimax-2step","name":"MiniMax H3 Image 2-Step","host":"akhaliq-minimax-h3-image-2step.hf.space","cat":"image","ep":"","spd":3,"ref":180},{"id":"t2i-pollinations-z","name":"Pollinations Z-Image (ללא הגבלה)","host":"gen.pollinations.ai","cat":"image","ep":"","spd":2,"ref":1},{"id":"t2i-pollinations-sana","name":"Pollinations Sana (ללא הגבלה)","host":"image.pollinations.ai","cat":"image","ep":"","spd":2,"ref":1},{"id":"t2i-horde-deliberate","name":"AI Horde Fast Engine (Deliberate/ICBINP)","host":"aihorde.net","cat":"image","ep":"","spd":7,"ref":1},{"id":"t2i-horde-sdxl","name":"AI Horde SDXL Realism (Juggernaut/Albedo)","host":"aihorde.net","cat":"image","ep":"","spd":11,"ref":1},{"id":"t2i-horde-flux","name":"AI Horde FLUX.1 Schnell Cluster","host":"aihorde.net","cat":"image","ep":"","spd":12,"ref":1},{"id":"vid-zerogpu-wan22","name":"Wan 2.2 AOTI Faster","host":"zerogpu-aoti-wan2-2-fp8da-aoti-faster.hf.space","cat":"video","ep":"generate_video","spd":22,"ref":180},{"id":"vid-r3gm-1","name":"Wan 2.2 Preview 1","host":"r3gm-wan2-2-fp8da-aoti-preview.hf.space","cat":"video","ep":"generate_video","spd":22,"ref":180},{"id":"vid-r3gm-2","name":"Wan 2.2 Preview 2","host":"r3gm-wan2-2-fp8da-aoti-preview2.hf.space","cat":"video","ep":"generate_video","spd":22,"ref":180},{"id":"vid-kingnish","name":"Kingnish Wan 2.2 Fast","host":"kingnish-wan2-2-fast.hf.space","cat":"video","ep":"generate_video","spd":25,"ref":180},{"id":"vid-ltx2-turbo","name":"LTX-2 Turbo (Static Camera)","host":"alexnasa-ltx-2-turbo.hf.space","cat":"video","ep":"generate_video","spd":16,"ref":180},{"id":"vid-ltx-distilled","name":"Lightricks LTX-Video Distilled","host":"lightricks-ltx-video-distilled.hf.space","cat":"video","ep":"image_to_video","spd":12,"ref":180},{"id":"vid-cogvideox","name":"Z.ai CogVideoX-5B Studio","host":"zai-org-cogvideox-5b-space.hf.space","cat":"video","ep":"generate","spd":20,"ref":180},{"id":"vid-pyramid","name":"Pyramid-Flow Video","host":"pyramid-flow-pyramid-flow.hf.space","cat":"video","ep":"generate_video","spd":19,"ref":180},{"id":"vid-ltx23","name":"Lightricks LTX-2.3","host":"lightricks-ltx-2-3.hf.space","cat":"video","ep":"generate_video","spd":18,"ref":180},{"id":"vid-ltx25","name":"Lightricks LTX-2.5","host":"lightricks-ltx-2-5.hf.space","cat":"video","ep":"run","spd":20,"ref":180},{"id":"vid-wan21-fast","name":"MultimodalArt Wan 2.1 Fast","host":"multimodalart-wan2-1-fast.hf.space","cat":"video","ep":"generate_video","spd":24,"ref":180},{"id":"vid-prithiv-wan22","name":"Prithiv Wan 2.2 Fast","host":"prithivmlmods-wan2-2-fast.hf.space","cat":"video","ep":"generate_video","spd":24,"ref":180},{"id":"vid-dream22","name":"Dream Wan 2.2 AOTI","host":"dream2589632147-dream-wan2-2-fp8da-aoti-preview-2.hf.space","cat":"video","ep":"generate_video","spd":25,"ref":180},{"id":"vid-cbensimon","name":"Cbensimon Wan 2.2","host":"cbensimon-wan2-2-fp8da-aoti-preview2.hf.space","cat":"video","ep":"generate_video","spd":24,"ref":180},{"id":"vid-kulkas222","name":"Kulkas Wan 2.2","host":"kulkas2pintu-wan222.hf.space","cat":"video","ep":"generate_video","spd":25,"ref":180},{"id":"vid-ysharma","name":"Ysharma Wan 2.1 Fast","host":"ysharma-wan2-1-fast.hf.space","cat":"video","ep":"generate-video","spd":25,"ref":180},{"id":"vid-upsampler","name":"Upsampler Wan 2.2 14B","host":"upsampler-wan-2-2-14b-image-to-video.hf.space","cat":"video","ep":"generate_video","spd":28,"ref":180},{"id":"vid-wan22-lightning","name":"Wan 2.2 Lightning 4-Step","host":"saravutw-wan2-2-i2v-lightning-4-8step-custom.hf.space","cat":"video","ep":"generate_video","spd":14,"ref":180},{"id":"vid-wan22-pro-superb","name":"Wan 2.2 Pro Superb","host":"prashant-ai-ml-wan-2-2-pro-superb.hf.space","cat":"video","ep":"generate_video","spd":18,"ref":180},{"id":"vid-wan22-wip","name":"Wan 2.2 High-Quota Node","host":"zsaxcdssdf-wan2-2-wip.hf.space","cat":"video","ep":"generate_video","spd":19,"ref":180},{"id":"vid-wan21-vace","name":"Wan 2.1 VACE Studio","host":"fffiloni-wan2-1-vace-1-3b.hf.space","cat":"video","ep":"generate","spd":17,"ref":180},{"id":"vid-wan21-fffiloni","name":"Wan 2.1 Turbo Mirror","host":"fffiloni-wan2-1.hf.space","cat":"video","ep":"infer","spd":18,"ref":180},{"id":"vid-ltx-opt","name":"LTX-Video ZeroGPU Opt","host":"deeprat-ltx-video-zerogpu-optimized.hf.space","cat":"video","ep":"image_to_video","spd":13,"ref":180},{"id":"vid-ltx-upsampler","name":"LTX-Video Upsampler Node","host":"upsampler-ltx-video.hf.space","cat":"video","ep":"generate_video","spd":15,"ref":180},{"id":"vid-ltx23-sync","name":"LTX-2.3 Audio-Video Sync","host":"linoyts-ltx-2-3-sync.hf.space","cat":"video","ep":"generate_video","spd":18,"ref":180},{"id":"vid-ltx25-rio","name":"LTX-2.5 Studio Mirror","host":"rioshiina-ltx-2-5.hf.space","cat":"video","ep":"run","spd":18,"ref":180},{"id":"vid-ltx2-a2v","name":"LTX-2 Audio2Video","host":"multimodalart-ltx2-audio-to-video.hf.space","cat":"video","ep":"generate","spd":18,"ref":180},{"id":"vid-ltx23-flf","name":"LTX-2.3 Keyframe Studio","host":"linoyts-ltx-2-3-first-last-frame.hf.space","cat":"video","ep":"generate_video","spd":19,"ref":180},{"id":"vid-cogvideox-2b","name":"Z.ai CogVideoX-2B Fast","host":"zai-org-cogvideox-2b-space.hf.space","cat":"video","ep":"generate","spd":16,"ref":180},{"id":"vid-wan22-rcm","name":"Wan 2.2 RCM Turbo","host":"linoyts-wan2-2-i2v-rcm.hf.space","cat":"video","ep":"generate_video","spd":12,"ref":180},{"id":"vid-wan22-v3","name":"Wan 2.2 I2V v3 Pool","host":"jcishere-wan2-2-i2v-v3.hf.space","cat":"video","ep":"generate_video","spd":16,"ref":180},{"id":"vid-wan22-flf-mm","name":"Wan 2.2 Keyframe Pro","host":"multimodalart-wan-2-2-first-last-frame.hf.space","cat":"video","ep":"generate_video","spd":18,"ref":180},{"id":"vid-wan22-poij","name":"Wan 2.2 AOTI Mirror C","host":"poij134-wan2-2-fp8da-aoti-preview-2.hf.space","cat":"video","ep":"generate_video","spd":18,"ref":180},{"id":"vid-wan21-vace-linoy","name":"Wan 2.1 VACE Fast Node","host":"linoyts-wan2-1-vace-fast.hf.space","cat":"video","ep":"generate_video","spd":16,"ref":180},{"id":"vid-wan22-lion","name":"Wan 2.2 Keyframe Mirror B","host":"lionfxxx-wan-2-2-first-last-frame.hf.space","cat":"video","ep":"generate_video","spd":19,"ref":180},{"id":"vid-wan22-dm1","name":"Dream Wan 2.2 Mirror B","host":"deepmind1-dream-wan2-2-fp8da-aoti-preview-2.hf.space","cat":"video","ep":"generate_video","spd":20,"ref":180},{"id":"vid-wan21-diyos","name":"Diyos Wan 2.1 Video","host":"diyos1-diyos-wan21.hf.space","cat":"video","ep":"generate_video","spd":20,"ref":180},{"id":"vid-ltx23-rdata","name":"LTX-2.3 Studio Mirror B","host":"rdata92-ltx-2-3-10eros.hf.space","cat":"video","ep":"generate","spd":17,"ref":180},{"id":"vid-pan2","name":"PAN2 Video Studio","host":"akhaliq-pan2.hf.space","cat":"video","ep":"generate","spd":18,"ref":180},{"id":"vid-ltx25-bbox","name":"LTX-2.5 Motion Control","host":"yuvraj108c-ltx25-bbox-control-demo.hf.space","cat":"video","ep":"generate","spd":17,"ref":180},{"id":"vid-minimax-h3","name":"MiniMax H3 Animation Video","host":"solricks-3d-animation-style-minimax-h3.hf.space","cat":"video","ep":"generate","spd":18,"ref":180},{"id":"ls-wan22-s2v","name":"Wan 2.2 Speech2Video","host":"wan-ai-wan2-2-s2v.hf.space","cat":"lipsync","ep":"","spd":24,"ref":180},{"id":"ls-omniavatar","name":"OmniAvatar LipSync","host":"alexnasa-omniavatar.hf.space","cat":"lipsync","ep":"","spd":22,"ref":180},{"id":"ls-echomimic","name":"EchoMimic","host":"fffiloni-echomimic.hf.space","cat":"lipsync","ep":"","spd":20,"ref":180},{"id":"aud-edge-tts","name":"Edge TTS Hebrew/Global","host":"innoai-edge-tts-text-to-speech.hf.space","cat":"audio","ep":"tts_interface","spd":3,"ref":1},{"id":"aud-kokoro","name":"Kokoro TTS Zero","host":"remsky-kokoro-tts-zero.hf.space","cat":"audio","ep":"","spd":3,"ref":1},{"id":"aud-acestep","name":"ACE-Step Music v1.5","host":"ace-step-ace-step-v1-5.hf.space","cat":"audio","ep":"","spd":14,"ref":180},{"id":"aud-dia-16b","name":"Nari Dia-1.6B (דיבור וצחוק)","host":"nari-labs-dia-1-6b.hf.space","cat":"audio","ep":"generate_audio","spd":4,"ref":180},{"id":"aud-chatterbox","name":"ResembleAI Chatterbox TTS","host":"resembleai-chatterbox.hf.space","cat":"audio","ep":"generate_tts_audio","spd":4,"ref":180},{"id":"aud-musicgen","name":"Meta MusicGen Audio/SFX","host":"facebook-musicgen.hf.space","cat":"audio","ep":"predict_batched","spd":8,"ref":180},{"id":"llm-ovh","name":"OVH Kepler Qwen3.5-9B","host":"oai.endpoints.kepler.ai.cloud.ovh.net","cat":"llm","ep":"","spd":1,"ref":1},{"id":"llm-llm7","name":"LLM7.io Chat (250/שעה)","host":"api.llm7.io","cat":"llm","ep":"","spd":1,"ref":60},{"id":"llm-kilo","name":"Kilo AI Gateway","host":"api.kilo.ai","cat":"llm","ep":"","spd":1,"ref":60},{"id":"llm-pollinations","name":"Pollinations Text","host":"text.pollinations.ai","cat":"llm","ep":"","spd":1,"ref":1},{"id":"llm-horde","name":"AI Horde OAI","host":"oai.aihorde.net","cat":"llm","ep":"","spd":3,"ref":1}];
+const HORDE_MODELS = {
+  't2i-horde-deliberate': ['Deliberate', "ICBINP - I Can't Believe It's Not Photography", 'AbsoluteReality', 'stable_diffusion'],
+  't2i-horde-sdxl': ['Juggernaut XL', 'AlbedoBase XL 3.1', 'AlbedoBase XL (SDXL)', 'Deliberate'],
+  't2i-horde-flux': ['Flux.1-Schnell fp8 (Compact)', 'Deliberate', 'AlbedoBase XL 3.1'],
+  'ed-horde-img2img': ['Deliberate', "ICBINP - I Can't Believe It's Not Photography", 'AbsoluteReality', 'stable_diffusion'],
+  'ed-horde-sdxl-edit': ['Juggernaut XL', 'AlbedoBase XL 3.1', 'Deliberate']
+};
+const st = { ratio:'16:9', type:null, imgUrl:null, vidUrl:null, vidBlob:null, muted:false, vault:[], ctrl:null, cd:{}, rot:{}, perf:{} };
+const $ = id => document.getElementById(id);
+const isZeroGpu = s => s.host.endsWith('.hf.space') && !s.id.includes('cpu');
 
-  if (location.protocol === 'file:' || location.protocol === 'content:') el.localFileWarn.style.display = 'block';
-  const setBusy = b => { el.btnCreateVideo.disabled = el.btnCreateImage.disabled = el.btnExtend.disabled = el.btnSurprise.disabled = b; };
-  const syncInputs = Array.from(document.querySelectorAll('[data-sync-key="1"]'));
-  syncInputs.forEach(inp => inp.addEventListener('input', () => syncInputs.forEach(o => { if (o !== inp) o.value = inp.value; })));
+function setErr(m){ if(!m){ $('errBox').classList.add('hide'); return; } $('errTxt').textContent=m; $('errBox').classList.remove('hide'); }
+function updateUi(){
+  $('sCnt').textContent = SERVERS.filter(s => !st.cd[s.id] || st.cd[s.id] <= Date.now()).length;
+  $('vCnt').textContent = st.vault.length;
+  $('stageBox').className = 'stage' + (st.ratio==='9:16'?' r916':st.ratio==='1:1'?' r11':'');
+  $('emptyPlay').classList.toggle('hide', !!st.type);
+  $('imgView').classList.toggle('hide', st.type!=='image');
+  $('vidView').classList.toggle('hide', st.type!=='video');
+  $('vidView').muted = st.muted;
+  $('btnMute').classList.toggle('muted-on', st.muted);
+  $('btnMute').innerHTML = st.muted ? '&#128263; ללא שמע' : '&#128266; השתק שמע';
+  $('btnClear').disabled = !st.type;
+  $('btnDlNow').disabled = !st.type;
+}
+updateUi();
 
-  function showQuotaNotice(msg) { el.quotaMsg.textContent = msg; el.quotaOverlay.classList.add('active'); }
-  el.qCloseBtn.addEventListener('click', () => el.quotaOverlay.classList.remove('active'));
-  el.qOpenSetBtn.addEventListener('click', () => { el.quotaOverlay.classList.remove('active'); el.openSettingsBtn.click(); });
-  el.qMakeImgBtn.addEventListener('click', () => { el.quotaOverlay.classList.remove('active'); el.btnCreateImage.click(); });
+document.querySelectorAll('#ratioSeg button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('#ratioSeg button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); st.ratio = b.dataset.r; updateUi();
+});
+$('btnMute').onclick = () => { st.muted = !st.muted; updateUi(); };
+$('btnClear').onclick = () => { st.type=null; st.imgUrl=null; st.vidUrl=null; st.vidBlob=null; $('vidView').src=''; $('imgView').src=''; setErr(''); updateUi(); };
+$('btnStopAll').onclick = () => { if(st.ctrl) st.ctrl.abort(); stopRender(); $('btnClear').click(); };
+$('btnCopyHtml').onclick = async () => {
+  try { await navigator.clipboard.writeText('<!doctype html>\n' + document.documentElement.outerHTML); $('btnCopyHtml').textContent='הועתק!'; setTimeout(()=>$('btnCopyHtml').textContent='העתק',1800); } catch {}
+};
+$('btnSrvs').onclick = () => {
+  $('srvList').innerHTML = SERVERS.map(s=>'<div class="srvRow"><div style="min-width:0"><b>'+s.name+'</b><div style="font-size:10px;color:#94a3b8">~'+s.spd+'s · מתחדש כל '+s.ref+' דק׳</div></div><span style="color:#38bdf8;font-weight:700">'+s.cat.toUpperCase()+'</span></div>').join('');
+  $('srvModal').classList.add('on');
+};
+$('btnVault').onclick = () => {
+  $('vaultList').innerHTML = st.vault.length ? st.vault.map((v,i)=>'<div class="srvRow"><span>'+(v.type==='video'?'סרטון':'תמונה')+' #'+(i+1)+'</span><button class="btn-white" onclick="dlVault('+i+')">הורד</button></div>').join('') : '<div style="text-align:center;color:#94a3b8;padding:16px">אין פריטים</div>';
+  $('vaultModal').classList.add('on');
+};
+$('btnIdea').onclick = () => {
+  const ideas = ['תינוק צוחק בחיוך רחב בסלון','אסטרונאוט במאדים עם מוזיקה חללית','כלב מרכיב משקפי שמש על חוף הים','גשם ניאון בעיר עתידנית בלילה'];
+  $('promptBox').value = ideas[Math.floor(Math.random()*ideas.length)];
+};
 
-  const EXC = { hf:['hf_'], airforce:['sk-air-'], gemini:['AIza'], groq:['gsk_'], cerebras:['csk-'], openrouter:['sk-or-'], nvidia:['nvapi-'], pollinations:['pk_','sk_'] };
-  function getProviderKey(p) {
-    const k = (state.keys[p] || '').trim(); if (!k) return '';
-    if (EXC[p]) return EXC[p].some(x => k.startsWith(x)) ? k : '';
-    if (Object.entries(EXC).some(([n, arr]) => n !== p && arr.some(x => k.startsWith(x)))) return '';
-    return k;
-  }
+let progTmr = null, curPct = 5;
+function startRender(expSec=10){
+  curPct = 5; setRenderPct(5);
+  $('emptyPlay').classList.add('hide');
+  $('renderOverlay').classList.add('on');
+  const t0 = performance.now();
+  clearInterval(progTmr);
+  progTmr = setInterval(()=>{
+    const el = (performance.now()-t0)/1000;
+    curPct = Math.max(curPct, Math.min(94, 6 + 86*(1-Math.exp(-el/Math.max(3,expSec*0.65)))));
+    setRenderPct(curPct);
+  }, 150);
+}
+function setRenderPct(p){
+  const v = Math.round(Math.max(1,Math.min(100,p)));
+  $('pctTxt').textContent = v+'%'; $('pBarFill').style.width = v+'%';
+  $('ringArc').style.strokeDashoffset = 188.5 * (1 - v/100);
+}
+function stopRender(){ clearInterval(progTmr); $('renderOverlay').classList.remove('on'); }
 
-  function isServerAvailable(id) { const u = state.serverCooldowns[id]; if (!u) return true; if (Date.now() > u) { delete state.serverCooldowns[id]; return true; } return false; }
-  const markCooldown = (id, m = 8) => { state.serverCooldowns[id] = Date.now() + m * 60000; };
-  el.resetCooldownsBtn.addEventListener('click', () => { state.serverCooldowns = {}; });
+function rotated(cat){
+  const now = Date.now();
+  let arr = SERVERS.filter(s => s.cat===cat && (!st.cd[s.id] || st.cd[s.id]<=now));
+  if(!arr.length) arr = SERVERS.filter(s => s.cat===cat);
+  const proven = arr.filter(s => (st.perf[s.id]?.ok||0)>0 && !(st.perf[s.id]?.fail||0));
+  const fresh = arr.filter(s => !st.perf[s.id] || !(st.perf[s.id]?.fail||0) && !(st.perf[s.id]?.ok||0));
+  const deg = arr.filter(s => (st.perf[s.id]?.fail||0)>0);
+  const idx = st.rot[cat]||0; st.rot[cat] = idx+1;
+  const rotA = a => a.length<=1 ? a : [...a.slice(idx%a.length), ...a.slice(0,idx%a.length)];
+  return [...rotA(proven), ...rotA(fresh), ...rotA(deg)];
+}
 
-  async function runCascade(steps, startPct = 15, endPct = 92, label = 'מעבד...') {
-    let q = steps.filter(s => s.enabled() && isServerAvailable(s.id));
-    if (!q.length) { state.serverCooldowns = {}; q = steps.filter(s => s.enabled()); }
-    const span = Math.max(10, endPct - startPct);
-    for (let i = 0; i < q.length; i++) {
-      setRenderProgress(startPct + Math.round((i / q.length) * span), label);
-      try { const res = await q[i].run(); if (res) return res; markCooldown(q[i].id, 3); }
-      catch (e) { markCooldown(q[i].id, /402|429|401|403|quota|credit|limit|exceeded|insufficient|balance/i.test(String(e?.message||'')) ? 30 : 4); }
-    }
-    return null;
-  }
-
-  const RING_CIRC = 2 * Math.PI * 32, prog = { displayed:1, target:1, maxAuto:90, tick:null, auto:null };
-  function applyProg(v) {
-    const p = Math.max(1, Math.min(100, Math.round(v)));
-    el.progressPct.textContent = p + '%'; el.progressBarFill.style.width = p + '%';
-    el.ringFill.style.strokeDashoffset = RING_CIRC * (1 - p / 100);
-  }
-  function startRenderProgress(sub = '', maxAuto = 90) {
-    el.quotaOverlay.classList.remove('active');
-    clearInterval(prog.tick); clearInterval(prog.auto);
-    prog.displayed = prog.target = 1; prog.maxAuto = maxAuto; el.renderSub.textContent = sub; applyProg(1);
-    el.renderOverlay.classList.add('active');
-    prog.tick = setInterval(() => { if (prog.displayed < prog.target) { const d = prog.target - prog.displayed; prog.displayed = Math.min(prog.target, prog.displayed + (d > 20 ? 3 : d > 8 ? 2 : 1)); applyProg(prog.displayed); } }, 35);
-    prog.auto = setInterval(() => { if (prog.target < prog.maxAuto) prog.target = Math.min(prog.maxAuto, prog.target + 1); }, 320);
-  }
-  function setRenderProgress(pct, sub = null) { if (sub) el.renderSub.textContent = sub; const c = Math.max(1, Math.min(99, Math.round(pct))); if (c > prog.target) prog.target = c; }
-  async function finishRenderProgress(ok = true) {
-    clearInterval(prog.auto);
-    if (!ok) { clearInterval(prog.tick); el.renderOverlay.classList.remove('active'); return; }
-    prog.target = 100; el.renderSub.textContent = 'הושלם!';
-    await new Promise(res => { const w = setInterval(() => { if (prog.displayed < 100) { prog.displayed = Math.min(100, prog.displayed + 4); applyProg(prog.displayed); } if (prog.displayed >= 100) { clearInterval(w); clearInterval(prog.tick); setTimeout(() => { el.renderOverlay.classList.remove('active'); res(); }, 200); } }, 24); });
-  }
-
-  function calcAspectLockedSize(sw, sh, maxSide = 1024, step = 16) {
-    const w0 = sw || 1024, h0 = sh || 576, sc = Math.min(1, maxSide / Math.max(w0, h0));
-    return { w: Math.max(256, Math.round((w0 * sc) / step) * step), h: Math.max(256, Math.round((h0 * sc) / step) * step) };
-  }
-  function getDimsRatio() {
-    if (state.ratio === '9:16') return { width:576, height:1024, hordeW:320, hordeH:512 };
-    if (state.ratio === '1:1') return { width:1024, height:1024, hordeW:512, hordeH:512 };
-    return { width:1024, height:576, hordeW:512, hordeH:320 };
-  }
-  const fmtTime = s => (!Number.isFinite(s) || s < 0) ? '00:00' : `${String(Math.floor(s/60)).padStart(2,'0')}:${String(Math.floor(s%60)).padStart(2,'0')}`;
-  const getVidMime = () => ['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm','video/mp4'].find(m => window.MediaRecorder && MediaRecorder.isTypeSupported(m)) || 'video/webm';
-  const loadImageEl = (src, cors = true) => new Promise((res, rej) => {
-    const i = new Image(); if (cors && !src.startsWith('data:') && !src.startsWith('blob:')) i.crossOrigin = 'anonymous';
-    const t = setTimeout(() => rej(new Error('Timeout')), 25000);
-    i.onload = () => { clearTimeout(t); res(i); }; i.onerror = () => { clearTimeout(t); rej(new Error('Load failed')); }; i.src = src;
-  });
-  const checkOk = async r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r; };
-  const isPuterIn = () => typeof window.puter !== 'undefined' && puter.auth?.isSignedIn?.();
-  const updPuter = () => { el.puterStatusTxt.textContent = isPuterIn() ? 'מחובר ✓' : 'חיבור חשבון חינמי'; };
-  window.addEventListener('load', () => setTimeout(updPuter, 700));
-  el.puterConnectBtn.addEventListener('click', async () => {
-    if (location.protocol === 'file:' || location.protocol === 'content:') { alert('חיבור זה זמין רק בהפעלה דרך כתובת אתר (http/https).'); return; }
-    if (typeof window.puter === 'undefined') return;
-    try { await puter.auth.signIn(); updPuter(); } catch {}
-  });
-
-  function clearStage() {
-    state.mediaType = state.currentImageSrc = null; state.videoSegments = []; state.activeSegmentIndex = 0; state.hasMask = state.maskMode = false;
-    el.video.pause(); el.video.removeAttribute('src'); el.video.style.display = 'none';
-    el.image.removeAttribute('src'); el.image.style.display = 'none';
-    el.maskCanvas.style.display = 'none'; el.maskBar.classList.remove('visible');
-    el.toggleMaskBtn.classList.remove('active'); el.toggleMaskBtn.disabled = true;
-    el.centerPlayBtn.classList.remove('visible'); el.timelineOverlay.classList.remove('active');
-    el.emptyStage.style.display = 'flex'; el.btnClearMediaBelow.disabled = el.btnUndoSegment.disabled = true;
-    el.viewport.style.aspectRatio = ''; el.quotaOverlay.classList.remove('active'); updateTransport(false);
-  }
-  el.btnClearMediaBelow.addEventListener('click', clearStage);
-  el.btnUndoSegment.addEventListener('click', async () => { if (state.mediaType === 'video' && state.videoSegments.length > 1) { state.videoSegments.pop(); await showVideoStage(state.videoSegments, false, false); } });
-  el.btnClearPrompt.addEventListener('click', () => { el.promptInput.value = ''; el.promptInput.focus(); });
-
-  function showImageStage(src, add = true) {
-    state.mediaType = 'image'; state.currentImageSrc = src; state.hasMask = false;
-    el.quotaOverlay.classList.remove('active'); el.emptyStage.style.display = 'none'; el.video.pause(); el.video.style.display = 'none';
-    el.image.src = src; el.image.style.display = 'block';
-    el.image.onload = () => { if (el.image.naturalWidth && el.image.naturalHeight) el.viewport.style.aspectRatio = `${el.image.naturalWidth}/${el.image.naturalHeight}`; syncMaskCanvas(); };
-    el.centerPlayBtn.classList.remove('visible'); el.timelineOverlay.classList.remove('active');
-    el.btnClearMediaBelow.disabled = false; el.btnUndoSegment.disabled = true; el.toggleMaskBtn.disabled = false;
-    updateTransport(false); syncMaskCanvas();
-    if (add) saveToVault({ type:'image', url:src });
-  }
-  const probeDur = url => new Promise(res => {
-    const v = document.createElement('video'); v.preload = 'metadata'; v.src = url;
-    const t = setTimeout(() => res(5), 2200);
-    v.onloadedmetadata = () => { clearTimeout(t); res(Number.isFinite(v.duration) && v.duration > 0 ? v.duration : 5); };
-    v.onerror = () => { clearTimeout(t); res(5); };
-  });
-  async function showVideoStage(segs, auto = false, add = true) {
-    state.mediaType = 'video'; state.videoSegments = segs; state.maskMode = false;
-    el.quotaOverlay.classList.remove('active'); el.maskBar.classList.remove('visible'); el.maskCanvas.style.display = 'none';
-    el.toggleMaskBtn.classList.remove('active'); el.toggleMaskBtn.disabled = true;
-    for (const s of segs) if (!s.duration) s.duration = await probeDur(s.url);
-    state.activeSegmentIndex = 0; el.emptyStage.style.display = 'none'; el.image.style.display = 'none'; el.video.style.display = 'block';
-    el.timelineOverlay.classList.add('active'); el.btnClearMediaBelow.disabled = false; el.btnUndoSegment.disabled = segs.length <= 1;
-    updateTransport(true); loadSeg(0, auto);
-    if (add) { const l = segs[segs.length - 1]; saveToVault({ type:'video', url:l.url, blob:l.blob, segments:[...segs] }); }
-  }
-
-  const getTotDur = () => state.videoSegments.reduce((s, x) => s + (x.duration || 0), 0);
-  const getGlobCur = () => state.videoSegments.slice(0, state.activeSegmentIndex).reduce((s, x) => s + (x.duration || 0), 0) + (el.video.currentTime || 0);
-  function seekGlob(sec, play = false) {
-    let acc = 0;
-    for (let i = 0; i < state.videoSegments.length; i++) {
-      const d = state.videoSegments[i].duration || 5;
-      if (sec <= acc + d || i === state.videoSegments.length - 1) {
-        const off = Math.max(0, Math.min(d, sec - acc));
-        if (i !== state.activeSegmentIndex) {
-          state.activeSegmentIndex = i; el.video.src = state.videoSegments[i].url;
-          el.video.onloadedmetadata = () => { el.video.currentTime = off; if (play) el.video.play().catch(() => {}); };
-        } else el.video.currentTime = off;
-        return;
-      }
-      acc += d;
-    }
-  }
-  function loadSeg(i, auto = false) {
-    if (!state.videoSegments[i]) return;
-    state.activeSegmentIndex = i; el.video.src = state.videoSegments[i].url; el.video.load();
-    if (auto) el.video.play().catch(() => showPausedUI()); else showPausedUI();
-  }
-  const updateTransport = en => [el.btnSkipBack, el.btnPlay, el.btnPause, el.btnStop, el.btnSkipFwd].forEach(b => b.disabled = !en);
-  const showPausedUI = () => { if (state.mediaType === 'video') { el.centerPlayBtn.classList.add('visible'); revealTL(false); } };
-  const hidePausedUI = () => { el.centerPlayBtn.classList.remove('visible'); revealTL(true); };
-  function revealTL(auto = true) {
-    if (state.mediaType !== 'video') return;
-    el.timelineOverlay.classList.remove('auto-hidden'); clearTimeout(state.autoHideTimer);
-    if (auto && !el.video.paused) state.autoHideTimer = setTimeout(() => el.timelineOverlay.classList.add('auto-hidden'), 2400);
-  }
-  el.video.addEventListener('play', hidePausedUI); el.video.addEventListener('pause', showPausedUI);
-  el.video.addEventListener('ended', () => { if (state.activeSegmentIndex < state.videoSegments.length - 1) loadSeg(state.activeSegmentIndex + 1, true); else showPausedUI(); });
-  el.video.addEventListener('loadedmetadata', () => {
-    const s = state.videoSegments[state.activeSegmentIndex];
-    if (s && Number.isFinite(el.video.duration) && el.video.duration > 0) s.duration = el.video.duration;
-    if (el.video.videoWidth && el.video.videoHeight) el.viewport.style.aspectRatio = `${el.video.videoWidth}/${el.video.videoHeight}`;
-  });
-  el.video.addEventListener('timeupdate', () => { const t = getTotDur() || el.video.duration || 0, c = getGlobCur(); el.timelineSlider.max = t || 100; el.timelineSlider.value = c; el.timeDisplay.textContent = `${fmtTime(c)} / ${fmtTime(t)}`; });
-  el.viewport.addEventListener('mousemove', () => revealTL(true));
-  el.viewport.addEventListener('touchstart', () => revealTL(true), { passive:true });
-  el.viewport.addEventListener('click', e => { if (state.mediaType === 'video' && e.target === el.video) el.video.paused ? el.video.play() : el.video.pause(); });
-  el.timelineSlider.addEventListener('input', () => { seekGlob(parseFloat(el.timelineSlider.value), !el.video.paused); revealTL(true); });
-  el.centerPlayBtn.addEventListener('click', () => el.video.play());
-  el.btnPlay.addEventListener('click', () => el.video.play()); el.btnPause.addEventListener('click', () => el.video.pause());
-  el.btnStop.addEventListener('click', () => { el.video.pause(); if (state.videoSegments.length) loadSeg(0, false); el.video.currentTime = 0; showPausedUI(); });
-  el.btnSkipBack.addEventListener('click', () => { seekGlob(Math.max(0, getGlobCur() - (el.video.paused ? 1/24 : 2)), !el.video.paused); revealTL(true); });
-  el.btnSkipFwd.addEventListener('click', () => { seekGlob(Math.min(getTotDur(), getGlobCur() + (el.video.paused ? 1/24 : 2)), !el.video.paused); revealTL(true); });
-
-  function syncMaskCanvas() {
-    const show = state.maskMode && state.mediaType === 'image';
-    el.maskBar.classList.toggle('visible', show); el.maskCanvas.style.display = show ? 'block' : 'none';
-    if (show) { el.maskCanvas.width = el.viewport.clientWidth; el.maskCanvas.height = el.viewport.clientHeight; }
-  }
-  el.toggleMaskBtn.addEventListener('click', () => { if (state.mediaType === 'image') { state.maskMode = !state.maskMode; el.toggleMaskBtn.classList.toggle('active', state.maskMode); syncMaskCanvas(); } });
-  el.toolBrushBtn.addEventListener('click', () => { state.maskTool = 'brush'; el.toolBrushBtn.classList.add('active'); el.toolEraserBtn.classList.remove('active'); });
-  el.toolEraserBtn.addEventListener('click', () => { state.maskTool = 'eraser'; el.toolEraserBtn.classList.add('active'); el.toolBrushBtn.classList.remove('active'); });
-  const getPtr = e => { const r = el.maskCanvas.getBoundingClientRect(), cx = e.touches ? e.touches[0].clientX : e.clientX, cy = e.touches ? e.touches[0].clientY : e.clientY; return { x:(cx-r.left)*(el.maskCanvas.width/r.width), y:(cy-r.top)*(el.maskCanvas.height/r.height) }; };
-  const startD = e => { state.isDrawing = true; drawM(e); };
-  function drawM(e) {
-    if (!state.isDrawing) return; e.preventDefault();
-    const ctx = el.maskCanvas.getContext('2d'), p = getPtr(e);
-    ctx.save();
-    if (state.maskTool === 'eraser') { ctx.globalCompositeOperation = 'destination-out'; ctx.fillStyle = 'rgba(0,0,0,1)'; }
-    else { ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = 'rgba(56,189,248,0.56)'; state.hasMask = true; }
-    ctx.beginPath(); ctx.arc(p.x, p.y, Number(el.brushSize.value)/2, 0, Math.PI*2); ctx.fill(); ctx.restore();
-  }
-  el.maskCanvas.addEventListener('mousedown', startD); el.maskCanvas.addEventListener('mousemove', drawM); window.addEventListener('mouseup', () => state.isDrawing = false);
-  el.maskCanvas.addEventListener('touchstart', startD, { passive:false }); el.maskCanvas.addEventListener('touchmove', drawM, { passive:false }); window.addEventListener('touchend', () => state.isDrawing = false);
-  el.clearMaskBtn.addEventListener('click', () => { el.maskCanvas.getContext('2d').clearRect(0,0,el.maskCanvas.width,el.maskCanvas.height); state.hasMask = false; });
-
-  async function extractImageBundle(baseUrl) {
-    const img = await loadImageEl(baseUrl, true), iw = img.naturalWidth || 1024, ih = img.naturalHeight || 576;
-    const { w:tw, h:th } = calcAspectLockedSize(iw, ih, 1024, 64), { w:hw, h:hh } = calcAspectLockedSize(iw, ih, 512, 64);
-    const sc = document.createElement('canvas'); sc.width = tw; sc.height = th; sc.getContext('2d').drawImage(img,0,0,tw,th);
-    const sourceDataUrl = sc.toDataURL('image/png'), sourceJpegDataUrl = sc.toDataURL('image/jpeg', .92);
-    const sourceJpegBlob = await new Promise(r => sc.toBlob(r, 'image/jpeg', .92)), sourcePngBase64 = sourceDataUrl.split(',')[1];
-    const hc = document.createElement('canvas'); hc.width = hw; hc.height = hh; hc.getContext('2d').drawImage(img,0,0,hw,hh);
-    const sourceWebpBase64 = hc.toDataURL('image/webp', .88).split(',')[1];
-    let maskCanvasAligned = null;
-    if (state.hasMask) {
-      const cw = el.maskCanvas.width || 1, ch = el.maskCanvas.height || 1, fs = Math.min(cw/iw, ch/ih), dw = iw*fs, dh = ih*fs;
-      const mc = document.createElement('canvas'); mc.width = tw; mc.height = th; const mctx = mc.getContext('2d');
-      mctx.drawImage(el.maskCanvas, (cw-dw)/2, (ch-dh)/2, dw, dh, 0, 0, tw, th);
-      const md = mctx.getImageData(0,0,tw,th); let any = false;
-      for (let i=0;i<md.data.length;i+=4) { if(md.data[i+3]>20){md.data[i]=md.data[i+1]=md.data[i+2]=md.data[i+3]=255;any=true;} else {md.data[i]=md.data[i+1]=md.data[i+2]=0;md.data[i+3]=255;} }
-      if (any) { mctx.putImageData(md,0,0); maskCanvasAligned = mc; }
-    }
-    return { tw, th, hw, hh, sourceDataUrl, sourceJpegDataUrl, sourceJpegBlob, sourcePngBase64, sourceWebpBase64, maskCanvasAligned };
-  }
-
-  document.querySelectorAll('.ratio-btn').forEach(b => b.addEventListener('click', () => {
-    document.querySelectorAll('.ratio-btn').forEach(x => x.classList.remove('active'));
-    b.classList.add('active'); state.ratio = b.dataset.ratio; el.viewport.style.aspectRatio = '';
-    el.viewport.classList.remove('ratio-9-16','ratio-1-1');
-    if (state.ratio === '9:16') el.viewport.classList.add('ratio-9-16');
-    if (state.ratio === '1:1') el.viewport.classList.add('ratio-1-1');
-    setTimeout(syncMaskCanvas, 50);
-  }));
-
-  const closeDD = () => { el.videoDropdown.classList.remove('open'); el.imageDropdown.classList.remove('open'); };
-  el.btnUploadVideoMenu.addEventListener('click', e => { e.stopPropagation(); const o = el.videoDropdown.classList.contains('open'); closeDD(); if (!o) el.videoDropdown.classList.add('open'); });
-  el.btnUploadImageMenu.addEventListener('click', e => { e.stopPropagation(); const o = el.imageDropdown.classList.contains('open'); closeDD(); if (!o) el.imageDropdown.classList.add('open'); });
-  document.addEventListener('click', closeDD);
-  el.optVideoGallery.addEventListener('click', () => el.inputVideoGallery.click());
-  el.optImageGallery.addEventListener('click', () => el.inputImageGallery.click());
-  el.inputVideoGallery.addEventListener('change', e => { handleVideoFile(e.target.files[0]); e.target.value=''; });
-  el.inputVideoCameraNative.addEventListener('change', e => { handleVideoFile(e.target.files[0]); e.target.value=''; });
-  el.inputImageGallery.addEventListener('change', e => { handleImageFile(e.target.files[0]); e.target.value=''; });
-  el.inputImageCameraNative.addEventListener('change', e => { handleImageFile(e.target.files[0]); e.target.value=''; });
-
-  async function normalizeImg(blob) {
-    const tu = URL.createObjectURL(blob), img = await loadImageEl(tu, false), { w, h } = calcAspectLockedSize(img.naturalWidth, img.naturalHeight, 1280, 2);
-    const c = document.createElement('canvas'); c.width = w; c.height = h; c.getContext('2d').drawImage(img,0,0,w,h);
-    URL.revokeObjectURL(tu); return await new Promise(r => c.toBlob(r, 'image/jpeg', .94));
-  }
-  async function handleImageFile(file) {
-    if (!file) return; startRenderProgress('טוען תמונה...', 90);
-    try {
-      let b = file;
-      if ((/\.(heic|heif)$/i.test(file.name) || file.type === 'image/heic') && window.heic2any) {
-        setRenderProgress(45); const res = await window.heic2any({ blob:file, toType:'image/jpeg', quality:.94 }); b = Array.isArray(res) ? res[0] : res;
-      }
-      const clean = await normalizeImg(b); await finishRenderProgress(true); showImageStage(URL.createObjectURL(clean), true);
-    } catch { await finishRenderProgress(true); showImageStage(URL.createObjectURL(file), true); }
-  }
-  async function handleVideoFile(file) {
-    if (!file) return; startRenderProgress('טוען סרטון...', 90);
-    const u = URL.createObjectURL(file); await finishRenderProgress(true); await showVideoStage([{ url:u, blob:file, duration:0 }], false, true);
-  }
-  el.optImageCamera.addEventListener('click', () => openCam('image')); el.optVideoCamera.addEventListener('click', () => openCam('video'));
-  async function openCam(kind) {
-    if (!navigator.mediaDevices?.getUserMedia) { (kind==='image' ? el.inputImageCameraNative : el.inputVideoCameraNative).click(); return; }
-    try {
-      state.cameraStream = await navigator.mediaDevices.getUserMedia({ video:{facingMode:'environment'}, audio:kind==='video' });
-      el.cameraPreview.srcObject = state.cameraStream;
-      el.capturePhotoBtn.style.display = kind==='image' ? 'flex' : 'none';
-      el.startRecBtn.style.display = kind==='video' ? 'flex' : 'none';
-      el.stopRecBtn.style.display = 'none'; el.cameraModal.classList.add('open');
-    } catch { (kind==='image' ? el.inputImageCameraNative : el.inputVideoCameraNative).click(); }
-  }
-  const stopCam = () => { state.cameraStream?.getTracks().forEach(t => t.stop()); state.cameraStream = null; el.cameraModal.classList.remove('open'); };
-  el.closeCameraBtn.addEventListener('click', stopCam);
-  el.capturePhotoBtn.addEventListener('click', () => {
-    const c = document.createElement('canvas'); c.width = el.cameraPreview.videoWidth || 1280; c.height = el.cameraPreview.videoHeight || 720;
-    c.getContext('2d').drawImage(el.cameraPreview,0,0); c.toBlob(b => { showImageStage(URL.createObjectURL(b), true); stopCam(); }, 'image/jpeg', .94);
-  });
-  el.startRecBtn.addEventListener('click', () => {
-    state.recordedChunks = []; const mime = getVidMime();
-    state.mediaRecorder = new MediaRecorder(state.cameraStream, { mimeType:mime });
-    state.mediaRecorder.ondataavailable = e => { if (e.data.size > 0) state.recordedChunks.push(e.data); };
-    state.mediaRecorder.onstop = () => { const b = new Blob(state.recordedChunks, { type:mime }); showVideoStage([{ url:URL.createObjectURL(b), blob:b, duration:0 }], false, true); stopCam(); };
-    state.mediaRecorder.start(); el.startRecBtn.style.display = 'none'; el.stopRecBtn.style.display = 'flex';
-  });
-  el.stopRecBtn.addEventListener('click', () => state.mediaRecorder?.stop());
-
-  const HE_LEX = [
-    ['תחליף את','replace the'],['החלף את','replace the'],['תשנה את','change the'],['שנה את','change the'],['תוסיף','add'],['הוסף','add'],
-    ['תוריד את','remove the'],['מחק את','remove the'],['שים לו','put on him'],['שים לה','put on her'],['שים להם','put on them'],
-    ['מחבק','hugging'],['מחבקת','hugging'],['מחבקים','hugging'],['תינוק','baby'],['צוחק','laughing'],['צוחקת','laughing'],['צוחקים','laughing'],
-    ['אנשים','people'],['כולם','everyone'],['איש','man'],['אישה','woman'],['ילד','boy'],['ילדה','girl'],['משפחה','family'],
-    ['מדבר','speaking talking'],['מדברת','speaking talking'],['מדברים','talking'],['שר','singing'],['שרה','singing'],['מחייך','smiling'],['מחייכים','smiling'],
-    ['מנופפים','waving hands'],['רוקדים','dancing'],['הולך','walking'],['הולכים','walking'],['רץ','running'],['עף','flying'],
-    ['ספה','sofa'],['סלון','living room'],['בית','house'],['שמיים','sky'],['ים','ocean sea'],['חוף','beach'],['שקיעה','sunset'],
-    ['לילה','night'],['גלקסיה','galaxy'],['שלג','snow'],['גשם','rain'],['אש','fire'],['יער','forest'],['עיר','city'],['עתידני','futuristic'],
-    ['משקפי שמש','sunglasses'],['משקפיים','glasses'],['כובע','hat'],['חולצה','shirt'],['שמלה','dress'],['רקע','background'],
-    ['אדום','red'],['כחול','blue'],['ירוק','green'],['זהב','gold'],['סגול','purple'],['שחור','black'],['לבן','white'],['קולנועי','cinematic']
-  ];
-
-  /* ========= ALL 7 USER LLM SERVERS + AI HORDE + CEREBRAS + POLLINATIONS ========= */
-  async function callMultiLLM(inst) {
-    const gk = getProviderKey('gemini'), gq = getProviderKey('groq'), ck = getProviderKey('cerebras'), ok = getProviderKey('openrouter'), lk = getProviderKey('llm7');
-    const fns = [
-      async () => { const r = await fetch('https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'Qwen3.5-9B',messages:[{role:'user',content:inst}],max_tokens:240})}); return r.ok ? (await r.json())?.choices?.[0]?.message?.content?.trim() : null; },
-      async () => { const h = {'Content-Type':'application/json'}; if (lk) h['Authorization']=`Bearer ${lk}`; const r = await fetch('https://api.llm7.io/v1/chat/completions',{method:'POST',headers:h,body:JSON.stringify({model:'fast',messages:[{role:'user',content:inst}],max_tokens:240})}); return r.ok ? (await r.json())?.choices?.[0]?.message?.content?.trim() : null; },
-      async () => { const r = await fetch('https://api.kilo.ai/api/gateway/chat/completions',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'kilo-auto/free',messages:[{role:'user',content:inst}],max_tokens:240})}); return r.ok ? (await r.json())?.choices?.[0]?.message?.content?.trim() : null; },
-      async () => { const r = await fetch('https://oai.aihorde.net/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${getProviderKey('horde')||'0000000000'}`},body:JSON.stringify({messages:[{role:'user',content:inst}],max_tokens:200})}); return r.ok ? (await r.json())?.choices?.[0]?.message?.content?.trim() : null; },
-      async () => { const url = (state.keys.ollama || 'http://localhost:8020/v1/chat/completions').trim(), ctrl = new AbortController(); setTimeout(()=>ctrl.abort(), 900); const r = await fetch(url,{method:'POST',signal:ctrl.signal,headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'llama3',messages:[{role:'user',content:inst}],max_tokens:200})}); return r.ok ? (await r.json())?.choices?.[0]?.message?.content?.trim() : null; },
-      async () => { if (!gk) return null; for (const m of ['gemini-2.5-flash','gemini-3-flash-preview']){ const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(gk)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:inst}]}]})}); if (r.ok) return (await r.json())?.candidates?.[0]?.content?.parts?.[0]?.text?.trim(); } return null; },
-      async () => { if (!gq) return null; const r = await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${gq}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:inst}]})}); return r.ok ? (await r.json())?.choices?.[0]?.message?.content?.trim() : null; },
-      async () => { if (!ck) return null; const r = await fetch('https://api.cerebras.ai/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${ck}`,'Content-Type':'application/json'},body:JSON.stringify({model:'llama-3.3-70b',messages:[{role:'user',content:inst}]})}); return r.ok ? (await r.json())?.choices?.[0]?.message?.content?.trim() : null; },
-      async () => { if (!ok) return null; const r = await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Authorization':`Bearer ${ok}`,'Content-Type':'application/json'},body:JSON.stringify({model:'meta-llama/llama-3.3-70b-instruct:free',messages:[{role:'user',content:inst}]})}); return r.ok ? (await r.json())?.choices?.[0]?.message?.content?.trim() : null; },
-      async () => { const r = await fetch(`https://text.pollinations.ai/${encodeURIComponent(inst)}`); if (!r.ok) return null; const t = (await r.text()).trim(); return (t && t.length < 360 && !/<!DOCTYPE|<html|error|401|402|rate/i.test(t)) ? t : null; }
-    ];
-    for (const f of fns) { try { const r = await f(); if (r) return r; } catch {} }
-    throw new Error('No LLM');
-  }
-
-  function detectAudioFlags(raw) {
-    const t = raw.trim();
-    const hasSpeech = /(מדבר|מדברת|מדברים|אומר|אומרת|תגיד|שיגיד|תדבר|ידבר|דיבור|דיבוב|קול|שפת|פה|שר|שרה|talk|speak|say|voice|lip.?sync|sing|dialogue)/i.test(t);
-    const hasMusic = /(מוזיקה|מנגינה|שיר|סאונד|צליל|music|song|melody|beat|soundtrack)/i.test(t);
-    const qm = t.match(/["'״׳]([^"'״׳]{2,140})["'״׳]/);
-    const spokenText = qm ? qm[1].trim() : t.replace(/(תעשה ש|תגרום ל|שידבר|שמדבר|תדבר|דיבוב|בקול|וידאו|סרטון|עם מוזיקה)/gi, '').trim();
-    return { hasSpeech, hasMusic, spokenText: spokenText || t };
-  }
-
-  async function translateStrict(raw, modeType) {
-    const clean = raw.trim(), isEdit = modeType === 'image-edit', isI2V = modeType === 'img2vid';
-    if (!/[\u0590-\u05FF]/.test(clean)) {
-      if (isEdit) return `${clean}. Strictly preserve all original faces, people, proportions, and unmodified background identical.`;
-      if (isI2V) return `${clean}. Keep the exact same people, faces, clothing, and background from the reference image unchanged.`;
-      return clean;
-    }
-    try {
-      const rule = isEdit
-        ? 'Translate this photo edit literally into English. Explicitly state to keep all original people, faces, poses, and unmodified background identical.'
-        : isI2V
-        ? 'Translate this image-to-video motion instruction literally into English. Explicitly keep the exact same people, faces, clothing, and background from the reference image unchanged.'
-        : 'Translate this prompt literally into a clear, accurate English visual prompt keeping 100% of every requested detail without inventing unrelated objects.';
-      const t = await callMultiLLM(`${rule} Output ONLY the English text: "${clean}"`);
-      if (t && !/error|401|402/i.test(t)) return t;
-    } catch {}
-    let tr = null;
-    try { const r = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(clean)}&langpair=he|en`); if (r.ok) { const c = (await r.json())?.responseData?.translatedText?.trim(); if (c && !/MYMEMORY|LIMIT/i.test(c) && !/[\u0590-\u05FF]/.test(c)) tr = c; } } catch {}
-    if (!tr) { let f = clean; for (const [h, e] of HE_LEX) f = f.replaceAll(h, ` ${e} `); tr = f.replace(/[\u0590-\u05FF]+/g,' ').replace(/\s+/g,' ').trim(); }
-    let out = tr || clean;
-    if (isEdit) out += '. Strictly preserve all original faces, people, proportions, and unmodified background identical.';
-    if (isI2V) out += '. Keep the exact same people, faces, clothing, and background from the reference image unchanged.';
-    return out;
-  }
-
-  const SURPRISE = ['שועל זהב זוהר עומד ביער מושלג מתחת לזוהר הצפוני','עיר עתידנית שקופה בתוך האוקיינוס עם לווייתנים','אסטרונאוט עומד על פסגת הר במאדים מול שקיעה סגולה','מכונית ספורט שחורה דוהרת בגשם בלילה עם השתקפויות ניאון','טירה עתיקה מרחפת על אי ירוק בין עננים זהובים'];
-  el.btnSurprise.addEventListener('click', async () => {
-    el.btnSurprise.disabled = true;
-    try { el.promptInput.value = await callMultiLLM('המצא רעיון אחד יצירתי בעברית (עד 14 מילים). החזר רק את המשפט.'); }
-    catch { el.promptInput.value = SURPRISE[Math.floor(Math.random()*SURPRISE.length)]; }
-    finally { el.btnSurprise.disabled = false; }
-  });
-
-  /* ========= LLM7.io & Api.Airforce MEDIA DISCOVERY ========= */
-  async function getLlm7Catalog() {
-    if (state.llm7Models) return state.llm7Models;
-    const r = await checkOk(await fetch('https://api.llm7.io/v1/models'));
-    state.llm7Models = (await r.json())?.data || [];
-    return state.llm7Models;
-  }
-  async function callLlm7Image(prompt, base64Img = null) {
-    const lk = getProviderKey('llm7') || 'unused', models = await getLlm7Catalog();
-    const m = models.find(x => x.model_type === 'image' && (x.tier === 'turbo' || !x.usage_based_only)) || models.find(x => x.model_type === 'image');
-    const modelId = m?.id || 'gpt-image-2';
-    const ep = base64Img ? 'https://api.llm7.io/v1/images/edits' : 'https://api.llm7.io/v1/images/generations';
-    const body = base64Img ? { model:modelId, prompt, image:`data:image/png;base64,${base64Img}` } : { model:modelId, prompt };
-    const r = await checkOk(await fetch(ep, { method:'POST', headers:{'Authorization':`Bearer ${lk}`,'Content-Type':'application/json'}, body:JSON.stringify(body) }));
-    const d = await r.json();
-    return d?.data?.[0]?.url || (d?.data?.[0]?.b64_json ? `data:image/png;base64,${d.data[0].b64_json}` : null);
-  }
-  async function callLlm7Video(prompt, jpegDataUrl = null) {
-    const lk = getProviderKey('llm7') || 'unused', models = await getLlm7Catalog();
-    const m = models.find(x => x.model_type === 'video' && (!jpegDataUrl || x.capabilities?.atlascloud_routes?.some(r=>r.request_types?.includes('image-to-video')))) || models.find(x => x.model_type === 'video');
-    if (!m) throw new Error('No video model');
-    const sub = await checkOk(await fetch('https://api.llm7.io/v1/videos', {
-      method:'POST', headers:{'Authorization':`Bearer ${lk}`,'Content-Type':'application/json'},
-      body:JSON.stringify({ model:m.id, prompt, seconds:6, ...(jpegDataUrl ? { input_reference:jpegDataUrl } : {}) })
-    }));
-    const id = (await sub.json())?.id; if (!id) throw new Error('No id');
-    for (let i=0; i<36; i++) {
-      await new Promise(r => setTimeout(r, 3000));
-      const st = await (await fetch(`https://api.llm7.io/v1/videos/${encodeURIComponent(id)}`, { headers:{'Authorization':`Bearer ${lk}`} })).json();
-      if (st?.status === 'completed') {
-        const cr = await checkOk(await fetch(`https://api.llm7.io/v1/videos/${encodeURIComponent(id)}/content`, { headers:{'Authorization':`Bearer ${lk}`} }));
-        const b = await cr.blob(); return { url:URL.createObjectURL(b), blob:b, duration:0 };
-      }
-      if (st?.status === 'failed') throw new Error('Fail');
-    }
-    throw new Error('Timeout');
-  }
-
-  async function callAirforceVideo(prompt, rawB64 = null) {
-    const ak = getProviderKey('airforce'); if (!ak) throw new Error('No key');
-    if (!state.airforceModels) {
-      const r = await checkOk(await fetch('https://api.airforce/v1/models', { headers:{'Authorization':`Bearer ${ak}`} }));
-      state.airforceModels = (await r.json())?.data || [];
-    }
-    const vm = state.airforceModels.find(m => m.media_type === 'video' && (!rawB64 || m.video_caps?.modes?.includes('image'))) || state.airforceModels.find(m => m.media_type === 'video');
-    if (!vm) throw new Error('No video model');
-    const sub = await checkOk(await fetch('https://api.airforce/v1/video/generations', {
-      method:'POST', headers:{'Authorization':`Bearer ${ak}`,'Content-Type':'application/json'},
-      body:JSON.stringify({ model:vm.id, prompt, mode:rawB64?'image':'text', duration_seconds:6, aspect_ratio:state.ratio, ...(rawB64?{input_images:[{b64_json:rawB64}]}:{}) })
-    }));
-    const dj = await sub.json(), tid = dj?.id || dj?.task_id;
-    if (dj?.data?.[0]?.url) { const b = await (await fetch(dj.data[0].url)).blob(); return { url:URL.createObjectURL(b), blob:b, duration:0 }; }
-    if (!tid) throw new Error('No task');
-    for (let i=0; i<36; i++) {
-      await new Promise(r => setTimeout(r, 3000));
-      const sr = await fetch(`https://api.airforce/v1/video/generations/${encodeURIComponent(tid)}`, { headers:{'Authorization':`Bearer ${ak}`} });
-      if (!sr.ok) continue;
-      const st = await sr.json(), vu = st?.url || st?.video_url || st?.data?.[0]?.url || st?.output?.[0];
-      if (vu) { const b = await (await fetch(vu)).blob(); return { url:URL.createObjectURL(b), blob:b, duration:0 }; }
-      if (/fail|error/i.test(st?.status || '')) throw new Error('Fail');
-    }
-    throw new Error('Timeout');
-  }
-
-  async function uploadOrInline(host, blob, fallbackUrl, fname = 'input.jpg') {
-    const hf = getProviderKey('hf');
-    try {
-      const fd = new FormData(); fd.append('files', blob, fname);
-      const o = { method:'POST', body:fd }; if (hf) o.headers = { 'Authorization':`Bearer ${hf}` };
-      const arr = await (await checkOk(await fetch(`https://${host}/gradio_api/upload`, o))).json();
-      if (arr?.[0]) return { path:arr[0], meta:{ _type:'gradio.FileData' } };
-    } catch {}
-    return fallbackUrl ? { url:fallbackUrl, meta:{ _type:'gradio.FileData' } } : null;
-  }
-
-  async function callGradioEP(host, ep, dataArr, ms = 65000) {
-    const hf = getProviderKey('hf'), ctrl = new AbortController(), tm = setTimeout(() => ctrl.abort(), ms);
-    const hdr = { 'Content-Type':'application/json' }; if (hf) hdr['Authorization'] = `Bearer ${hf}`;
-    const pr = await checkOk(await fetch(`https://${host}/gradio_api/call/${ep}`, { method:'POST', headers:hdr, signal:ctrl.signal, body:JSON.stringify({ data:dataArr }) }));
-    const { event_id } = await pr.json(); if (!event_id) { clearTimeout(tm); throw new Error('No event_id'); }
-    const go = { signal:ctrl.signal }; if (hf) go.headers = { 'Authorization':`Bearer ${hf}` };
-    const sse = await (await fetch(`https://${host}/gradio_api/call/${ep}/${event_id}`, go)).text();
-    clearTimeout(tm);
-    if (sse.includes('event: error')) throw new Error(/quota|limit|exceeded/i.test(sse) ? 'quota exceeded' : 'Space error');
-    const dl = sse.split('\n').reverse().find(l => l.startsWith('data: '));
-    if (!dl) throw new Error('No data');
-    return JSON.parse(dl.slice(6));
-  }
-
-  async function callGradioDyn(host, prompt, imgBlob = null, imgFallback = null, isVid = false, tW = 1024, tH = 576, audBlob = null, audFallback = null, isAudioOut = false) {
-    const info = await (await checkOk(await fetch(`https://${host}/gradio_api/info`))).json();
-    const eps = info?.named_endpoints || {}, keys = Object.keys(eps).filter(k => !/clear|reset|example|update|change|toggle|load|cancel/i.test(k));
-    const epKey = keys.find(k => /edit|generate|infer|predict|video|i2v|t2v|tts|synth|talk|speak|music|run/i.test(k) && eps[k].parameters?.some(p => /prompt|instruction|text|speech|audio|image/i.test(p.parameter_name||p.label||''))) || keys[0];
-    if (!epKey) throw new Error('No endpoint');
-
-    const upImg = imgBlob ? await uploadOrInline(host, imgBlob, imgFallback, 'photo.jpg') : null;
-    const upAud = audBlob ? await uploadOrInline(host, audBlob, audFallback, 'audio.wav') : null;
-
-    let imgSet = false, audSet = false, prmSet = false;
-    const arr = (eps[epKey].parameters || []).map(p => {
-      const n = `${p.parameter_name||''} ${p.label||''}`.toLowerCase(), to = p.type || {}, td = JSON.stringify(to).toLowerCase();
-      if (!audSet && upAud && (td.includes('filedata') && /audio|wav|mp3|speech|voice|sound|music/.test(n) || /driven_audio|audio/.test(n))) { audSet = true; return upAud; }
-      if (!imgSet && upImg && (td.includes('filedata') || /image|img|source_image|input|frame|portrait|face/.test(n))) { imgSet = true; return (to.type==='array'||td.includes('"type":"array"')) ? [upImg] : upImg; }
-      if (!prmSet && /prompt|instruction|edit|caption|text|lyrics/.test(n) && !/negative/.test(n)) { prmSet = true; return prompt; }
-      if (/voice/.test(n) && to.type === 'string' && /[\u0590-\u05FF]/.test(prompt)) return 'he-IL-AvriNeural';
-      if (/negative/.test(n)) return p.parameter_has_default ? p.parameter_default : '';
-      if (/enhance|rewrite/.test(n) && to.type === 'boolean') return false;
-      if (/width/.test(n) && (to.type==='number'||to.type==='integer')) return tW;
-      if (/height/.test(n) && (to.type==='number'||to.type==='integer')) return tH;
-      if (/duration|second/.test(n) && (to.type==='number'||to.type==='integer')) return 6;
-      if (p.parameter_has_default) return p.parameter_default;
-      if (to.type === 'boolean') return true;
-      if (to.type === 'number' || to.type === 'integer') return /step/.test(n) ? 4 : /seed/.test(n) ? 42 : 1;
-      return to.type === 'string' ? '' : null;
+async function translateHe(txt, sig){
+  if(!/[\u0590-\u05FF]/.test(txt)) return txt;
+  try{
+    const r = await fetch('https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/chat/completions',{
+      method:'POST',headers:{'Content-Type':'application/json'},signal:sig,
+      body:JSON.stringify({model:'Qwen3.5-9B',messages:[{role:'user',content:'Translate to concise English visual prompt only: '+txt}],max_tokens:180})
     });
+    if(r.ok){ const j = await r.json(); const out = j?.choices?.[0]?.message?.content?.trim(); if(out) return out; }
+  }catch{}
+  try{
+    const mr = await fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(txt)+'&langpair=he|en',{signal:sig});
+    const mj = await mr.json(); const c = mj?.responseData?.translatedText;
+    if(c && !/[\u0590-\u05FF]/.test(c)) return c;
+  }catch{}
+  return txt;
+}
 
-    if (imgBlob && !imgSet) throw new Error('No image param');
-    if (audBlob && !audSet) throw new Error('No audio param');
-    const res = await callGradioEP(host, epKey.replace(/^\//,''), arr, isVid ? 85000 : 45000);
-    const item = res?.find(x => x && (x.url || x.video?.url || x.image?.url || x.audio?.url || x[0]?.url));
-    const u = item?.url || item?.video?.url || item?.image?.url || item?.audio?.url || item?.[0]?.url;
-    if (!u) throw new Error('No URL');
-    const b = await (await fetch(u)).blob();
-    return { url:URL.createObjectURL(b), blob:b, isAudio:isAudioOut };
-  }
+async function uploadBlob(host, blob, name, sig){
+  const fd = new FormData(); fd.append('files', blob, name);
+  const r = await fetch('https://'+host+'/gradio_api/upload',{method:'POST',body:fd,signal:sig});
+  const arr = await r.json(); return {path:arr[0], meta:{_type:'gradio.FileData'}};
+}
 
-  async function generateSpeechAudio(spoken) {
-    const isHe = /[\u0590-\u05FF]/.test(spoken);
-    const res = await runCascade([
-      { id:'tts_ph', enabled:()=>isHe, run:async()=>await callGradioDyn('phonikud-phonikud-tts.hf.space', spoken, null, null, false, 0, 0, null, null, true) },
-      { id:'tts_edge1', enabled:()=>true, run:async()=>await callGradioDyn('innoai-edge-tts-text-to-speech.hf.space', spoken, null, null, false, 0, 0, null, null, true) },
-      { id:'tts_edge2', enabled:()=>true, run:async()=>await callGradioDyn('voicecloning-be-text-to-speech.hf.space', spoken, null, null, false, 0, 0, null, null, true) },
-      { id:'tts_edge3', enabled:()=>true, run:async()=>await callGradioDyn('nick088-edge-tts.hf.space', spoken, null, null, false, 0, 0, null, null, true) },
-      { id:'tts_kok1', enabled:()=>!isHe, run:async()=>await callGradioDyn('hexgrad-kokoro-tts.hf.space', spoken, null, null, false, 0, 0, null, null, true) },
-      { id:'tts_kok2', enabled:()=>!isHe, run:async()=>await callGradioDyn('oddadmix-kokoro-7m-distill-demo.hf.space', spoken, null, null, false, 0, 0, null, null, true) },
-      { id:'tts_pol', enabled:()=>Boolean(getProviderKey('pollinations')), run:async()=>{ const r = await checkOk(await fetch(`https://gen.pollinations.ai/text/${encodeURIComponent(spoken)}?model=openai-audio&voice=nova&key=${encodeURIComponent(getProviderKey('pollinations'))}`)); const b = await r.blob(); return { url:URL.createObjectURL(b), blob:b }; } }
-    ], 12, 32, 'מפיק קול ודיבור...');
-    return res?.blob || null;
-  }
-
-  async function generateMusicAudio(en) {
-    const res = await runCascade([
-      { id:'mus_ace15', enabled:()=>true, run:async()=>await callGradioDyn('ace-step-ace-step-v1-5.hf.space', en, null, null, false, 0, 0, null, null, true) },
-      { id:'mus_ace', enabled:()=>true, run:async()=>await callGradioDyn('ace-step-ace-step.hf.space', en, null, null, false, 0, 0, null, null, true) },
-      { id:'mus_mg', enabled:()=>true, run:async()=>await callGradioDyn('facebook-musicgen.hf.space', en, null, null, false, 0, 0, null, null, true) }
-    ], 15, 36, 'יוצר מוזיקה...');
-    return res?.blob || null;
-  }
-
-  const blobToDataUri = b => new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(b); });
-
-  async function muxAudioIntoVideo(vUrl, aBlob) {
-    const v = document.createElement('video'); v.crossOrigin = 'anonymous'; v.muted = true; v.src = vUrl;
-    await new Promise(r => { v.onloadedmetadata = r; });
-    const cw = Math.min(v.videoWidth || 1024, 1280) & ~1, ch = Math.round(cw * ((v.videoHeight || 576) / (v.videoWidth || 1024))) & ~1;
-    const c = document.createElement('canvas'); c.width = cw; c.height = ch; const ctx = c.getContext('2d');
-    const aUrl = URL.createObjectURL(aBlob), aEl = new Audio(aUrl); aEl.crossOrigin = 'anonymous';
-    const actx = new (window.AudioContext || window.webkitAudioContext)();
-    await actx.resume().catch(()=>{});
-    const srcN = actx.createMediaElementSource(aEl), dest = actx.createMediaStreamDestination();
-    srcN.connect(dest);
-    const comb = new MediaStream([...c.captureStream(24).getVideoTracks(), ...dest.stream.getAudioTracks()]);
-    const mime = getVidMime(), rec = new MediaRecorder(comb, { mimeType:mime }), chunks = [];
-    rec.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
-    const done = new Promise(res => { rec.onstop = () => { actx.close().catch(()=>{}); URL.revokeObjectURL(aUrl); res(new Blob(chunks, { type:mime })); }; });
-    rec.start(); aEl.play().catch(()=>{}); await v.play();
-    (function draw() { if (v.ended || v.paused) { aEl.pause(); rec.stop(); return; } ctx.drawImage(v,0,0,cw,ch); requestAnimationFrame(draw); })();
-    const ob = await done;
-    return { url:URL.createObjectURL(ob), blob:ob, duration:v.duration || 6 };
-  }
-
-  async function runAIHorde(params) {
-    const hk = getProviderKey('horde') || '0000000000';
-    const body = { prompt:params.prompt, params:{ width:Math.min(512,params.width||512), height:Math.min(512,params.height||512), steps:24, cfg_scale:7.5, sampler_name:'k_euler_a', n:1, denoising_strength:params.denoising_strength??.6 }, nsfw:false, r2:true };
-    if (params.source_image) { body.source_image = params.source_image; body.source_processing = 'img2img'; }
-    const sub = await checkOk(await fetch('https://aihorde.net/api/v2/generate/async',{method:'POST',headers:{'Content-Type':'application/json','apikey':hk,'Client-Agent':'StudioYaniv:1.0:app'},body:JSON.stringify(body)}));
-    const { id } = await sub.json(); if (!id) throw new Error('No id');
-    for (let i=0;i<28;i++){
-      await new Promise(r=>setTimeout(r,2000));
-      const chk = await (await fetch(`https://aihorde.net/api/v2/generate/check/${id}`)).json();
-      setRenderProgress(55 + Math.min(40, i*1.6));
-      if (chk.done) {
-        const st = await (await fetch(`https://aihorde.net/api/v2/generate/status/${id}`)).json(), img = st?.generations?.[0]?.img;
-        if (!img) throw new Error('No img');
-        return img.startsWith('http') ? URL.createObjectURL(await (await fetch(img)).blob()) : `data:image/webp;base64,${img}`;
+async function callGradio(host, ep, data, sig, timeoutMs=45000){
+  const c = new AbortController(); const t = setTimeout(()=>c.abort(), timeoutMs);
+  sig?.addEventListener('abort', ()=>c.abort());
+  try{
+    const pr = await fetch('https://'+host+'/gradio_api/call/'+ep,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data}),signal:c.signal});
+    const {event_id} = await pr.json();
+    const sr = await fetch('https://'+host+'/gradio_api/call/'+ep+'/'+event_id,{signal:c.signal});
+    const txt = await sr.text();
+    const lines = txt.split('\n');
+    for(let i=0;i<lines.length;i++){
+      if(lines[i].startsWith('event: error')){
+        const d = (lines[i+1]||'').replace(/^data:\s*/,'').trim();
+        const isQ = /quota|limit|exceeded|zerogpu/i.test(d) || (host.endsWith('.hf.space') && (d==='null'||d==='{"error":null}'||d==='{"error": null}'));
+        throw new Error(isQ ? 'ZeroGPU quota exceeded' : ('Space error: '+d.slice(0,60)));
       }
-      if (chk.faulted) throw new Error('Faulted');
-    }
-    throw new Error('Timeout');
-  }
-
-  /* ========= FREE & RENEWING IMAGE PIPELINE ========= */
-  async function routeTextToImage(en) {
-    const { width, height, hordeW, hordeH } = getDimsRatio(), seed = Math.floor(Math.random()*999999);
-    const url = await runCascade([
-      { id:'t2i_puter', enabled:()=>isPuterIn(), run:async()=>(await puter.ai.txt2img(en,{model:'black-forest-labs/flux-1-schnell'}))?.src },
-      { id:'t2i_air', enabled:()=>Boolean(getProviderKey('airforce')), run:async()=>{ const r=await checkOk(await fetch('https://api.airforce/v1/images/generations',{method:'POST',headers:{'Authorization':`Bearer ${getProviderKey('airforce')}`,'Content-Type':'application/json'},body:JSON.stringify({model:'image-1',prompt:en,aspect_ratio:state.ratio})})); const d=await r.json(); return d?.data?.[0]?.url||(d?.data?.[0]?.b64_json?`data:image/png;base64,${d.data[0].b64_json}`:null); } },
-      { id:'t2i_llm7', enabled:()=>true, run:async()=>await callLlm7Image(en, null) },
-      { id:'t2i_cf', enabled:()=>Boolean(state.keys.cfAccount&&getProviderKey('cfToken')), run:async()=>{ const r=await checkOk(await fetch(`https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(state.keys.cfAccount)}/ai/run/@cf/black-forest-labs/flux-1-schnell`,{method:'POST',headers:{'Authorization':`Bearer ${getProviderKey('cfToken')}`,'Content-Type':'application/json'},body:JSON.stringify({prompt:en,num_steps:4})})); const b=(await r.json())?.result?.image; return b?`data:image/png;base64,${b}`:null; } },
-      { id:'t2i_ir', enabled:()=>Boolean(getProviderKey('imageRouter')), run:async()=>{ const r=await checkOk(await fetch('https://api.imagerouter.io/v1/openai/images/generations',{method:'POST',headers:{'Authorization':`Bearer ${getProviderKey('imageRouter')}`,'Content-Type':'application/json'},body:JSON.stringify({prompt:en,model:'black-forest-labs/FLUX-1-schnell:free'})})); const d=await r.json(); return d?.data?.[0]?.url||(d?.data?.[0]?.b64_json?`data:image/png;base64,${d.data[0].b64_json}`:null); } },
-      { id:'t2i_nv', enabled:()=>Boolean(getProviderKey('nvidia')), run:async()=>{ const r=await checkOk(await fetch('https://ai.api.nvidia.com/v1/genai/black-forest-labs/flux.1-schnell',{method:'POST',headers:{'Authorization':`Bearer ${getProviderKey('nvidia')}`,'Accept':'application/json','Content-Type':'application/json'},body:JSON.stringify({prompt:en,width,height,steps:4,seed:0})})); const d=await r.json(), b=d?.artifacts?.[0]?.base64||d?.image; return b?`data:image/jpeg;base64,${b}`:null; } },
-      { id:'t2i_mmh3', enabled:()=>true, run:async()=>(await callGradioDyn('minimaxai-minimax-h3-image.hf.space',en,null,null,false,width,height))?.url },
-      { id:'t2i_ph3', enabled:()=>true, run:async()=>(await callGradioDyn('prunaai-p-h3-image.hf.space',en,null,null,false,width,height))?.url },
-      { id:'t2i_ast', enabled:()=>true, run:async()=>(await callGradioDyn('ast-1320-qwen-2511-flux-2-klein.hf.space',en,null,null,false,width,height))?.url },
-      { id:'t2i_q21', enabled:()=>true, run:async()=>(await callGradioDyn('qwen-qwen-image-2-1.hf.space',en,null,null,false,width,height))?.url },
-      { id:'t2i_z1', enabled:()=>true, run:async()=>(await callGradioDyn('mrfakename-z-image-turbo.hf.space',en,null,null,false,width,height))?.url },
-      { id:'t2i_z2', enabled:()=>true, run:async()=>(await callGradioDyn('tongyi-mai-z-image-turbo.hf.space',en,null,null,false,width,height))?.url },
-      { id:'t2i_q1', enabled:()=>true, run:async()=>(await callGradioDyn('qwen-qwen-image.hf.space',en,null,null,false,width,height))?.url },
-      { id:'t2i_f1', enabled:()=>true, run:async()=>{ const r=await callGradioEP('black-forest-labs-flux-1-schnell.hf.space','infer',[en,0,true,width,height,4]); return r?.[0]?.url?URL.createObjectURL(await(await fetch(r[0].url)).blob()):null; } },
-      { id:'t2i_pol', enabled:()=>true, run:async()=>{ const pk=getProviderKey('pollinations'), ep=pk?`https://gen.pollinations.ai/image/${encodeURIComponent(en)}?model=flux&width=${width}&height=${height}&seed=${seed}&nologo=true&key=${encodeURIComponent(pk)}`:`https://image.pollinations.ai/prompt/${encodeURIComponent(en)}?width=${width}&height=${height}&seed=${seed}&model=flux&nologo=true`; const r=await checkOk(await fetch(ep)), b=await r.blob(); if(b.size<15000)throw new Error('402'); return URL.createObjectURL(b); } },
-      { id:'t2i_horde', enabled:()=>true, run:async()=>await runAIHorde({prompt:en,width:hordeW,height:hordeH}) }
-    ], 15, 92, 'מייצר תמונה...');
-    if (!url) throw new Error('המכסה הזמנית לתמונות התמלאה כרגע, נסה שוב בעוד רגע.');
-    return url;
-  }
-
-  /* ========= FREE & RENEWING IMAGE EDIT PIPELINE ========= */
-  async function routeRealAIImageEdit(en, baseUrl) {
-    setRenderProgress(12, 'מכין תמונה לעריכה...');
-    const { tw, th, hw, hh, sourceDataUrl, sourceJpegBlob, sourcePngBase64, sourceWebpBase64, maskCanvasAligned } = await extractImageBundle(baseUrl);
-    const edited = await runCascade([
-      { id:'ed_puter', enabled:()=>isPuterIn(), run:async()=>(await puter.ai.txt2img(en,{model:'black-forest-labs/flux-2-dev',input_image:sourcePngBase64}))?.src },
-      { id:'ed_air', enabled:()=>Boolean(getProviderKey('airforce')), run:async()=>{ const r=await checkOk(await fetch('https://api.airforce/v1/images/generations',{method:'POST',headers:{'Authorization':`Bearer ${getProviderKey('airforce')}`,'Content-Type':'application/json'},body:JSON.stringify({model:'image-1-edit',prompt:en,input_images:[{b64_json:sourcePngBase64}]})})); const d=await r.json(); return d?.data?.[0]?.url||(d?.data?.[0]?.b64_json?`data:image/png;base64,${d.data[0].b64_json}`:null); } },
-      { id:'ed_llm7', enabled:()=>true, run:async()=>await callLlm7Image(en, sourcePngBase64) },
-      { id:'ed_mmh3', enabled:()=>true, run:async()=>(await callGradioDyn('minimaxai-minimax-h3-image.hf.space',en,sourceJpegBlob,sourceDataUrl,false,tw,th))?.url },
-      { id:'ed_ph3', enabled:()=>true, run:async()=>(await callGradioDyn('prunaai-p-h3-image.hf.space',en,sourceJpegBlob,sourceDataUrl,false,tw,th))?.url },
-      { id:'ed_ast', enabled:()=>true, run:async()=>(await callGradioDyn('ast-1320-qwen-2511-flux-2-klein.hf.space',en,sourceJpegBlob,sourceDataUrl,false,tw,th))?.url },
-      { id:'ed_qorig', enabled:()=>true, run:async()=>(await callGradioDyn('qwen-qwen-image-edit.hf.space',en,sourceJpegBlob,sourceDataUrl,false,tw,th))?.url },
-      { id:'ed_q2511f', enabled:()=>true, run:async()=>(await callGradioDyn('prithivmlmods-qwen-image-edit-2511-loras-fast.hf.space',en,sourceJpegBlob,sourceDataUrl,false,tw,th))?.url },
-      { id:'ed_q2511', enabled:()=>true, run:async()=>(await callGradioDyn('qwen-qwen-image-edit-2511.hf.space',en,sourceJpegBlob,sourceDataUrl,false,tw,th))?.url },
-      { id:'ed_qfast', enabled:()=>true, run:async()=>(await callGradioDyn('multimodalart-qwen-image-edit-fast.hf.space',en,sourceJpegBlob,sourceDataUrl,false,tw,th))?.url },
-      { id:'ed_q21', enabled:()=>true, run:async()=>(await callGradioDyn('qwen-qwen-image-2-1.hf.space',en,sourceJpegBlob,sourceDataUrl,false,tw,th))?.url },
-      { id:'ed_qnext', enabled:()=>true, run:async()=>(await callGradioDyn('memfice-qwen-image-edit-next-scene.hf.space',en,sourceJpegBlob,sourceDataUrl,false,tw,th))?.url },
-      { id:'ed_qpose', enabled:()=>true, run:async()=>(await callGradioDyn('yellowbox2026-qwen-image-edit-2511-anypose.hf.space',en,sourceJpegBlob,sourceDataUrl,false,tw,th))?.url },
-      { id:'ed_fr', enabled:()=>true, run:async()=>(await callGradioDyn('multimodalart-firered-image-edit-1-0-fast.hf.space',en,sourceJpegBlob,sourceDataUrl,false,tw,th))?.url },
-      { id:'ed_horde', enabled:()=>true, run:async()=>await runAIHorde({prompt:en,width:hw,height:hh,source_image:sourceWebpBase64,denoising_strength:maskCanvasAligned?0.72:0.42}) }
-    ], 15, 92, 'מעבד עריכה...');
-    if (!edited) throw new Error('מכסת העריכה הזמנית התמלאה כרגע, נסה שוב בעוד מספר דקות.');
-    return maskCanvasAligned ? await compositeMask(sourceDataUrl, edited, maskCanvasAligned) : await matchContain(edited, tw, th);
-  }
-
-  async function matchContain(url, tw, th) {
-    const img = await loadImageEl(url, true);
-    if (img.naturalWidth === tw && img.naturalHeight === th) return url;
-    const c = document.createElement('canvas'); c.width = tw; c.height = th;
-    const sc = Math.min(tw/img.naturalWidth, th/img.naturalHeight), dw = img.naturalWidth*sc, dh = img.naturalHeight*sc;
-    c.getContext('2d').drawImage(img, (tw-dw)/2, (th-dh)/2, dw, dh);
-    return c.toDataURL('image/png');
-  }
-  async function compositeMask(origUrl, editUrl, maskC) {
-    const [oImg, eImg] = await Promise.all([loadImageEl(origUrl,true), loadImageEl(editUrl,true)]);
-    const w = oImg.naturalWidth, h = oImg.naturalHeight, out = document.createElement('canvas'); out.width = w; out.height = h;
-    const ctx = out.getContext('2d'); ctx.drawImage(oImg,0,0,w,h);
-    const m = document.createElement('canvas'); m.width = w; m.height = h; const mctx = m.getContext('2d');
-    mctx.drawImage(maskC,0,0,w,h); const md = mctx.getImageData(0,0,w,h);
-    for (let i=0;i<md.data.length;i+=4) md.data[i+3] = md.data[i]>128 ? 255 : 0;
-    mctx.putImageData(md,0,0);
-    const cut = document.createElement('canvas'); cut.width = w; cut.height = h; const cctx = cut.getContext('2d');
-    cctx.filter = 'blur(4px)'; cctx.drawImage(m,0,0); cctx.filter = 'none'; cctx.globalCompositeOperation = 'source-in';
-    const sc = Math.min(w/eImg.naturalWidth, h/eImg.naturalHeight), dw = eImg.naturalWidth*sc, dh = eImg.naturalHeight*sc;
-    cctx.drawImage(eImg, (w-dw)/2, (h-dh)/2, dw, dh); ctx.drawImage(cut,0,0);
-    return out.toDataURL('image/png');
-  }
-
-  async function routeLipSyncVideo(en, frameUrl, audioBlob) {
-    const img = await loadImageEl(frameUrl, true), lk = calcAspectLockedSize(img.naturalWidth, img.naturalHeight, 1024, 16);
-    const c = document.createElement('canvas'); c.width = lk.w; c.height = lk.h; c.getContext('2d').drawImage(img,0,0,lk.w,lk.h);
-    const jpegUrl = c.toDataURL('image/jpeg', .92), imgBlob = await new Promise(r => c.toBlob(r, 'image/jpeg', .92));
-    const audDataUrl = await blobToDataUri(audioBlob);
-
-    const talking = await runCascade([
-      { id:'ls_w22s2v', enabled:()=>true, run:async()=>{ const r=await callGradioDyn('wan-ai-wan2-2-s2v.hf.space',en,imgBlob,jpegUrl,true,lk.w,lk.h,audioBlob,audDataUrl); return r?{...r,duration:0}:null; } },
-      { id:'ls_omni', enabled:()=>true, run:async()=>{ const r=await callGradioDyn('alexnasa-omniavatar.hf.space',en,imgBlob,jpegUrl,true,lk.w,lk.h,audioBlob,audDataUrl); return r?{...r,duration:0}:null; } },
-      { id:'ls_echo', enabled:()=>true, run:async()=>{ const r=await callGradioDyn('fffiloni-echomimic.hf.space',en,imgBlob,jpegUrl,true,lk.w,lk.h,audioBlob,audDataUrl); return r?{...r,duration:0}:null; } },
-      { id:'ls_hallo', enabled:()=>true, run:async()=>{ const r=await callGradioDyn('hasan93-hallo-talking-face.hf.space',en,imgBlob,jpegUrl,true,lk.w,lk.h,audioBlob,audDataUrl); return r?{...r,duration:0}:null; } },
-      { id:'ls_mtalk', enabled:()=>true, run:async()=>{ const r=await callGradioDyn('fffiloni-meigen-multitalk.hf.space',en,imgBlob,jpegUrl,true,lk.w,lk.h,audioBlob,audDataUrl); return r?{...r,duration:0}:null; } },
-      { id:'ls_sad1', enabled:()=>true, run:async()=>{ const r=await callGradioDyn('kevinwang676-sadtalker.hf.space',en,imgBlob,jpegUrl,true,lk.w,lk.h,audioBlob,audDataUrl); return r?{...r,duration:0}:null; } },
-      { id:'ls_sad2', enabled:()=>true, run:async()=>{ const r=await callGradioDyn('john6666-sadtalker.hf.space',en,imgBlob,jpegUrl,true,lk.w,lk.h,audioBlob,audDataUrl); return r?{...r,duration:0}:null; } },
-      { id:'ls_sad3', enabled:()=>true, run:async()=>{ const r=await callGradioDyn('henrybit-sadtalker-demo.hf.space',en,imgBlob,jpegUrl,true,lk.w,lk.h,audioBlob,audDataUrl); return r?{...r,duration:0}:null; } }
-    ], 35, 86, 'מסנכרן דיבוב ותנועת שפתיים...');
-
-    if (talking) { talking.duration = await probeDur(talking.url); return talking; }
-    return null;
-  }
-
-  /* ========= FREE & RENEWING VIDEO PIPELINE ========= */
-  async function requestVideoHop(en, frameUrl = null) {
-    let blob = null, jpegUrl = null, rawB64 = null, { width:tW, height:tH } = getDimsRatio();
-    if (frameUrl) {
-      const img = await loadImageEl(frameUrl, true), lk = calcAspectLockedSize(img.naturalWidth, img.naturalHeight, 1024, 16);
-      tW = lk.w; tH = lk.h;
-      const c = document.createElement('canvas'); c.width = tW; c.height = tH; c.getContext('2d').drawImage(img,0,0,tW,tH);
-      jpegUrl = c.toDataURL('image/jpeg', .92); rawB64 = jpegUrl.split(',')[1];
-      blob = await new Promise(r => c.toBlob(r, 'image/jpeg', .92));
-    }
-    const vid = await runCascade([
-      { id:'vid_puter', enabled:()=>isPuterIn(), run:async()=>{ const o={model:'wan-ai/wan2.7-t2v'}; if(jpegUrl)o.input_reference=jpegUrl; const v=await puter.ai.txt2vid(en,o); if(!v?.src)return null; const b=await(await fetch(v.src)).blob(); return {url:URL.createObjectURL(b),blob:b,duration:0}; } },
-      { id:'vid_air', enabled:()=>Boolean(getProviderKey('airforce')), run:async()=>await callAirforceVideo(en, rawB64) },
-      { id:'vid_llm7', enabled:()=>Boolean(getProviderKey('llm7')), run:async()=>await callLlm7Video(en, jpegUrl) },
-      { id:'vid_pol', enabled:()=>Boolean(getProviderKey('pollinations')), run:async()=>{ const r=await checkOk(await fetch(`https://gen.pollinations.ai/video/${encodeURIComponent(en)}?key=${encodeURIComponent(getProviderKey('pollinations'))}`)); if(!r.headers.get('content-type')?.includes('video'))return null; const b=await r.blob(); return {url:URL.createObjectURL(b),blob:b,duration:0}; } },
-      { id:'vid_knw22', enabled:()=>true, run:async()=>{ const r=await callGradioDyn('kingnish-wan2-2-fast.hf.space',en,blob,jpegUrl,true,tW,tH); return r?{...r,duration:0}:null; } },
-      { id:'vid_aoti22', enabled:()=>Boolean(blob), run:async()=>{ const r=await callGradioDyn('zerogpu-aoti-wan2-2-fp8da-aoti-faster.hf.space',en,blob,jpegUrl,true,tW,tH); return r?{...r,duration:0}:null; } },
-      { id:'vid_drm22', enabled:()=>Boolean(blob), run:async()=>{ const r=await callGradioDyn('dream2589632147-dream-wan2-2-fp8da-aoti-preview-2.hf.space',en,blob,jpegUrl,true,tW,tH); return r?{...r,duration:0}:null; } },
-      { id:'vid_up22', enabled:()=>Boolean(blob), run:async()=>{ const r=await callGradioDyn('upsampler-wan-2-2-14b-image-to-video.hf.space',en,blob,jpegUrl,true,tW,tH); return r?{...r,duration:0}:null; } },
-      { id:'vid_jci22', enabled:()=>Boolean(blob), run:async()=>{ const r=await callGradioDyn('jcishere-wan2-2-14b-fast-preview.hf.space',en,blob,jpegUrl,true,tW,tH); return r?{...r,duration:0}:null; } },
-      { id:'vid_ltx2t', enabled:()=>true, run:async()=>{ const r=await callGradioDyn('alexnasa-ltx-2-turbo.hf.space',en,blob,jpegUrl,true,tW,tH); return r?{...r,duration:0}:null; } },
-      { id:'vid_kul22', enabled:()=>Boolean(blob), run:async()=>{ const r=await callGradioDyn('kulkas2pintu-wan2-2-14b-fast-preview.hf.space',en,blob,jpegUrl,true,tW,tH); return r?{...r,duration:0}:null; } },
-      { id:'vid_w22', enabled:()=>Boolean(blob), run:async()=>{ const r=await callGradioDyn('prithivmlmods-wan2-2-fast.hf.space',en,blob,jpegUrl,true,tW,tH); return r?{...r,duration:0}:null; } },
-      { id:'vid_w21f', enabled:()=>Boolean(blob), run:async()=>{ const r=await callGradioDyn('multimodalart-wan2-1-fast.hf.space',en,blob,jpegUrl,true,tW,tH); return r?{...r,duration:0}:null; } },
-      { id:'vid_pepe', enabled:()=>true, run:async()=>{ const r=await callGradioDyn('pepe104-minimax-h3-turbo-lora-uncensored.hf.space',en,blob,jpegUrl,true,tW,tH); return r?{...r,duration:0}:null; } },
-      { id:'vid_ltx25', enabled:()=>true, run:async()=>{ const r=await callGradioDyn('lightricks-ltx-2-5.hf.space',en,blob,jpegUrl,true,tW,tH); return r?{...r,duration:0}:null; } },
-      { id:'vid_pih3', enabled:()=>true, run:async()=>{ const r=await callGradioDyn('lakonik-pi-h3.hf.space',en,blob,jpegUrl,true,tW,tH); return r?{...r,duration:0}:null; } },
-      { id:'vid_ok', enabled:()=>true, run:async()=>{ const r=await callGradioDyn('openking-wan2-video-generation.hf.space',en,blob,jpegUrl,true,tW,tH); return r?{...r,duration:0}:null; } },
-      { id:'vid_ani', enabled:()=>true, run:async()=>{ const r=await callGradioDyn(blob?'aidealab-animegen-i2v.hf.space':'aidealab-animegen-t2v.hf.space',en,blob,jpegUrl,true,tW,tH); return r?{...r,duration:0}:null; } }
-    ], 15, 86, 'מייצר וידאו...');
-    if (vid) { vid.duration = await probeDur(vid.url); return vid; }
-    if (!frameUrl) {
-      setRenderProgress(26, 'יוצר פריים פתיחה והופך לווידאו...');
-      const kf = await routeTextToImage(en);
-      if (kf) return await requestVideoHop(en, kf);
-    }
-    const err = new Error('מכסת הווידאו החינמית בכתובת זו התמלאה כרגע. ניתן ליצור תמונה ללא הגבלה, להוסיף מפתח חינמי מתחדש בהגדרות, או להשתמש באתרים החינמיים:');
-    err.isQuota = true;
-    throw err;
-  }
-
-  async function genMin6Sec(en, frameUrl = null, audioFlags = null) {
-    let speechBlob = null, musicBlob = null;
-    if (audioFlags?.hasSpeech) speechBlob = await generateSpeechAudio(audioFlags.spokenText);
-    if (audioFlags?.hasMusic && !audioFlags?.hasSpeech) musicBlob = await generateMusicAudio(en);
-
-    if (frameUrl && speechBlob) {
-      const lipSeg = await routeLipSyncVideo(en, frameUrl, speechBlob);
-      if (lipSeg) {
-        if ((lipSeg.duration || 0) >= 6) return lipSeg;
-        const lf = await capLastSegFrame(lipSeg.url);
-        try {
-          const cont = await requestVideoHop(`${en}. Seamless direct continuation keeping exact same faces and background.`, lf);
-          const mb = await mergeSegs([lipSeg, cont]), mu = URL.createObjectURL(mb);
-          return { url:mu, blob:mb, duration:await probeDur(mu) };
-        } catch { return lipSeg; }
+      if(lines[i].startsWith('event: complete')){
+        const d = lines[i+1]?.replace(/^data:\s*/,'');
+        if(d) return JSON.parse(d);
       }
     }
+    throw new Error('No complete event');
+  }finally{ clearTimeout(t); }
+}
 
-    const col = []; let tot = 0, cur = frameUrl;
-    for (let h = 0; h < 2 && tot < 6; h++) {
-      const p = h === 0 ? en : `${en}. Seamless direct continuation from final frame, keeping exact same people, faces, clothing, lighting, and background unchanged.`;
-      if (h > 0) setRenderProgress(88, 'משלים אורך וידאו (לפחות 6 שניות)...');
-      try {
-        const seg = await requestVideoHop(p, cur);
-        col.push(seg); tot += seg.duration || 5;
-        if (tot < 6) cur = await capLastSegFrame(seg.url);
-      } catch (err) { if (h === 0) throw err; break; }
-    }
-    if (!col.length) { const e = new Error('מכסת הווידאו החינמית התמלאה כרגע.'); e.isQuota = true; throw e; }
-    let finalSeg = col.length === 1 ? col[0] : null;
-    if (!finalSeg) {
-      setRenderProgress(93, 'מאחד לרצף חלק...');
-      const mb = await mergeSegs(col), mu = URL.createObjectURL(mb);
-      finalSeg = { url:mu, blob:mb, duration:await probeDur(mu) };
-    }
-    const attachAudio = speechBlob || musicBlob;
-    if (attachAudio) {
-      setRenderProgress(96, 'מצמיד קול / מוזיקה לווידאו...');
-      try { return await muxAudioIntoVideo(finalSeg.url, attachAudio); } catch {}
-    }
-    return finalSeg;
+function findUrl(res){
+  for(const it of res||[]){
+    if(!it) continue;
+    if(typeof it==='string' && (it.startsWith('http')||it.startsWith('data:'))) return it;
+    if(it.url) return it.url;
+    if(it.video?.url) return it.video.url;
+    if(it.image?.url) return it.image.url;
+    if(it.audio?.url) return it.audio.url;
+    if(Array.isArray(it) && it[0]?.url) return it[0].url;
   }
+  return null;
+}
 
-  async function capLastSegFrame(url) {
-    const v = document.createElement('video'); v.crossOrigin = 'anonymous'; v.src = url;
-    await new Promise(r => { v.onloadedmetadata = r; });
-    v.currentTime = Math.max(0, (v.duration || 1) - .05);
-    await new Promise(r => { v.onseeked = r; });
-    const c = document.createElement('canvas'); c.width = v.videoWidth || 1024; c.height = v.videoHeight || 576;
-    c.getContext('2d').drawImage(v,0,0,c.width,c.height);
-    return c.toDataURL('image/png');
+async function blobToHordeWebp(blob){
+  const img = new Image();
+  const u = URL.createObjectURL(blob);
+  img.src = u;
+  await new Promise(r => img.onload = r);
+  const w0 = img.naturalWidth||512, h0 = img.naturalHeight||512;
+  const sc = Math.min(1, 512/Math.max(w0,h0));
+  const w = Math.max(256, Math.round((w0*sc)/64)*64), h = Math.max(256, Math.round((h0*sc)/64)*64);
+  const c = document.createElement('canvas'); c.width=w; c.height=h;
+  c.getContext('2d').drawImage(img,0,0,w,h);
+  URL.revokeObjectURL(u);
+  return { w, h, b64: c.toDataURL('image/webp',0.88).split(',')[1] };
+}
+
+async function callHorde(specId, prompt, w, h, imgBlob, sig){
+  const body = {
+    prompt,
+    models: HORDE_MODELS[specId] || ['Deliberate', "ICBINP - I Can't Believe It's Not Photography", 'AlbedoBase XL 3.1', 'stable_diffusion'],
+    params: { width: Math.min(640,Math.max(256,Math.round(w/64)*64)), height: Math.min(640,Math.max(256,Math.round(h/64)*64)), steps: 22, cfg_scale: 7.2, clip_skip: 1, sampler_name: 'k_euler_a', n: 1, denoising_strength: 0.56 },
+    nsfw: false, censor_nsfw: true, r2: true
+  };
+  if(imgBlob){
+    const hw = await blobToHordeWebp(imgBlob);
+    body.params.width = hw.w; body.params.height = hw.h;
+    body.source_image = hw.b64; body.source_processing = 'img2img';
   }
-  const capLastStageFrame = async () => state.mediaType === 'image' ? state.currentImageSrc : (state.mediaType === 'video' && state.videoSegments.length ? await capLastSegFrame(state.videoSegments[state.videoSegments.length - 1].url) : null);
-
-  el.btnCreateVideo.addEventListener('click', async () => {
-    const raw = el.promptInput.value.trim();
-    if (!raw && !state.currentImageSrc && state.mediaType !== 'video') return;
-    setBusy(true); startRenderProgress('מכין יצירת וידאו...', 92);
-    try {
-      const audioFlags = detectAudioFlags(raw);
-      const baseFrame = state.mediaType === 'image' ? state.currentImageSrc : (state.mediaType === 'video' ? await capLastStageFrame() : null);
-      const en = await translateStrict(raw || 'natural cinematic motion keeping exact faces and background', baseFrame ? 'img2vid' : 'txt2vid');
-      const seg = await genMin6Sec(en, baseFrame, audioFlags);
-      await finishRenderProgress(true);
-      await showVideoStage([seg], true, true);
-    } catch (e) {
-      await finishRenderProgress(false);
-      if (e.isQuota) showQuotaNotice(e.message);
-      else alert(e.message);
-    }
-    finally { setBusy(false); }
+  const sr = await fetch('https://aihorde.net/api/v2/generate/async',{
+    method:'POST', headers:{'Content-Type':'application/json',apikey:'0000000000','Client-Agent':'StudioYaniv:2.1:standalone'},
+    body: JSON.stringify(body), signal:sig
   });
+  if(!sr.ok) throw new Error('Horde '+sr.status);
+  const {id} = await sr.json();
+  for(let i=0;i<36;i++){
+    if(sig?.aborted) throw new Error('Aborted');
+    await new Promise(r=>setTimeout(r,1100));
+    const ck = await (await fetch('https://aihorde.net/api/v2/generate/check/'+id,{signal:sig})).json();
+    if(ck.faulted) throw new Error('Horde faulted');
+    if(ck.done){
+      const stR = await (await fetch('https://aihorde.net/api/v2/generate/status/'+id,{signal:sig})).json();
+      const u = stR?.generations?.[0]?.img;
+      if(u && u.startsWith('http')) return await (await fetch(u,{signal:sig})).blob();
+      if(u) return await (await fetch('data:image/webp;base64,'+u)).blob();
+    }
+  }
+  throw new Error('Horde timeout');
+}
 
-  el.btnCreateImage.addEventListener('click', async () => {
-    const raw = el.promptInput.value.trim(); if (!raw) return;
-    setBusy(true); startRenderProgress('מכין יצירת תמונה...', 92);
-    try {
-      const wantsBrandNew = /(תמונה חדשה|צור תמונה מאפס|בלי התמונה|new unrelated image)/i.test(raw);
-      if (state.mediaType === 'image' && state.currentImageSrc && !wantsBrandNew) {
-        const en = await translateStrict(raw, 'image-edit');
-        const edited = await routeRealAIImageEdit(en, state.currentImageSrc);
-        await finishRenderProgress(true);
-        showImageStage(edited, true);
-      } else {
-        const en = await translateStrict(raw, 'txt2img');
-        const imgUrl = await routeTextToImage(en);
-        await finishRenderProgress(true);
-        showImageStage(imgUrl, true);
+async function dynCall(spec, prompt, imgBlob, sig){
+  const dims = st.ratio==='9:16'?[576,1024]:st.ratio==='1:1'?[1024,1024]:[1024,576];
+  if(spec.id==='t2i-pollinations-z' || spec.id==='t2i-pollinations-sana'){
+    const mod = spec.id==='t2i-pollinations-sana' ? 'sana' : 'zimage';
+    const seed = Math.floor(Math.random()*999999);
+    const urls = mod==='sana'
+      ? ['https://image.pollinations.ai/prompt/'+encodeURIComponent(prompt)+'?model=sana&width='+dims[0]+'&height='+dims[1]+'&seed='+seed+'&nologo=true',
+         'https://image.pollinations.ai/prompt/'+encodeURIComponent(prompt)+'?model=flux&width='+dims[0]+'&height='+dims[1]+'&seed='+seed+'&nologo=true']
+      : ['https://gen.pollinations.ai/image/'+encodeURIComponent(prompt)+'?model=zimage&width='+dims[0]+'&height='+dims[1]+'&seed='+seed+'&nologo=true',
+         'https://image.pollinations.ai/prompt/'+encodeURIComponent(prompt)+'?model=sana&width='+dims[0]+'&height='+dims[1]+'&seed='+seed+'&nologo=true'];
+    for(const pu of urls){
+      try{
+        const pr = await fetch(pu,{signal:sig});
+        if(pr.ok){ const b = await pr.blob(); if(b.size>1500) return b; }
+      }catch{}
+    }
+    throw new Error('Pollinations unavailable');
+  }
+  if(spec.id.startsWith('t2i-horde') || spec.id.startsWith('ed-horde')){
+    return await callHorde(spec.id, prompt, dims[0], dims[1], imgBlob, sig);
+  }
+  const info = await (await fetch('https://'+spec.host+'/gradio_api/info',{signal:sig})).json();
+  const eps = info.named_endpoints||{};
+  const keys = Object.keys(eps).filter(k=>!/clear|reset|example|update|toggle|load|lora|smart_config|policy|refresh|status|lambda/i.test(k));
+  const ek = (!imgBlob && eps['/text_to_video'] ? '/text_to_video' : null) || (imgBlob && eps['/image_to_video'] ? '/image_to_video' : null) || (spec.ep && eps['/'+spec.ep] ? '/'+spec.ep : null) || keys.find(k=>/edit|infer|generate|run|tts|audio/i.test(k)) || keys[0];
+  const up = imgBlob ? await uploadBlob(spec.host, imgBlob, 'src.jpg', sig) : null;
+  let im=false, pr=false;
+  const data = (eps[ek].parameters||[]).map(p=>{
+    const n = ((p.parameter_name||'')+' '+(p.label||'')).toLowerCase();
+    const py = (p.python_type?.type||'').toLowerCase();
+    if(!im && up && (py.includes('file') || /image|img|input_image/.test(n))){
+      im=true; return py.includes('dict(image') ? [{image:up,caption:null}] : py.startsWith('list') ? [up] : up;
+    }
+    if(!pr && /prompt|instruction|text/.test(n) && !/negative/.test(n)){ pr=true; return prompt; }
+    if(/width/.test(n)) return dims[0];
+    if(/height/.test(n)) return dims[1];
+    if(/step/.test(n)) return Math.min(Number(p.parameter_default)||8, 8);
+    if(/camera_lora/.test(n) && p.type?.enum?.includes('Static')) return 'Static';
+    return p.parameter_has_default ? p.parameter_default : (p.type?.type==='boolean'?true:1);
+  });
+  const res = await callGradio(spec.host, ek.replace(/^\//,''), data, sig, spec.cat==='video'?60000:22000);
+  const u = findUrl(res); if(!u) throw new Error('No media URL');
+  return await (await fetch(u,{signal:sig})).blob();
+}
+
+async function raceServers(cat, fn, batch=3, sig){
+  let rem = rotated(cat), zHits = 0;
+  while(rem.length>0){
+    if(sig.aborted) throw new Error('Aborted');
+    if(zHits>=3){ rem = rem.filter(s=>!isZeroGpu(s)); if(!rem.length) break; }
+    const b = rem.slice(0,batch); rem = rem.slice(batch);
+    const cs = b.map(()=>new AbortController());
+    sig.addEventListener('abort',()=>cs.forEach(c=>c.abort()));
+    let qErr = 0;
+    try{
+      return await Promise.any(b.map(async (s,j)=>{
+        try{ const res = await fn(s, cs[j].signal); cs.forEach((x,k)=>{if(k!==j)x.abort();}); st.perf[s.id]={ok:(st.perf[s.id]?.ok||0)+1,fail:0}; st.cd[s.id]=Date.now()+12000; return {res, s}; }
+        catch(e){ st.perf[s.id]={ok:st.perf[s.id]?.ok||0,fail:(st.perf[s.id]?.fail||0)+1}; if(/quota|exceeded|limit|429/i.test(String(e?.message||'')) && isZeroGpu(s)) qErr++; st.cd[s.id] = Date.now() + (s.ref||2)*60000; throw e; }
+      }));
+    }catch{
+      if(sig.aborted) throw new Error('Aborted');
+      zHits += qErr;
+    }
+  }
+  throw new Error('ZeroGPU IP quota exhausted');
+}
+
+async function renderMotionVideoFromBlob(imgBlob, rawPrompt, sig){
+  const img = new Image();
+  const u = URL.createObjectURL(imgBlob); img.src = u;
+  await new Promise(r => img.onload = r);
+  const asp = (img.naturalWidth||1024)/(img.naturalHeight||576);
+  const cW = (asp>=1?1024:Math.round(768*asp)) & ~1, cH = Math.round(cW/asp) & ~1;
+  const c = document.createElement('canvas'); c.width=cW; c.height=cH;
+  const ctx = c.getContext('2d');
+  const rec = new MediaRecorder(c.captureStream(24), {mimeType:'video/webm', videoBitsPerSecond:3200000});
+  const ch=[]; rec.ondataavailable=e=>{if(e.data.size)ch.push(e.data)};
+  const done = new Promise(res=>rec.onstop=()=>{URL.revokeObjectURL(u); res(new Blob(ch,{type:'video/webm'}));});
+  const t = rawPrompt.toLowerCase();
+  const snow=/שלג|חורף|snow/i.test(t), rain=/גשם|rain/i.test(t), fire=/אש|fire|spark/i.test(t);
+  const pts = Array.from({length:snow||rain||fire?36:0},(_,k)=>({x:(k*71)%cW,y:(k*131)%cH,v:1.5+(k%4)}));
+  rec.start();
+  let f=0, tot=96;
+  await new Promise(res=>{
+    const tick=()=>{
+      if(sig?.aborted || f>=tot){ rec.stop(); res(); return; }
+      const p=f/tot, z=1+0.055*(0.5-0.5*Math.cos(p*Math.PI)), dw=cW*z, dh=cH*z;
+      ctx.clearRect(0,0,cW,cH);
+      ctx.drawImage(img,(cW-dw)/2+Math.sin(p*6.28)*cW*0.01,(cH-dh)/2+Math.cos(p*6.28)*cH*0.008,dw,dh);
+      for(const pt of pts){
+        if(rain){ pt.y=(pt.y+pt.v*7)%cH; ctx.strokeStyle='rgba(186,230,253,.5)'; ctx.beginPath(); ctx.moveTo(pt.x,pt.y); ctx.lineTo(pt.x-3,pt.y+12); ctx.stroke(); }
+        else if(fire){ pt.y=(pt.y-pt.v*2+cH)%cH; ctx.fillStyle='rgba(251,146,60,.65)'; ctx.beginPath(); ctx.arc(pt.x,pt.y,2,0,6.28); ctx.fill(); }
+        else { pt.y=(pt.y+pt.v*1.4)%cH; ctx.fillStyle='rgba(255,255,255,.75)'; ctx.beginPath(); ctx.arc(pt.x,pt.y,2.2,0,6.28); ctx.fill(); }
       }
-    } catch (e) { await finishRenderProgress(false); alert(e.message); }
-    finally { setBusy(false); }
+      f++; setTimeout(tick,41);
+    };
+    tick();
   });
+  return await done;
+}
 
-  el.btnExtend.addEventListener('click', async () => {
-    if (!state.mediaType) return;
-    setBusy(true); startRenderProgress('מאריך סרטון (+6 שניות)...', 95);
-    try {
-      const lf = await capLastStageFrame(), raw = el.promptInput.value.trim() || 'המשך טבעי וחלק של הסצנה';
-      const en = await translateStrict(raw, 'img2vid'), audioFlags = detectAudioFlags(raw);
-      const locked = `${en}. Seamless continuation from the exact last frame: strictly preserve the exact same people, faces, clothing, lighting, and background without altering them.`;
-      const ext = await genMin6Sec(locked, lf, audioFlags);
-      const list = state.mediaType === 'video' ? [...state.videoSegments, ext] : [ext];
-      await finishRenderProgress(true); await showVideoStage(list, true, true);
-    } catch (e) {
-      await finishRenderProgress(false);
-      if (e.isQuota) showQuotaNotice(e.message);
-      else alert(e.message);
+function encodeWav(samples, sr){
+  const buf=new ArrayBuffer(44+samples.length*2), v=new DataView(buf);
+  const ws=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
+  ws(0,'RIFF'); v.setUint32(4,36+samples.length*2,true); ws(8,'WAVE'); ws(12,'fmt ');
+  v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true);
+  v.setUint32(24,sr,true); v.setUint32(28,sr*2,true); v.setUint16(32,2,true); v.setUint16(34,16,true);
+  ws(36,'data'); v.setUint32(40,samples.length*2,true);
+  for(let i=0;i<samples.length;i++){const x=Math.max(-1,Math.min(1,samples[i])); v.setInt16(44+i*2,x<0?x*0x8000:x*0x7fff,true);}
+  return new Blob([buf],{type:'audio/wav'});
+}
+
+async function composeSpeechLine(raw, sig){
+  const qm = raw.match(/["'״׳]([^"'״׳]{2,140})["'״׳]/);
+  if(qm) return qm[1].trim();
+  const am = raw.match(/(?:אומר|אומרת|אומרים|תגיד|שיגיד|לומר|להגיד|says?|saying)\s+(?:ש)?(.{2,120})/i);
+  if(am?.[1]) return am[1].trim();
+  const isHe = /[\u0590-\u05FF]/.test(raw);
+  try{
+    const r = await fetch('https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/chat/completions',{
+      method:'POST',headers:{'Content-Type':'application/json'},signal:sig,
+      body:JSON.stringify({model:'Qwen3.5-9B',messages:[{role:'user',content:(isHe?'כתוב משפט דיבור קצר וטבעי בעברית (בלי מרכאות) שמתאים להנחיה: ':'Write 1 short spoken line matching: ')+raw}],max_tokens:120})
+    });
+    if(r.ok){ const j = await r.json(); const out = j?.choices?.[0]?.message?.content?.replace(/^["'״׳]+|["'״׳]+$/g,'').trim(); if(out) return out; }
+  }catch{}
+  return isHe ? 'שלום לכולם! איזה יום נהדר.' : 'Hello everyone! Great to see you today.';
+}
+
+async function synthAudioForPrompt(raw, sig){
+  const hasLaugh = /(צחוק|צוחק|צוחקת|צוחקים|חחח|laugh)/i.test(raw);
+  const hasSpeech = /(מדבר|מדברת|מדברים|לדבר|דיבר|שידבר|תדבר|אומר|אומרת|תגיד|שיגיד|דיבור|דיבוב|דובב|לספר|בדיחה|נאום|קריינות|talk|speak|speech|say|dialogue)/i.test(raw);
+  const spoken = hasSpeech ? await composeSpeechLine(raw, sig) : raw;
+  if(hasSpeech || hasLaugh){
+    const ttsList = rotated('audio').filter(x=>!x.id.includes('music') && !x.id.includes('acestep'));
+    const ordered = /[\u0590-\u05FF]/.test(spoken) ? [...ttsList.filter(x=>x.id==='aud-edge-tts'), ...ttsList.filter(x=>x.id!=='aud-edge-tts')] : ttsList;
+    for(const s of ordered){
+      try{ return await dynCall(s, (hasLaugh && !hasSpeech)?'[S1] (laughs) '+spoken:spoken, null, sig); }catch{}
     }
-    finally { setBusy(false); }
-  });
-
-  function saveToVault(item) { state.vaultItems.unshift({ id:Date.now()+Math.random(), ...item }); el.vaultCount.textContent = state.vaultItems.length; renderVault(); }
-  async function mergeSegs(segs) {
-    const f = document.createElement('video'); f.src = segs[0].url; await new Promise(r => { f.onloadedmetadata = r; });
-    const cw = Math.min(f.videoWidth||1024, 1280) & ~1, ch = Math.round(cw*((f.videoHeight||576)/(f.videoWidth||1024))) & ~1;
-    const c = document.createElement('canvas'); c.width = cw; c.height = ch; const ctx = c.getContext('2d'), mime = getVidMime();
-    const rec = new MediaRecorder(c.captureStream(24), { mimeType:mime }), chunks = [];
-    rec.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
-    const done = new Promise(res => { rec.onstop = () => res(new Blob(chunks, { type:mime })); });
-    rec.start();
-    for (const s of segs) {
-      const v = document.createElement('video'); v.crossOrigin = 'anonymous'; v.muted = true; v.src = s.url;
-      await new Promise(r => { v.onloadedmetadata = r; }); await v.play();
-      await new Promise(r => { function d(){ if(v.ended||v.paused){r();return;} const sc=Math.min(cw/(v.videoWidth||cw),ch/(v.videoHeight||ch)), dw=(v.videoWidth||cw)*sc, dh=(v.videoHeight||ch)*sc; ctx.fillStyle='#000'; ctx.fillRect(0,0,cw,ch); ctx.drawImage(v,(cw-dw)/2,(ch-dh)/2,dw,dh); requestAnimationFrame(d); } d(); });
+    if(hasSpeech && !hasLaugh) throw new Error('שרתי הדיבור עמוסים כרגע, נסה שוב');
+  }
+  const sr=24000, dur=4.0, ctx=new OfflineAudioContext(1,sr*dur,sr), m=ctx.createGain();
+  m.gain.value=.55; m.connect(ctx.destination);
+  if(hasLaugh && !hasSpeech){
+    for(let i=0;i<7;i++){
+      const t=.1+i*.38, o=ctx.createOscillator(), f=ctx.createBiquadFilter(), g=ctx.createGain();
+      o.type='sawtooth'; o.frequency.setValueAtTime(260-i*10,t); f.type='bandpass'; f.frequency.value=820; f.Q.value=3.2;
+      g.gain.setValueAtTime(.001,t); g.gain.exponentialRampToValueAtTime(.85,t+.05); g.gain.exponentialRampToValueAtTime(.001,t+.28);
+      o.connect(f); f.connect(g); g.connect(m); o.start(t); o.stop(t+.3);
     }
-    rec.stop(); return await done;
-  }
-
-  async function dlItem(item) {
-    const a = document.createElement('a');
-    if (item.type === 'image') { a.href = item.url; a.download = `studio-yaniv-${Date.now()}.png`; a.click(); return; }
-    if (item.segments && item.segments.length > 1) {
-      el.downloadsModal.classList.remove('open'); startRenderProgress('מאחד סרטון...', 95);
-      const mb = await mergeSegs(item.segments); await finishRenderProgress(true);
-      a.href = URL.createObjectURL(mb); a.download = `studio-yaniv-${Date.now()}.webm`; a.click();
-    } else { a.href = item.url; a.download = `studio-yaniv-${Date.now()}.webm`; a.click(); }
-  }
-
-  function renderVault() {
-    if (!state.vaultItems.length) { el.downloadsList.innerHTML = `<div style="text-align:center;color:var(--muted);padding:18px;font-size:.86rem;">ריק</div>`; return; }
-    el.downloadsList.innerHTML = '';
-    state.vaultItems.forEach(item => {
-      const card = document.createElement('div'); card.className = 'dl-card';
-      const box = document.createElement('div'); box.className = 'dl-media-box';
-      if (item.type === 'video') { const v = document.createElement('video'); v.src = item.url; v.controls = true; v.playsInline = true; box.appendChild(v); }
-      else { const i = document.createElement('img'); i.src = item.url; box.appendChild(i); }
-      const acts = document.createElement('div'); acts.className = 'dl-actions';
-      const b1 = document.createElement('button'); b1.className = 'dl-btn dl-btn-save'; b1.textContent = '💾 שמור'; b1.onclick = () => dlItem(item);
-      const b2 = document.createElement('button'); b2.className = 'dl-btn dl-btn-del'; b2.textContent = '🗑 מחק'; b2.onclick = () => { state.vaultItems = state.vaultItems.filter(x => x.id !== item.id); el.vaultCount.textContent = state.vaultItems.length; renderVault(); };
-      acts.append(b1, b2); card.append(box, acts); el.downloadsList.appendChild(card);
+  } else {
+    [220,277.18,329.63].forEach((fr,i)=>{
+      const o=ctx.createOscillator(), g=ctx.createGain(); o.type='sine'; o.frequency.value=fr;
+      g.gain.setValueAtTime(.001,i*.3); g.gain.linearRampToValueAtTime(.18,i*.3+.5); g.gain.exponentialRampToValueAtTime(.02,dur);
+      o.connect(g); g.connect(m); o.start(i*.3); o.stop(dur);
     });
   }
+  return encodeWav((await ctx.startRendering()).getChannelData(0), sr);
+}
 
-  el.openDownloadsBtn.addEventListener('click', () => { renderVault(); el.downloadsModal.classList.add('open'); });
-  el.closeDownloadsBtn.addEventListener('click', () => el.downloadsModal.classList.remove('open'));
+async function muxOrStripVideo(vUrl, aBlob, keepOrig=false, strip=false, loopAud=true){
+  const v=document.createElement('video'); v.crossOrigin='anonymous'; v.muted=!keepOrig||strip; v.src=vUrl;
+  await new Promise(r=>v.onloadedmetadata=r);
+  const c=document.createElement('canvas'); c.width=(v.videoWidth||1024)&~1; c.height=(v.videoHeight||576)&~1;
+  const ctx=c.getContext('2d');
+  let tracks=[...c.captureStream(24).getVideoTracks()], actx=null, srcNode=null;
+  if(!strip && aBlob){
+    actx=new AudioContext(); await actx.resume().catch(()=>{});
+    const ab=await actx.decodeAudioData(await aBlob.arrayBuffer());
+    srcNode=actx.createBufferSource(); srcNode.buffer=ab; srcNode.loop=loopAud && ab.duration<(v.duration||5);
+    const dest=actx.createMediaStreamDestination(); srcNode.connect(dest);
+    if(keepOrig){ try{ const es=actx.createMediaElementSource(v); es.connect(dest); }catch{} }
+    tracks.push(...dest.stream.getAudioTracks());
+  }
+  const rec=new MediaRecorder(new MediaStream(tracks),{mimeType:'video/webm'});
+  const ch=[]; rec.ondataavailable=e=>{if(e.data.size)ch.push(e.data)};
+  const done=new Promise(res=>rec.onstop=()=>{try{srcNode?.stop()}catch{} actx?.close().catch(()=>{}); res(new Blob(ch,{type:'video/webm'}));});
+  rec.start(); srcNode?.start(0); await v.play();
+  (function d(){ if(v.ended||v.paused){rec.stop();return;} ctx.drawImage(v,0,0,c.width,c.height); requestAnimationFrame(d); })();
+  return await done;
+}
 
-  const KEY_IDS = [['llm7','keyLLM7'],['airforce','keyAirforce'],['hf','keyHF'],['cfToken','keyCfToken'],['cfAccount','keyCfAccount'],['gemini','keyGemini'],['nvidia','keyNvidia'],['imageRouter','keyImageRouter'],['pollinations','keyPollinations'],['groq','keyGroq'],['cerebras','keyCerebras'],['openrouter','keyOpenRouter'],['horde','keyHorde'],['ollama','keyOllama']];
-  el.openSettingsBtn.addEventListener('click', () => { KEY_IDS.forEach(([k,id]) => $(id).value = state.keys[k] || ''); el.settingsModal.classList.add('open'); });
-  el.closeSettingsBtn.addEventListener('click', () => el.settingsModal.classList.remove('open'));
-  el.saveSettingsBtn.addEventListener('click', () => {
-    const n = {}; KEY_IDS.forEach(([k,id]) => n[k] = $(id).value.trim());
-    state.keys = n; state.serverCooldowns = {};
-    localStorage.setItem('studio_yaniv_v20_keys', JSON.stringify(n));
-    el.settingsModal.classList.remove('open');
-  });
-})();
+async function captureVidFrame(url, atEnd=false){
+  const v=document.createElement('video'); v.crossOrigin='anonymous'; v.src=url;
+  await new Promise(r=>v.onloadedmetadata=r);
+  v.currentTime=atEnd?Math.max(0,(v.duration||1)-.05):.05;
+  await new Promise(r=>v.onseeked=r);
+  const c=document.createElement('canvas'); c.width=v.videoWidth||1024; c.height=v.videoHeight||576;
+  c.getContext('2d').drawImage(v,0,0);
+  return await new Promise(r=>c.toBlob(r,'image/jpeg',.92));
+}
+
+function showImg(b){ st.type='image'; st.imgUrl=URL.createObjectURL(b); $('imgView').src=st.imgUrl; st.vault.unshift({type:'image',url:st.imgUrl,blob:b}); updateUi(); }
+function showVid(b){ st.type='video'; st.vidBlob=b; st.vidUrl=URL.createObjectURL(b); $('vidView').src=st.vidUrl; $('vidView').play().catch(()=>{}); st.vault.unshift({type:'video',url:st.vidUrl,blob:b}); updateUi(); }
+
+// 1) עריכת תמונה
+$('btnImgEdit').onclick = async () => {
+  const raw = $('promptBox').value.trim(); if(!raw) return setErr('יש לכתוב תיאור עריכה או יצירת תמונה.');
+  setErr(''); st.ctrl = new AbortController(); startRender(8);
+  try{
+    const en = await translateHe(raw, st.ctrl.signal);
+    const srcBlob = st.type==='image' ? await (await fetch(st.imgUrl)).blob() : st.type==='video' ? await captureVidFrame(st.vidUrl, false) : null;
+    if(srcBlob){
+      const {res} = await raceServers('edit',(s,sig)=>dynCall(s,en,srcBlob,sig),3,st.ctrl.signal);
+      setRenderPct(100); showImg(res);
+    } else {
+      const {res} = await raceServers('image',(s,sig)=>dynCall(s,en,null,sig),3,st.ctrl.signal);
+      setRenderPct(100); showImg(res);
+    }
+  }catch(e){ if(!st.ctrl.signal.aborted) setErr(e.message||'שגיאה'); }
+  finally{ stopRender(); updateUi(); }
+};
+
+// 2) יצירת וידאו (מתמונה+טקסט / טקסט בלבד / תמונה בלבד)
+$('btnVid').onclick = async () => {
+  const raw = $('promptBox').value.trim();
+  const refBlob = st.type==='image' ? await (await fetch(st.imgUrl)).blob() : null;
+  if(!raw && !refBlob) return setErr('יש לכתוב תיאור לסרטון או להעלות תמונה (או שניהם יחד).');
+  setErr(''); st.ctrl = new AbortController(); startRender(16);
+  try{
+    const en = await translateHe(raw||'smooth cinematic motion', st.ctrl.signal);
+    const audProm = raw ? synthAudioForPrompt(raw, st.ctrl.signal) : Promise.resolve(null);
+    let vb;
+    try{ vb = (await raceServers('video',(s,sig)=>dynCall(s,en,refBlob,sig),2,st.ctrl.signal)).res; }
+    catch{
+      if(st.ctrl.signal.aborted) throw new Error('Aborted');
+      const kf = refBlob || (await raceServers('image',(s,sig)=>dynCall(s,en,null,sig),3,st.ctrl.signal)).res;
+      try{ vb = (await raceServers('video',(s,sig)=>dynCall(s,en,kf,sig),2,st.ctrl.signal)).res; }
+      catch{
+        if(st.ctrl.signal.aborted) throw new Error('Aborted');
+        vb = await renderMotionVideoFromBlob(kf, raw||en, st.ctrl.signal);
+      }
+    }
+    const ab = await audProm;
+    const out = ab ? await muxOrStripVideo(URL.createObjectURL(vb), ab, false, false) : vb;
+    setRenderPct(100); showVid(out);
+  }catch(e){ if(!st.ctrl.signal.aborted) setErr(e.message||'שגיאה'); }
+  finally{ stopRender(); updateUi(); }
+};
+
+// 3) עריכת וידאו
+$('btnVidEdit').onclick = async () => {
+  const raw = $('promptBox').value.trim(); if(!raw) return setErr('יש לתאר בטקסט מה להוסיף או לערוך בסרטון.');
+  if(st.type!=='video') return setErr('יש להעלות או ליצור סרטון תחילה כדי לערוך אותו.');
+  setErr(''); st.ctrl = new AbortController(); startRender(18);
+  try{
+    const stripped = raw.replace(/["'״׳][^"'״׳]*["'״׳]/g,' ').replace(/(?:מדבר|לדבר|מספר|תדבר|שידבר|אומר|תגיד|שיגיד)\s+(?:על|ש|את)\s+.+$/i,' ');
+    const isSp = /(מדבר|מדברת|מדברים|לדבר|דיבר|שידבר|תדבר|אומר|אומרת|תגיד|שיגיד|דיבור|דיבוב|דובב|לספר|בדיחה|talk|speak|speech|say)/i.test(raw);
+    const audioOnly = (isSp || /(צחוק|צוחק|מוזיקה|שמע|סאונד|קול|laugh|voice|music)/i.test(raw)) && !/(משקפיים|כובע|שלג|רקע|אלמנט|צבע|חולצה|החלף|תוריד|add a |put a )/i.test(stripped);
+    if(audioOnly){
+      const ab = await synthAudioForPrompt(raw, st.ctrl.signal);
+      const out = await muxOrStripVideo(st.vidUrl, ab, !st.muted, false, !isSp);
+      setRenderPct(100); showVid(out); return;
+    }
+    const en = await translateHe(raw, st.ctrl.signal);
+    const frBlob = await captureVidFrame(st.vidUrl, false);
+    let editedImg = frBlob;
+    try{ editedImg = (await raceServers('edit',(s,sig)=>dynCall(s,en,frBlob,sig),3,st.ctrl.signal)).res; }
+    catch(e){ if(st.ctrl.signal.aborted) throw e; }
+    let vidBlob;
+    try{ vidBlob = (await raceServers('video',(s,sig)=>dynCall(s,en,editedImg,sig),2,st.ctrl.signal)).res; }
+    catch(e){ if(st.ctrl.signal.aborted) throw e; vidBlob = await renderMotionVideoFromBlob(editedImg, raw, st.ctrl.signal); }
+    const ab = await synthAudioForPrompt(raw, st.ctrl.signal);
+    const finalV = await muxOrStripVideo(URL.createObjectURL(vidBlob), ab, false, false, !isSp);
+    setRenderPct(100); showVid(finalV);
+  }catch(e){ if(!st.ctrl.signal.aborted) setErr(e.message||'שגיאה'); }
+  finally{ stopRender(); updateUi(); }
+};
+
+$('inImg').onchange = e => { const f=e.target.files?.[0]; if(f) showImg(f); e.target.value=''; };
+$('inVid').onchange = e => { const f=e.target.files?.[0]; if(f) showVid(f); e.target.value=''; };
+
+window.dlVault = async (idx) => {
+  const item = st.vault[idx]; if(!item) return;
+  let url = item.url;
+  if(item.type==='video' && st.muted){
+    const silent = await muxOrStripVideo(item.url, null, false, true);
+    url = URL.createObjectURL(silent);
+  }
+  const a=document.createElement('a'); a.href=url; a.download='studio-yaniv-'+(item.type==='video'?'video.webm':'image.png'); a.click();
+};
+$('btnDlNow').onclick = () => { if(st.vault.length) window.dlVault(0); };
 </script>
 </body>
-    </html>
+</html>
