@@ -4,44 +4,62 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0" />
 <title>Studio Yaniv — סטודיו AI מקצועי</title>
+<script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js" defer></script>
+<script id="embeddedKeys" type="application/json">{}</script>
 <style>
-  :root{--bg:#06080f;--card:#0b101b;--card2:#141c2f;--bd:rgba(255,255,255,.08);--sky:#38bdf8;--blue:#2563eb;--txt:#f8fafc;--mut:#94a3b8;--red:#ef4444}
+  :root{--bg:#06080f;--card:#0b101b;--card2:#141c2f;--bd:rgba(255,255,255,.08);--sky:#38bdf8;--blue:#2563eb;--grn:#10b981;--txt:#f8fafc;--mut:#94a3b8;--red:#ef4444}
   *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
   body{background:var(--bg);color:var(--txt);min-height:100dvh;display:flex;flex-direction:column}
-  header{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px;background:rgba(7,10,18,.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--bd);box-shadow:0 4px 20px rgba(0,0,0,.45)}
-  .brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:17px}
+  header{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 12px;background:rgba(7,10,18,.95);backdrop-filter:blur(14px);border-bottom:1px solid var(--bd);box-shadow:0 4px 20px rgba(0,0,0,.45)}
+  .brand{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-weight:800;font-size:13px;line-height:1.1;flex-shrink:0;white-space:nowrap}
+  .brand-logo{width:38px;height:38px;display:block;flex-shrink:0;border-radius:9px;box-shadow:0 3px 10px rgba(37,99,235,.4)}
+  .hdr-tools{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap;flex:1;min-width:0}
   .row{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
   .seg{display:flex;gap:3px;padding:3px;background:#0c111d;border:1px solid var(--bd);border-radius:10px}
   button{border:none;cursor:pointer;color:inherit;background:none;font:inherit;transition:.15s}
-  .btn-pill{padding:5px 10px;border-radius:8px;font-size:11px;font-weight:700;color:var(--mut)}
+  .btn-pill{padding:5px 9px;border-radius:8px;font-size:11px;font-weight:700;color:var(--mut)}
   .btn-pill.on{background:linear-gradient(135deg,var(--blue),var(--sky));color:#fff}
-  .btn-white{background:#fff;color:#020617;padding:7px 12px;border-radius:10px;font-size:12px;font-weight:800}
-  .btn-dark{background:#0c111d;border:1px solid var(--bd);padding:7px 11px;border-radius:10px;font-size:12px;font-weight:600}
-  main{width:100%;max-width:880px;margin:0 auto;padding:14px;display:flex;flex-direction:column;gap:12px;flex:1}
-  .stage{position:relative;width:100%;margin:0 auto;aspect-ratio:16/9;max-height:48dvh;background:#03050a;border:1px solid var(--bd);border-radius:16px;overflow:hidden;display:flex;align-items:center;justify-content:center;box-shadow:0 14px 40px rgba(0,0,0,.65)}
-  .stage.r916{aspect-ratio:9/16;max-width:270px;max-height:52dvh}
-  .stage.r11{aspect-ratio:1/1;max-width:380px;max-height:48dvh}
+  .btn-white{background:#fff;color:#020617;padding:7px 10px;border-radius:10px;font-size:12px;font-weight:800}
+  .btn-dark{background:#0c111d;border:1px solid var(--bd);padding:7px 10px;border-radius:10px;font-size:12px;font-weight:600}
+  main{width:100%;max-width:880px;margin:0 auto;padding:14px;display:flex;flex-direction:column;gap:11px;flex:1}
+  .stage{position:relative;width:100%;margin:0 auto;aspect-ratio:16/9;max-height:46dvh;background:#03050a;border:1px solid var(--bd);border-radius:16px;overflow:hidden;display:flex;align-items:center;justify-content:center;box-shadow:0 14px 40px rgba(0,0,0,.65)}
+  .stage.r916{aspect-ratio:9/16;max-width:270px;max-height:50dvh}
+  .stage.r11{aspect-ratio:1/1;max-width:380px;max-height:46dvh}
   video,img{width:100%;height:100%;object-fit:contain;display:block}
   .hide{display:none!important}
   .bar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:8px 10px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
   .icbtn{height:36px;padding:0 12px;border-radius:9px;background:var(--card2);border:1px solid var(--bd);font-size:12px;font-weight:700;display:inline-flex;align-items:center;gap:5px}
   .icbtn.muted-on{background:rgba(245,158,11,.18);border-color:rgba(245,158,11,.5);color:#fcd34d}
   .icbtn.danger{background:rgba(239,68,68,.15);border-color:rgba(239,68,68,.4);color:#fca5a5}
+  .icbtn:disabled{opacity:.35;cursor:not-allowed}
   .card{background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:13px;display:flex;flex-direction:column;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
   .pwrap{position:relative;background:#060911;border:1px solid var(--bd);border-radius:12px;padding:4px 4px 4px 40px}
   .pwrap:focus-within{border-color:rgba(56,189,248,.6)}
   textarea{width:100%;background:transparent;border:none;color:#fff;padding:7px 9px;font-size:14px;resize:none;outline:none}
   .ideaMini{position:absolute;left:7px;top:7px;width:28px;height:28px;border-radius:8px;background:var(--card2);border:1px solid var(--bd);color:#38bdf8;font-size:14px;display:flex;align-items:center;justify-content:center}
+  .keyBar{display:flex;gap:6px;align-items:center;background:#060911;border:1px solid rgba(56,189,248,.4);border-radius:11px;padding:6px 9px;flex-shrink:0}
+  .keyBar input{flex:1;background:transparent;border:none;color:#fff;font-size:12px;outline:none;direction:ltr;min-width:0}
+  .keyBar button{background:linear-gradient(135deg,var(--blue),var(--sky));border-radius:8px;padding:6px 11px;font-size:11px;font-weight:800;color:#fff;white-space:nowrap}
+  .keyBar button.sec{background:var(--card2);border:1px solid var(--bd);color:#cbd5e1}
+  .keyStat{font-size:11px;color:#34d399;font-weight:700;padding:2px 4px;line-height:1.45}
+  .keyStat.warn{color:#fbbf24}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-  @media(max-width:560px){.grid3{grid-template-columns:1fr}}
-  .act{padding:11px 12px;border-radius:12px;font-size:13px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+  .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .act{width:100%;padding:11px 8px;border-radius:12px;font-size:13px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap;min-width:0}
+  @media(max-width:560px){.grid3{gap:6px}.grid3 .act{padding:10px 4px;font-size:12px}}
   .act.v{background:linear-gradient(135deg,#7c3aed,#2563eb);color:#fff}
   .act.b{background:linear-gradient(135deg,#2563eb,#0ea5e9);color:#fff}
   .act.e{background:linear-gradient(135deg,#059669,#14b8a6);color:#fff}
+  .act.x{background:rgba(16,185,129,.16);border:1px solid rgba(16,185,129,.4);color:#6ee7b7}
   .act.n{background:var(--card2);border:1px solid var(--bd)}
   .act:disabled{opacity:.35;cursor:not-allowed}
-  .err{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#fecaca;padding:9px 12px;border-radius:12px;font-size:12px;display:flex;justify-content:space-between;align-items:center}
+  .upWrap{position:relative}
+  .ddMenu{position:absolute;bottom:calc(100% + 6px);left:0;right:0;background:var(--card2);border:1px solid var(--sky);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.85);display:none;flex-direction:column;overflow:hidden;z-index:40}
+  .ddMenu.on{display:flex}
+  .ddItem{padding:11px 13px;font-size:13px;font-weight:600;text-align:right;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:8px}
+  .ddItem:last-child{border-bottom:none}
+  .ddItem:hover{background:rgba(56,189,248,.18)}
+  .err{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.4);color:#fecaca;padding:9px 12px;border-radius:12px;font-size:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;line-height:1.45}
   #renderOverlay{position:absolute;inset:0;z-index:30;background:rgba(5,7,12,.95);backdrop-filter:blur(8px);display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:16px}
   #renderOverlay.on{display:flex}
   .ringWrap{position:relative;width:76px;height:76px;display:flex;align-items:center;justify-content:center}
@@ -49,23 +67,76 @@
   .pbar{width:176px;max-width:75%;height:6px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden}
   .pbar>i{display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--blue),var(--sky));transition:width .16s ease-out}
   .stopBtn{width:38px;height:38px;border-radius:50%;background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.55);color:#fecaca;display:flex;align-items:center;justify-content:center;font-size:14px}
-  .modal{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;padding:12px}
+  .modal{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.84);display:none;align-items:center;justify-content:center;padding:12px}
   .modal.on{display:flex}
-  .mbox{background:var(--card);border:1px solid var(--bd);border-radius:16px;width:100%;max-width:540px;height:86dvh;max-height:86dvh;display:flex;flex-direction:column;overflow:hidden}
-  .mhead{flex-shrink:0;display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--bd);font-weight:800}
-  .mbody{flex:1;min-height:0;padding:12px;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:8px}
-  .srvRow{display:flex;justify-content:space-between;align-items:center;gap:8px;background:#080c16;border:1px solid var(--bd);padding:8px 10px;border-radius:10px;font-size:12px}
+  .mbox{background:var(--card);border:1px solid var(--bd);border-radius:16px;width:100%;max-width:560px;max-height:88dvh;display:flex;flex-direction:column;overflow:hidden}
+  .mhead{flex-shrink:0;display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--bd);font-weight:800;gap:8px}
+  .mbody{flex:1;min-height:0;padding:12px;overflow-y:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:10px}
+  .srvRow{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 11px;border-radius:11px;font-size:12px;border:1px solid var(--bd);background:#080c16}
+  .srvRow.ok{border-color:rgba(16,185,129,.45);background:rgba(16,185,129,.09)}
+  .srvRow.pin{border-color:rgba(16,185,129,.85);background:rgba(16,185,129,.18);box-shadow:0 0 14px rgba(16,185,129,.22)}
+  .srvRow.cool{border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.07);opacity:.78}
+  .srvSt{font-size:11px;font-weight:800;white-space:nowrap}
+  .srvSt.ok{color:#34d399}
+  .srvSt.cool{color:#fbbf24}
+  .vCard{background:#080c16;border:1px solid var(--bd);border-radius:13px;padding:10px;display:flex;flex-direction:column;gap:8px}
+  .vBox{width:100%;max-height:240px;background:#000;border-radius:9px;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .vBox video,.vBox img{width:100%;max-height:240px;object-fit:contain}
+  .vBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .vSave{background:#fff;color:#020617;padding:9px;border-radius:9px;font-weight:800;font-size:13px}
+  .vDel{background:rgba(239,68,68,.16);border:1px solid rgba(239,68,68,.4);color:#fca5a5;padding:9px;border-radius:9px;font-weight:800;font-size:13px}
+  .keyGrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  .keyGrid input{width:100%;background:#060911;border:1px solid var(--bd);color:#fff;padding:7px 9px;border-radius:8px;font-size:11px;direction:ltr}
+  .keyGrid input.hasVal{border-color:rgba(16,185,129,.65);background:rgba(16,185,129,.06)}
+  @media(max-width:560px){.keyGrid{grid-template-columns:1fr}}
+  #camView{width:100%;max-height:280px;background:#000;border-radius:12px}
 </style>
 </head>
 <body>
 <header>
-  <div class="brand"><span>Studio Yaniv</span></div>
-  <div class="row">
+  <div class="brand">
+    <svg class="brand-logo" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-label="Studio Yaniv Logo">
+      <defs>
+        <linearGradient id="bgSquircle" x1="60" y1="0" x2="60" y2="120" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#b4e5ff"/>
+          <stop offset="48%" stop-color="#58aef2"/>
+          <stop offset="100%" stop-color="#1960ce"/>
+        </linearGradient>
+        <linearGradient id="ringMetal" x1="20" y1="15" x2="100" y2="105" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#ffffff"/>
+          <stop offset="30%" stop-color="#cbd5e1"/>
+          <stop offset="65%" stop-color="#f8fafc"/>
+          <stop offset="100%" stop-color="#64748b"/>
+        </linearGradient>
+        <linearGradient id="syBlue" x1="35" y1="22" x2="88" y2="98" gradientUnits="userSpaceOnUse">
+          <stop offset="0%" stop-color="#38bdf8"/>
+          <stop offset="50%" stop-color="#0d6efd"/>
+          <stop offset="100%" stop-color="#053b96"/>
+        </linearGradient>
+        <radialGradient id="dotGrad" cx="35%" cy="35%" r="65%">
+          <stop offset="0%" stop-color="#7dd3fc"/>
+          <stop offset="100%" stop-color="#0a4ebd"/>
+        </radialGradient>
+        <filter id="drop" x="-12%" y="-12%" width="124%" height="124%">
+          <feDropShadow dx="0" dy="2" stdDeviation="2.2" flood-color="#041c47" flood-opacity="0.45"/>
+        </filter>
+      </defs>
+      <rect x="2" y="2" width="116" height="116" rx="26" fill="url(#bgSquircle)" stroke="rgba(255,255,255,0.45)" stroke-width="2"/>
+      <circle cx="60" cy="60" r="44" fill="none" stroke="url(#ringMetal)" stroke-width="3.6" filter="url(#drop)"/>
+      <text x="58" y="57" text-anchor="middle" font-family="Georgia, Times New Roman, serif" font-weight="900" font-size="42" fill="url(#syBlue)" stroke="#bae6fd" stroke-width="1" filter="url(#drop)">S</text>
+      <circle cx="77" cy="40" r="6.4" fill="url(#dotGrad)" stroke="#bae6fd" stroke-width="0.9" filter="url(#drop)"/>
+      <path d="M26 57 C42 57, 54 67, 56 97 C58 76, 72 56, 86 28 C78 52, 66 72, 57 98 C51 77, 39 63, 26 57 Z" fill="url(#syBlue)" stroke="#bae6fd" stroke-width="0.9" stroke-linejoin="round" filter="url(#drop)"/>
+      <path d="M57 94 C64 74, 75 56, 85 30" fill="none" stroke="#e0f2fe" stroke-width="1.6" stroke-linecap="round" opacity="0.85"/>
+    </svg>
+    <span>Studio Yaniv</span>
+  </div>
+  <div class="hdr-tools">
     <div class="seg" id="ratioSeg">
       <button class="btn-pill on" data-r="16:9">16:9</button>
       <button class="btn-pill" data-r="9:16">9:16</button>
       <button class="btn-pill" data-r="1:1">1:1</button>
     </div>
+    <button class="btn-dark" id="btnDlHtml" title="הורד קובץ HTML עם המפתחות השמורים">&#11015; קוד</button>
     <button class="btn-dark" id="btnCopyHtml" title="העתק קוד HTML">העתק</button>
     <button class="btn-white" id="btnVault">שמורים (<span id="vCnt">0</span>)</button>
     <button class="btn-dark" id="btnSrvs">שרתים (<span id="sCnt">0</span>)</button>
@@ -86,7 +157,7 @@
         <span class="ringPct" id="pctTxt">5%</span>
       </div>
       <div class="pbar"><i id="pBarFill"></i></div>
-      <button class="stopBtn" id="btnStopAll" aria-label="הפסק מחק" title="הפסק מחק">&#9632;</button>
+      <button class="stopBtn" id="btnStopAll" aria-label="הפסק" title="הפסק">&#9632;</button>
     </div>
   </section>
 
@@ -104,50 +175,349 @@
 
   <section class="card">
     <div class="pwrap">
-      <textarea id="promptBox" rows="2" placeholder="כתוב תיאור ליצירת וידאו (מתמונה וטקסט / מטקסט / מתמונה), עריכת תמונה או עריכת וידאו..."></textarea>
+      <textarea id="promptBox" rows="2" placeholder="כתוב תיאור מדויק: שינוי על התמונה, הפיכת תמונה לוידאו, דיבור בעברית, או מוזיקה/קולות..."></textarea>
       <button class="ideaMini" id="btnIdea" title="רעיון מפתיע">&#127922;</button>
     </div>
     <div class="grid3">
       <button class="act v" id="btnVid">יצירת וידאו</button>
-      <button class="act b" id="btnImgEdit">עריכת תמונה</button>
       <button class="act e" id="btnVidEdit">עריכת וידאו</button>
+      <button class="act b" id="btnImgEdit">עריכת תמונה</button>
+    </div>
+    <div class="grid2">
+      <button class="act x" id="btnExtend" disabled>&#9193; הארכת סרטון +6s</button>
+      <button class="act n" id="btnAgain" disabled>&#128260; צור שוב</button>
     </div>
   </section>
 
   <section class="grid2">
-    <button class="act n" onclick="document.getElementById('inVid').click()">העלאת סרטון</button>
-    <button class="act n" onclick="document.getElementById('inImg').click()">העלאת תמונה</button>
-    <input type="file" id="inVid" accept="video/*" hidden />
-    <input type="file" id="inImg" accept="image/*" hidden />
+    <div class="upWrap">
+      <button class="act n" id="btnUpVidMenu">&#127909; העלאת סרטון &#9662;</button>
+      <div class="ddMenu" id="vidMenu">
+        <button class="ddItem" id="optVidGal">&#128193; גלריה</button>
+        <button class="ddItem" id="optVidCam">&#128247; צילום סרטון במצלמה</button>
+      </div>
+      <input type="file" id="inVid" accept="video/*,.mp4,.mov,.webm" hidden />
+      <input type="file" id="inVidCam" accept="video/*" capture="environment" hidden />
+    </div>
+    <div class="upWrap">
+      <button class="act n" id="btnUpImgMenu">&#128444; העלאת תמונה &#9662;</button>
+      <div class="ddMenu" id="imgMenu">
+        <button class="ddItem" id="optImgGal">&#128193; גלריה</button>
+        <button class="ddItem" id="optImgCam">&#128247; צילום תמונה במצלמה</button>
+      </div>
+      <input type="file" id="inImg" accept="image/*,.heic,.heif,.png,.jpg,.jpeg,.webp" hidden />
+      <input type="file" id="inImgCam" accept="image/*" capture="environment" hidden />
+    </div>
   </section>
 </main>
 
 <div class="modal" id="srvModal" onclick="this.classList.remove('on')">
-  <div class="mbox" onclick="event.stopPropagation()">
-    <div class="mhead"><span>שרתי AI חינמיים (מעבר אוטומטי)</span><button onclick="document.getElementById('srvModal').classList.remove('on')">&#10005;</button></div>
-    <div class="mbody" id="srvList"></div>
+  <div class="mbox" style="height:88dvh" onclick="event.stopPropagation()">
+    <div class="mhead">
+      <span>שרתים ומפתחות (מתחלפים ללא הגבלה)</span>
+      <div class="row">
+        <button class="btn-dark" id="btnTestSrvs" style="padding:4px 9px;font-size:11px">&#128269; בדוק</button>
+        <button class="btn-dark" id="btnResetSrvs" style="padding:4px 9px;font-size:11px">&#8635; אפס</button>
+        <button onclick="document.getElementById('srvModal').classList.remove('on')">&#10005;</button>
+      </div>
+    </div>
+    <div class="mbody">
+      <div class="keyBar">
+        <span>&#128273;</span>
+        <input id="quickKeyInput" type="text" autocomplete="off" spellcheck="false" placeholder="הדבק מפתח כאן (נשמר אוטומטית): hf_ / sk_ / sk-air- / nvapi- / AIza / gsk_" />
+        <button id="btnApplyKey">שמור</button>
+        <button class="sec" id="btnTestKey">בדוק מפתח</button>
+      </div>
+      <div class="keyStat" id="keyStat"></div>
+      <div class="keyGrid">
+        <input id="kHF" data-k="hf" type="password" placeholder="Hugging Face (hf_... מתחדש יומי)" />
+        <input id="kAir" data-k="airforce" type="password" placeholder="Api.Airforce (sk-air-... 1000/יום)" />
+        <input id="kLlm7" data-k="llm7" type="password" placeholder="LLM7.io Token (250/שעה וידאו+תמונה)" />
+        <input id="kPol" data-k="pollinations" type="password" placeholder="Pollinations Secret (sk_... מ-enter.pollinations.ai)" />
+        <input id="kCfTok" data-k="cfToken" type="password" placeholder="Cloudflare Token (~173 FLUX/יום)" />
+        <input id="kCfAcc" data-k="cfAccount" type="text" placeholder="Cloudflare Account ID" />
+        <input id="kNv" data-k="nvidia" type="password" placeholder="NVIDIA NIM (nvapi-... חינמי קבוע)" />
+        <input id="kGem" data-k="gemini" type="password" placeholder="Google Gemini (AIza... תמונה+תרגום)" />
+        <input id="kGroq" data-k="groq" type="password" placeholder="Groq (gsk_... מתחדש יומי)" />
+        <input id="kHorde" data-k="horde" type="text" placeholder="AI Horde Key (ברירת מחדל: 0000000000)" />
+      </div>
+      <div id="srvList" style="display:flex;flex-direction:column;gap:7px"></div>
+    </div>
   </div>
 </div>
 
 <div class="modal" id="vaultModal" onclick="this.classList.remove('on')">
-  <div class="mbox" onclick="event.stopPropagation()">
-    <div class="mhead"><span>תיקיית הורדות</span><button onclick="document.getElementById('vaultModal').classList.remove('on')">&#10005;</button></div>
+  <div class="mbox" style="height:88dvh" onclick="event.stopPropagation()">
+    <div class="mhead"><span>תיקיית השמורים</span><button onclick="document.getElementById('vaultModal').classList.remove('on')">&#10005;</button></div>
     <div class="mbody" id="vaultList"></div>
   </div>
 </div>
 
+<div class="modal" id="camModal">
+  <div class="mbox" onclick="event.stopPropagation()">
+    <div class="mhead"><span id="camTitle">&#128247; מצלמה</span><button id="btnCloseCam">&#10005;</button></div>
+    <div class="mbody">
+      <video id="camView" autoplay muted playsinline></video>
+      <div class="row" style="justify-content:center">
+        <button class="act b" id="btnSnap" style="display:none;flex:1">&#128248; צלם תמונה</button>
+        <button class="act x" id="btnRecStart" style="display:none;flex:1">&#9210; התחל הקלטה</button>
+        <button class="act v" id="btnRecStop" style="display:none;flex:1">&#9209; עצור ושמור</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
-const SERVERS = [{"id":"ed-kontext","name":"FLUX.1 Kontext Dev","host":"black-forest-labs-flux-1-kontext-dev.hf.space","cat":"edit","ep":"infer","spd":6,"ref":180},{"id":"ed-flux2-bfl","name":"Official BFL FLUX.2 Dev","host":"black-forest-labs-flux-2-dev.hf.space","cat":"edit","ep":"infer","spd":6,"ref":180},{"id":"ed-qwen-fast","name":"Qwen Image Edit Fast","host":"multimodalart-qwen-image-edit-fast.hf.space","cat":"edit","ep":"infer","spd":4,"ref":180},{"id":"ed-omni","name":"Omni Image Editor","host":"selfit-camera-omni-image-editor.hf.space","cat":"edit","ep":"edit_image_interface","spd":5,"ref":180},{"id":"ed-nag-kontext","name":"NAG FLUX.1 Kontext","host":"chendy-nag-flux-1-kontext-dev.hf.space","cat":"edit","ep":"sample","spd":5,"ref":180},{"id":"ed-firered-fast","name":"FireRed Edit 1.0 Fast","host":"multimodalart-firered-image-edit-1-0-fast.hf.space","cat":"edit","ep":"infer","spd":4,"ref":180},{"id":"ed-firered-gece","name":"FireRed Fast Mirror","host":"geceff1-firered-image-edit-1-0-fast.hf.space","cat":"edit","ep":"edit_image","spd":4,"ref":180},{"id":"ed-firered-svn","name":"FireRed Fast S2","host":"svngoku-firered-image-edit-1-0-fast.hf.space","cat":"edit","ep":"infer","spd":5,"ref":180},{"id":"ed-firered-11","name":"FireRed Image Edit 1.1","host":"fireredteam-firered-image-edit-1-1.hf.space","cat":"edit","ep":"infer","spd":6,"ref":180},{"id":"ed-qwen-2511","name":"Qwen Image Edit 2511","host":"qwen-qwen-image-edit-2511.hf.space","cat":"edit","ep":"infer","spd":6,"ref":180},{"id":"ed-qwen-2509","name":"Official Qwen Image Edit 2509","host":"qwen-qwen-image-edit-2509.hf.space","cat":"edit","ep":"infer","spd":6,"ref":180},{"id":"ed-qwen-linoy-fast","name":"Linoy Qwen Edit 2511 Fast","host":"linoyts-qwen-image-edit-2511-fast.hf.space","cat":"edit","ep":"infer","spd":5,"ref":180},{"id":"ed-qwen-inpaint","name":"Qwen Edit Inpaint","host":"linoyts-qwen-image-edit-inpaint.hf.space","cat":"edit","ep":"infer","spd":5,"ref":180},{"id":"ed-qwen-obj","name":"Qwen Object Manipulator","host":"prithivmlmods-qwen-image-edit-object-manipulator.hf.space","cat":"edit","ep":"edit_image","spd":6,"ref":180},{"id":"ed-qwen-anypose","name":"Qwen Edit AnyPose","host":"linoyts-qwen-image-edit-2511-anypose.hf.space","cat":"edit","ep":"infer","spd":6,"ref":180},{"id":"ed-qwen-angles","name":"Qwen Angles 3D Edit","host":"linoyts-qwen-image-edit-angles.hf.space","cat":"edit","ep":"maybe_infer","spd":6,"ref":180},{"id":"ed-qwen-orig","name":"Qwen Image Edit Core","host":"qwen-qwen-image-edit.hf.space","cat":"edit","ep":"infer","spd":6,"ref":180},{"id":"ed-flux2-turbo","name":"FLUX.2 Dev Turbo","host":"multimodalart-flux-2-dev-turbo.hf.space","cat":"edit","ep":"infer","spd":5,"ref":180},{"id":"ed-kontext-mate","name":"Kontext Photo Mate v2","host":"prithivmlmods-flux-1-kontext-photo-mate-v2.hf.space","cat":"edit","ep":"infer","spd":6,"ref":180},{"id":"ed-kulkas-qwen","name":"Qwen Edit Studio","host":"kulkas2pintu-qwen-edit-image.hf.space","cat":"edit","ep":"edit","spd":6,"ref":180},{"id":"ed-flux1-img2img","name":"FLUX.1 Schnell Img2Img","host":"akjava-flux1-schnell-img2img.hf.space","cat":"edit","ep":"process_images","spd":4,"ref":180},{"id":"ed-firered-prithiv","name":"FireRed Edit 1.0 Node B","host":"prithivmlmods-firered-image-edit-1-0-fast.hf.space","cat":"edit","ep":"edit_image","spd":5,"ref":180},{"id":"ed-firered-jp","name":"FireRed Edit Node C","host":"someone-in-the-world-firered-imageedit-japanese.hf.space","cat":"edit","ep":"infer","spd":5,"ref":180},{"id":"ed-firered-exp","name":"FireRed Experimental Edit","host":"someone-in-the-world-firered-experimental-turbo.hf.space","cat":"edit","ep":"infer","spd":5,"ref":180},{"id":"ed-dreamlite","name":"DreamLite High-Detail Editor","host":"carlofkl-dreamlite.hf.space","cat":"edit","ep":"generate_image","spd":5,"ref":180},{"id":"ed-noct-q","name":"Noct-Q Studio Editor","host":"acloudguy-noct-q-studio.hf.space","cat":"edit","ep":"generate","spd":6,"ref":180},{"id":"ed-horde-img2img","name":"AI Horde Fast Img2Img (Deliberate/ICBINP)","host":"aihorde.net","cat":"edit","ep":"","spd":7,"ref":1},{"id":"ed-horde-sdxl-edit","name":"AI Horde SDXL Realism Img2Img","host":"aihorde.net","cat":"edit","ep":"","spd":11,"ref":1},{"id":"t2i-flux1","name":"FLUX.1 Schnell (1.4s)","host":"black-forest-labs-flux-1-schnell.hf.space","cat":"image","ep":"infer","spd":2,"ref":180},{"id":"t2i-flux2-dev","name":"Official BFL FLUX.2 Dev","host":"black-forest-labs-flux-2-dev.hf.space","cat":"image","ep":"infer","spd":5,"ref":180},{"id":"t2i-flux1-dev","name":"Official BFL FLUX.1 Dev","host":"black-forest-labs-flux-1-dev.hf.space","cat":"image","ep":"infer","spd":6,"ref":180},{"id":"t2i-flux-abid","name":"FLUX.1 Schnell Node B","host":"abidlabs-black-forest-labs-flux-1-schnell.hf.space","cat":"image","ep":"predict","spd":3,"ref":180},{"id":"t2i-flux-merged","name":"FLUX.1 Merged Studio","host":"multimodalart-flux-1-merged.hf.space","cat":"image","ep":"infer","spd":4,"ref":180},{"id":"t2i-sdxl-hysts","name":"SDXL High-Quota Pool","host":"hysts-sdxl.hf.space","cat":"image","ep":"predict","spd":4,"ref":120},{"id":"t2i-tongyi-z","name":"Tongyi-MAI Z-Image Official","host":"tongyi-mai-z-image-turbo.hf.space","cat":"image","ep":"generate","spd":3,"ref":180},{"id":"t2i-sd35-turbo","name":"Stability SD 3.5 Large Turbo","host":"stabilityai-stable-diffusion-3-5-large-turbo.hf.space","cat":"image","ep":"infer","spd":4,"ref":180},{"id":"t2i-sd35-large","name":"Stability SD 3.5 Large","host":"stabilityai-stable-diffusion-3-5-large.hf.space","cat":"image","ep":"infer","spd":6,"ref":180},{"id":"t2i-qwen-official","name":"Official Qwen Image","host":"qwen-qwen-image.hf.space","cat":"image","ep":"infer","spd":5,"ref":180},{"id":"t2i-z-mr","name":"Z-Image Turbo (3.8s)","host":"mrfakename-z-image-turbo.hf.space","cat":"image","ep":"generate_image","spd":4,"ref":180},{"id":"t2i-omni","name":"Omni Text2Image","host":"selfit-camera-omni-image-editor.hf.space","cat":"image","ep":"text_to_image_interface","spd":4,"ref":180},{"id":"t2i-z-akhaliq","name":"Z-Image Turbo Akhaliq","host":"akhaliq-z-image-turbo.hf.space","cat":"image","ep":"generate_image","spd":3,"ref":180},{"id":"t2i-z-victor","name":"Z-Image Turbo Victor","host":"victor-z-image-turbo-mcp.hf.space","cat":"image","ep":"generate_image","spd":3,"ref":180},{"id":"t2i-z-rahul","name":"Z-Image Turbo Rahul","host":"rahul7star-z-image-turbo.hf.space","cat":"image","ep":"generate_image","spd":3,"ref":180},{"id":"t2i-z-master","name":"Z-Image Realism Node B","host":"masterp3000-z-image-turbo-realism.hf.space","cat":"image","ep":"generate_image","spd":4,"ref":180},{"id":"t2i-z-cpuai","name":"Z-Image Unlimited CPU","host":"cpuai-z-image-turbo-cpu.hf.space","cat":"image","ep":"generate_image","spd":7,"ref":5},{"id":"t2i-z-any","name":"Z-Image Anycoder","host":"anycoderapps-z-image-turbo.hf.space","cat":"image","ep":"generate_image","spd":4,"ref":180},{"id":"t2i-z-lar","name":"Z-Image Laruss","host":"laruss5-z-image-turbo.hf.space","cat":"image","ep":"generate_image","spd":4,"ref":180},{"id":"t2i-z-real","name":"Z-Image Realism","host":"linoyts-z-image-turbo-realism.hf.space","cat":"image","ep":"generate_image","spd":4,"ref":180},{"id":"t2i-z-mcp","name":"Z-Image MCP","host":"mcp-tools-z-image-turbo.hf.space","cat":"image","ep":"generate","spd":5,"ref":180},{"id":"t2i-eval-flux","name":"FLUX.1 Schnell Mirror","host":"evalstate-flux1-schnell.hf.space","cat":"image","ep":"infer","spd":3,"ref":180},{"id":"t2i-minimax-h3","name":"MiniMax H3 Image","host":"minimaxai-minimax-h3-image.hf.space","cat":"image","ep":"","spd":5,"ref":180},{"id":"t2i-pruna-h3","name":"Pruna P-H3 Image","host":"prunaai-p-h3-image.hf.space","cat":"image","ep":"","spd":4,"ref":180},{"id":"t2i-qwen-21","name":"Qwen Image 2.1","host":"qwen-qwen-image-2-1.hf.space","cat":"image","ep":"","spd":6,"ref":180},{"id":"t2i-firered-exp","name":"FireRed Experimental Studio","host":"someone-in-the-world-firered-experimental-turbo.hf.space","cat":"image","ep":"infer","spd":4,"ref":180},{"id":"t2i-dreamlite","name":"DreamLite T2I Studio","host":"carlofkl-dreamlite.hf.space","cat":"image","ep":"generate_image","spd":4,"ref":180},{"id":"t2i-minimax-2step","name":"MiniMax H3 Image 2-Step","host":"akhaliq-minimax-h3-image-2step.hf.space","cat":"image","ep":"","spd":3,"ref":180},{"id":"t2i-pollinations-z","name":"Pollinations Z-Image (ללא הגבלה)","host":"gen.pollinations.ai","cat":"image","ep":"","spd":2,"ref":1},{"id":"t2i-pollinations-sana","name":"Pollinations Sana (ללא הגבלה)","host":"image.pollinations.ai","cat":"image","ep":"","spd":2,"ref":1},{"id":"t2i-horde-deliberate","name":"AI Horde Fast Engine (Deliberate/ICBINP)","host":"aihorde.net","cat":"image","ep":"","spd":7,"ref":1},{"id":"t2i-horde-sdxl","name":"AI Horde SDXL Realism (Juggernaut/Albedo)","host":"aihorde.net","cat":"image","ep":"","spd":11,"ref":1},{"id":"t2i-horde-flux","name":"AI Horde FLUX.1 Schnell Cluster","host":"aihorde.net","cat":"image","ep":"","spd":12,"ref":1},{"id":"vid-zerogpu-wan22","name":"Wan 2.2 AOTI Faster","host":"zerogpu-aoti-wan2-2-fp8da-aoti-faster.hf.space","cat":"video","ep":"generate_video","spd":22,"ref":180},{"id":"vid-r3gm-1","name":"Wan 2.2 Preview 1","host":"r3gm-wan2-2-fp8da-aoti-preview.hf.space","cat":"video","ep":"generate_video","spd":22,"ref":180},{"id":"vid-r3gm-2","name":"Wan 2.2 Preview 2","host":"r3gm-wan2-2-fp8da-aoti-preview2.hf.space","cat":"video","ep":"generate_video","spd":22,"ref":180},{"id":"vid-kingnish","name":"Kingnish Wan 2.2 Fast","host":"kingnish-wan2-2-fast.hf.space","cat":"video","ep":"generate_video","spd":25,"ref":180},{"id":"vid-ltx2-turbo","name":"LTX-2 Turbo (Static Camera)","host":"alexnasa-ltx-2-turbo.hf.space","cat":"video","ep":"generate_video","spd":16,"ref":180},{"id":"vid-ltx-distilled","name":"Lightricks LTX-Video Distilled","host":"lightricks-ltx-video-distilled.hf.space","cat":"video","ep":"image_to_video","spd":12,"ref":180},{"id":"vid-cogvideox","name":"Z.ai CogVideoX-5B Studio","host":"zai-org-cogvideox-5b-space.hf.space","cat":"video","ep":"generate","spd":20,"ref":180},{"id":"vid-pyramid","name":"Pyramid-Flow Video","host":"pyramid-flow-pyramid-flow.hf.space","cat":"video","ep":"generate_video","spd":19,"ref":180},{"id":"vid-ltx23","name":"Lightricks LTX-2.3","host":"lightricks-ltx-2-3.hf.space","cat":"video","ep":"generate_video","spd":18,"ref":180},{"id":"vid-ltx25","name":"Lightricks LTX-2.5","host":"lightricks-ltx-2-5.hf.space","cat":"video","ep":"run","spd":20,"ref":180},{"id":"vid-wan21-fast","name":"MultimodalArt Wan 2.1 Fast","host":"multimodalart-wan2-1-fast.hf.space","cat":"video","ep":"generate_video","spd":24,"ref":180},{"id":"vid-prithiv-wan22","name":"Prithiv Wan 2.2 Fast","host":"prithivmlmods-wan2-2-fast.hf.space","cat":"video","ep":"generate_video","spd":24,"ref":180},{"id":"vid-dream22","name":"Dream Wan 2.2 AOTI","host":"dream2589632147-dream-wan2-2-fp8da-aoti-preview-2.hf.space","cat":"video","ep":"generate_video","spd":25,"ref":180},{"id":"vid-cbensimon","name":"Cbensimon Wan 2.2","host":"cbensimon-wan2-2-fp8da-aoti-preview2.hf.space","cat":"video","ep":"generate_video","spd":24,"ref":180},{"id":"vid-kulkas222","name":"Kulkas Wan 2.2","host":"kulkas2pintu-wan222.hf.space","cat":"video","ep":"generate_video","spd":25,"ref":180},{"id":"vid-ysharma","name":"Ysharma Wan 2.1 Fast","host":"ysharma-wan2-1-fast.hf.space","cat":"video","ep":"generate-video","spd":25,"ref":180},{"id":"vid-upsampler","name":"Upsampler Wan 2.2 14B","host":"upsampler-wan-2-2-14b-image-to-video.hf.space","cat":"video","ep":"generate_video","spd":28,"ref":180},{"id":"vid-wan22-lightning","name":"Wan 2.2 Lightning 4-Step","host":"saravutw-wan2-2-i2v-lightning-4-8step-custom.hf.space","cat":"video","ep":"generate_video","spd":14,"ref":180},{"id":"vid-wan22-pro-superb","name":"Wan 2.2 Pro Superb","host":"prashant-ai-ml-wan-2-2-pro-superb.hf.space","cat":"video","ep":"generate_video","spd":18,"ref":180},{"id":"vid-wan22-wip","name":"Wan 2.2 High-Quota Node","host":"zsaxcdssdf-wan2-2-wip.hf.space","cat":"video","ep":"generate_video","spd":19,"ref":180},{"id":"vid-wan21-vace","name":"Wan 2.1 VACE Studio","host":"fffiloni-wan2-1-vace-1-3b.hf.space","cat":"video","ep":"generate","spd":17,"ref":180},{"id":"vid-wan21-fffiloni","name":"Wan 2.1 Turbo Mirror","host":"fffiloni-wan2-1.hf.space","cat":"video","ep":"infer","spd":18,"ref":180},{"id":"vid-ltx-opt","name":"LTX-Video ZeroGPU Opt","host":"deeprat-ltx-video-zerogpu-optimized.hf.space","cat":"video","ep":"image_to_video","spd":13,"ref":180},{"id":"vid-ltx-upsampler","name":"LTX-Video Upsampler Node","host":"upsampler-ltx-video.hf.space","cat":"video","ep":"generate_video","spd":15,"ref":180},{"id":"vid-ltx23-sync","name":"LTX-2.3 Audio-Video Sync","host":"linoyts-ltx-2-3-sync.hf.space","cat":"video","ep":"generate_video","spd":18,"ref":180},{"id":"vid-ltx25-rio","name":"LTX-2.5 Studio Mirror","host":"rioshiina-ltx-2-5.hf.space","cat":"video","ep":"run","spd":18,"ref":180},{"id":"vid-ltx2-a2v","name":"LTX-2 Audio2Video","host":"multimodalart-ltx2-audio-to-video.hf.space","cat":"video","ep":"generate","spd":18,"ref":180},{"id":"vid-ltx23-flf","name":"LTX-2.3 Keyframe Studio","host":"linoyts-ltx-2-3-first-last-frame.hf.space","cat":"video","ep":"generate_video","spd":19,"ref":180},{"id":"vid-cogvideox-2b","name":"Z.ai CogVideoX-2B Fast","host":"zai-org-cogvideox-2b-space.hf.space","cat":"video","ep":"generate","spd":16,"ref":180},{"id":"vid-wan22-rcm","name":"Wan 2.2 RCM Turbo","host":"linoyts-wan2-2-i2v-rcm.hf.space","cat":"video","ep":"generate_video","spd":12,"ref":180},{"id":"vid-wan22-v3","name":"Wan 2.2 I2V v3 Pool","host":"jcishere-wan2-2-i2v-v3.hf.space","cat":"video","ep":"generate_video","spd":16,"ref":180},{"id":"vid-wan22-flf-mm","name":"Wan 2.2 Keyframe Pro","host":"multimodalart-wan-2-2-first-last-frame.hf.space","cat":"video","ep":"generate_video","spd":18,"ref":180},{"id":"vid-wan22-poij","name":"Wan 2.2 AOTI Mirror C","host":"poij134-wan2-2-fp8da-aoti-preview-2.hf.space","cat":"video","ep":"generate_video","spd":18,"ref":180},{"id":"vid-wan21-vace-linoy","name":"Wan 2.1 VACE Fast Node","host":"linoyts-wan2-1-vace-fast.hf.space","cat":"video","ep":"generate_video","spd":16,"ref":180},{"id":"vid-wan22-lion","name":"Wan 2.2 Keyframe Mirror B","host":"lionfxxx-wan-2-2-first-last-frame.hf.space","cat":"video","ep":"generate_video","spd":19,"ref":180},{"id":"vid-wan22-dm1","name":"Dream Wan 2.2 Mirror B","host":"deepmind1-dream-wan2-2-fp8da-aoti-preview-2.hf.space","cat":"video","ep":"generate_video","spd":20,"ref":180},{"id":"vid-wan21-diyos","name":"Diyos Wan 2.1 Video","host":"diyos1-diyos-wan21.hf.space","cat":"video","ep":"generate_video","spd":20,"ref":180},{"id":"vid-ltx23-rdata","name":"LTX-2.3 Studio Mirror B","host":"rdata92-ltx-2-3-10eros.hf.space","cat":"video","ep":"generate","spd":17,"ref":180},{"id":"vid-pan2","name":"PAN2 Video Studio","host":"akhaliq-pan2.hf.space","cat":"video","ep":"generate","spd":18,"ref":180},{"id":"vid-ltx25-bbox","name":"LTX-2.5 Motion Control","host":"yuvraj108c-ltx25-bbox-control-demo.hf.space","cat":"video","ep":"generate","spd":17,"ref":180},{"id":"vid-minimax-h3","name":"MiniMax H3 Animation Video","host":"solricks-3d-animation-style-minimax-h3.hf.space","cat":"video","ep":"generate","spd":18,"ref":180},{"id":"ls-wan22-s2v","name":"Wan 2.2 Speech2Video","host":"wan-ai-wan2-2-s2v.hf.space","cat":"lipsync","ep":"","spd":24,"ref":180},{"id":"ls-omniavatar","name":"OmniAvatar LipSync","host":"alexnasa-omniavatar.hf.space","cat":"lipsync","ep":"","spd":22,"ref":180},{"id":"ls-echomimic","name":"EchoMimic","host":"fffiloni-echomimic.hf.space","cat":"lipsync","ep":"","spd":20,"ref":180},{"id":"aud-edge-tts","name":"Edge TTS Hebrew/Global","host":"innoai-edge-tts-text-to-speech.hf.space","cat":"audio","ep":"tts_interface","spd":3,"ref":1},{"id":"aud-kokoro","name":"Kokoro TTS Zero","host":"remsky-kokoro-tts-zero.hf.space","cat":"audio","ep":"","spd":3,"ref":1},{"id":"aud-acestep","name":"ACE-Step Music v1.5","host":"ace-step-ace-step-v1-5.hf.space","cat":"audio","ep":"","spd":14,"ref":180},{"id":"aud-dia-16b","name":"Nari Dia-1.6B (דיבור וצחוק)","host":"nari-labs-dia-1-6b.hf.space","cat":"audio","ep":"generate_audio","spd":4,"ref":180},{"id":"aud-chatterbox","name":"ResembleAI Chatterbox TTS","host":"resembleai-chatterbox.hf.space","cat":"audio","ep":"generate_tts_audio","spd":4,"ref":180},{"id":"aud-musicgen","name":"Meta MusicGen Audio/SFX","host":"facebook-musicgen.hf.space","cat":"audio","ep":"predict_batched","spd":8,"ref":180},{"id":"llm-ovh","name":"OVH Kepler Qwen3.5-9B","host":"oai.endpoints.kepler.ai.cloud.ovh.net","cat":"llm","ep":"","spd":1,"ref":1},{"id":"llm-llm7","name":"LLM7.io Chat (250/שעה)","host":"api.llm7.io","cat":"llm","ep":"","spd":1,"ref":60},{"id":"llm-kilo","name":"Kilo AI Gateway","host":"api.kilo.ai","cat":"llm","ep":"","spd":1,"ref":60},{"id":"llm-pollinations","name":"Pollinations Text","host":"text.pollinations.ai","cat":"llm","ep":"","spd":1,"ref":1},{"id":"llm-horde","name":"AI Horde OAI","host":"oai.aihorde.net","cat":"llm","ep":"","spd":3,"ref":1}];
+/* VERIFIED HIGH-TOKEN, UNLIMITED & ROTATING SERVERS */
+const SERVERS = [
+// --- IMAGE EDIT ---
+["ed-horde-img2img","AI Horde Unlimited Img2Img (ללא הגבלה)","aihorde.net","edit","",6,1],
+["ed-horde-sdxl-edit","AI Horde Unlimited SDXL Edit (ללא הגבלה)","aihorde.net","edit","",8,1],
+["ed-horde-realistic","AI Horde Realistic Edit (ללא הגבלה)","aihorde.net","edit","",7,1],
+["ed-gemini","Google Gemini Native Edit (AIza...)","generativelanguage.googleapis.com","edit","",3,5],
+["ed-llm7","LLM7.io Image Edit (נדרש טוקן)","api.llm7.io","edit","",3,4],
+["ed-airforce","Api.Airforce Edit (sk-air-)","api.airforce","edit","",4,8],
+["ed-qwen-official","Qwen Image Edit Official","qwen-qwen-image-edit.hf.space","edit","",5,6],
+["ed-qwen-fast","Qwen Image Edit Fast","multimodalart-qwen-image-edit-fast.hf.space","edit","infer",4,6],
+["ed-qwen-2511","Qwen Image Edit 2511","qwen-qwen-image-edit-2511.hf.space","edit","infer",6,6],
+["ed-kontext","FLUX.1 Kontext Dev","black-forest-labs-flux-1-kontext-dev.hf.space","edit","infer",6,6],
+["ed-flux2-bfl","Official BFL FLUX.2 Dev","black-forest-labs-flux-2-dev.hf.space","edit","infer",6,6],
+["ed-qwen-klein","Qwen 2511 + FLUX.2 Klein","ast-1320-qwen-2511-plus-flux-2-klein.hf.space","edit","",4,6],
+["ed-qwen-21-t","Qwen Image 2.1 Turbo Edit","hugging-apps-qwen-image-2-1-turbo.hf.space","edit","",4,6],
+["ed-pro-real","Pro Realism Edit Studio","kogutt999-pro-realism-edit-studio.hf.space","edit","",5,6],
+["ed-firered-fast","FireRed Edit 1.0 Fast","multimodalart-firered-image-edit-1-0-fast.hf.space","edit","infer",4,6],
+["ed-omni","Omni Image Editor","selfit-camera-omni-image-editor.hf.space","edit","edit_image_interface",5,6],
+["ed-qwen-2509-p","Qwen Edit 2509 Fast","prithivmlmods-qwen-image-edit-2509-loras-fast.hf.space","edit","",5,6],
+
+// --- IMAGE GENERATION ---
+["t2i-horde-deliberate","AI Horde Unlimited Fast (ללא הגבלה)","aihorde.net","image","",6,1],
+["t2i-horde-sdxl","AI Horde Unlimited SDXL (ללא הגבלה)","aihorde.net","image","",8,1],
+["t2i-horde-flux","AI Horde Unlimited FLUX (ללא הגבלה)","aihorde.net","image","",10,1],
+["t2i-horde-realistic","AI Horde AbsoluteReality (ללא הגבלה)","aihorde.net","image","",7,1],
+["t2i-z-cpuai","Z-Image Unlimited CPU (ללא מגבלת GPU)","cpuai-z-image-turbo-cpu.hf.space","image","generate_image",6,1],
+["t2i-gemini","Google Gemini Native Image (AIza...)","generativelanguage.googleapis.com","image","",3,5],
+["t2i-llm7","LLM7.io Images (נדרש טוקן)","api.llm7.io","image","",3,4],
+["t2i-pollinations","Pollinations FLUX (נדרש sk_)","gen.pollinations.ai","image","",2,4],
+["t2i-pollinations-zimage","Pollinations Z-Image (נדרש sk_)","gen.pollinations.ai","image","",2,4],
+["t2i-airforce","Api.Airforce Images (sk-air-)","api.airforce","image","",3,8],
+["t2i-cf","Cloudflare FLUX (173/יום מתחדש)","api.cloudflare.com","image","",3,10],
+["t2i-nvidia","NVIDIA NIM FLUX (nvapi-)","ai.api.nvidia.com","image","",3,10],
+["t2i-hf-router","HuggingFace Router Image (hf_ Inference)","router.huggingface.co","image","",3,30],
+["t2i-mrfakename-z","Z-Image Turbo (mrfakename)","mrfakename-z-image-turbo.hf.space","image","generate_image",2,6],
+["t2i-laruss5-z","Z-Image Turbo Mirror (laruss5)","laruss5-z-image-turbo.hf.space","image","generate_image",2,6],
+["t2i-anycoder-z","Z-Image Turbo Mirror (anycoder)","anycoderapps-z-image-turbo.hf.space","image","generate_image",2,6],
+["t2i-rahul-z","Z-Image Turbo Mirror (rahul7star)","rahul7star-z-image-turbo.hf.space","image","generate_image",2,6],
+["t2i-tongyi-z","Tongyi Z-Image Turbo Official","tongyi-mai-z-image-turbo.hf.space","image","generate",3,6],
+["t2i-qwen-img","Qwen Image Official","qwen-qwen-image.hf.space","image","",3,6],
+["t2i-qwen-mcp","Qwen Image Fast Mirror","mcp-tools-qwen-image-fast.hf.space","image","",3,6],
+["t2i-flux1","FLUX.1 Schnell","black-forest-labs-flux-1-schnell.hf.space","image","infer",2,6],
+["t2i-minimax-h3","MiniMax H3 Image","minimaxai-minimax-h3-image.hf.space","image","",5,6],
+["t2i-pruna-h3","Pruna P-H3 Image","prunaai-p-h3-image.hf.space","image","",4,6],
+
+// --- VIDEO GENERATION (VERIFIED LIVE SPACES + TOKEN APIs) ---
+["vid-upsampler-wan","Wan 2.2 14B I2V (Upsampler)","upsampler-wan-2-2-14b-image-to-video.hf.space","video","",16,5],
+["vid-dream-preview2","Dream Wan 2.2 14B AOTI","dream2589632147-dream-wan2-2-fp8da-aoti-preview-2.hf.space","video","",16,5],
+["vid-r3gm-preview2","Wan 2.2 14B Preview 2 (r3gm)","r3gm-wan2-2-fp8da-aoti-preview2.hf.space","video","",16,5],
+["vid-r3gm-1","Wan 2.2 14B Preview 1 (r3gm)","r3gm-wan2-2-fp8da-aoti-preview.hf.space","video","generate_video",16,5],
+["vid-zerogpu-wan22","Wan 2.2 AOTI Faster","zerogpu-aoti-wan2-2-fp8da-aoti-faster.hf.space","video","generate_video",16,5],
+["vid-gojo-wan22","Wan 2.2 I2V (Gojoosama)","gojoosama-wan22-i2v.hf.space","video","",15,5],
+["vid-kulkas-555","Wan 2.2 14B Lightning (kulkas)","kulkas2pintu-wan555.hf.space","video","",15,5],
+["vid-wan22-lightning","Wan 2.2 Lightning 4-Step","saravutw-wan2-2-i2v-lightning-4-8step-custom.hf.space","video","generate_video",14,5],
+["vid-wan22-rcm","Wan 2.2 RCM Turbo","linoyts-wan2-2-i2v-rcm.hf.space","video","generate_video",12,5],
+["vid-kingnish","Kingnish Wan 2.2 Fast","kingnish-wan2-2-fast.hf.space","video","generate_video",18,5],
+["vid-ltx2-turbo","LTX-2 Turbo (alexnasa)","alexnasa-ltx-2-turbo.hf.space","video","generate_video",15,5],
+["vid-ltx-distilled","Lightricks LTX Distilled","lightricks-ltx-video-distilled.hf.space","video","",14,5],
+["vid-ltx-fast","Lightricks LTX Video Fast","lightricks-ltx-video-fast.hf.space","video","",14,5],
+["vid-ltx23","Lightricks LTX-2.3 Audio+Video","lightricks-ltx-2-3.hf.space","video","",16,5],
+["vid-wan21-fast","MultimodalArt Wan 2.1 Fast","multimodalart-wan2-1-fast.hf.space","video","generate_video",18,5],
+["vid-numan-t2v","Wan 2.1 1.3B Video API","numanajmal0-wan2-1-t2v-1-3b-video-api.hf.space","video","",15,5],
+["vid-mm-h3","MiniMax H3 Video","multimodalart-minimax-h3.hf.space","video","",16,5],
+["vid-omni-fac","Omni Video Factory","vamo455-omni-video-factory.hf.space","video","",16,5],
+["vid-wan22-ti2v","Wan 2.2 TI2V 5B","arandomcoder2026-wan2-2-5b-ti2v.hf.space","video","",16,5],
+["vid-llm7","LLM7.io Video (נדרש טוקן)","api.llm7.io","video","",16,4],
+["vid-pollinations","Pollinations Video (נדרש sk_)","gen.pollinations.ai","video","",16,4],
+["vid-airforce","Api.Airforce Video (sk-air-)","api.airforce","video","",18,8],
+["vid-hf-router","HuggingFace Router Video (hf_ Inference)","router.huggingface.co","video","",14,30],
+
+// --- LIPSYNC ---
+["ls-wan22-s2v","Wan 2.2 Speech2Video","wan-ai-wan2-2-s2v.hf.space","lipsync","",20,6],
+["ls-wan22-anim","Wan 2.2 Animate","ia7cast-wan2-2-animate.hf.space","lipsync","",20,6],
+["ls-omniavatar","OmniAvatar LipSync","alexnasa-omniavatar.hf.space","lipsync","",20,6],
+["ls-echomimic","EchoMimic LipSync","fffiloni-echomimic.hf.space","lipsync","",18,6],
+["ls-hallo","Hallo Talking Face","hasan93-hallo-talking-face.hf.space","lipsync","",18,6],
+["ls-sadtalker","SadTalker LipSync","kevinwang676-sadtalker.hf.space","lipsync","",16,6],
+
+// --- AUDIO / TTS / SFX / MUSIC ---
+["aud-phonikud","Phonikud Hebrew TTS (ללא הגבלה)","phonikud-phonikud-tts.hf.space","audio","",2,1],
+["aud-edge-tts","Edge TTS Hebrew/Global (ללא הגבלה)","innoai-edge-tts-text-to-speech.hf.space","audio","tts_interface",2,1],
+["aud-edge-vc","Edge TTS Mirror (ללא הגבלה)","voicecloning-be-text-to-speech.hf.space","audio","",2,1],
+["aud-kokoro","Kokoro TTS Zero","remsky-kokoro-tts-zero.hf.space","audio","",3,1],
+["aud-pollinations","Pollinations Audio TTS (sk_)","gen.pollinations.ai","audio","",2,4],
+["sfx-mmaudio","MMAudio Sync SFX","hkchengrex-mmaudio.hf.space","sfx","",8,6],
+["sfx-tangoflux","TangoFlux SFX","declare-lab-tangoflux.hf.space","sfx","",6,6],
+["sfx-audiogen","AudioGen SFX","fffiloni-audiogen.hf.space","sfx","",6,6],
+["aud-acestep","ACE-Step Music v1.5","ace-step-ace-step-v1-5.hf.space","music","",14,6],
+["aud-musicgen","Meta MusicGen Music","facebook-musicgen.hf.space","music","predict_batched",8,6],
+
+// --- LLM PROMPT TRANSLATION ---
+["llm-ovh","OVH Kepler AI (ללא מפתח וללא הגבלה)","oai.endpoints.kepler.ai.cloud.ovh.net","llm","",1,1],
+["llm-llm7","LLM7.io Chat (250/שעה)","api.llm7.io","llm","",1,4],
+["llm-kilo","Kilo AI Gateway (200/שעה)","api.kilo.ai","llm","",1,4],
+["llm-horde","AI Horde OAI (ללא הגבלה)","oai.aihorde.net","llm","",3,1]
+].map(([id,name,host,cat,ep,spd,ref])=>({id,name,host,cat,ep,spd,ref}));
+
 const HORDE_MODELS = {
   't2i-horde-deliberate': ['Deliberate', "ICBINP - I Can't Believe It's Not Photography", 'AbsoluteReality', 'stable_diffusion'],
   't2i-horde-sdxl': ['Juggernaut XL', 'AlbedoBase XL 3.1', 'AlbedoBase XL (SDXL)', 'Deliberate'],
   't2i-horde-flux': ['Flux.1-Schnell fp8 (Compact)', 'Deliberate', 'AlbedoBase XL 3.1'],
+  't2i-horde-realistic': ['AbsoluteReality', "ICBINP - I Can't Believe It's Not Photography", 'Deliberate'],
   'ed-horde-img2img': ['Deliberate', "ICBINP - I Can't Believe It's Not Photography", 'AbsoluteReality', 'stable_diffusion'],
-  'ed-horde-sdxl-edit': ['Juggernaut XL', 'AlbedoBase XL 3.1', 'Deliberate']
+  'ed-horde-sdxl-edit': ['Juggernaut XL', 'AlbedoBase XL 3.1', 'Deliberate'],
+  'ed-horde-realistic': ['AbsoluteReality', 'Deliberate', 'Juggernaut XL']
 };
-const st = { ratio:'16:9', type:null, imgUrl:null, vidUrl:null, vidBlob:null, muted:false, vault:[], ctrl:null, cd:{}, rot:{}, perf:{} };
+
+function loadSavedKeys(){
+  let out = {};
+  try { const emb = document.getElementById('embeddedKeys')?.textContent?.trim(); if(emb) Object.assign(out, JSON.parse(emb)); } catch {}
+  try { const hm = location.hash.match(/keys=([^&]+)/); if(hm) Object.assign(out, JSON.parse(decodeURIComponent(escape(atob(hm[1]))))); } catch {}
+  try { if(typeof window.name === 'string' && window.name.startsWith('SY_KEYS:')) Object.assign(out, JSON.parse(window.name.slice(8))); } catch {}
+  try { const ls = localStorage.getItem('studio_yaniv_keys_v2'); if(ls) Object.assign(out, JSON.parse(ls)); } catch {}
+  return out;
+}
+
+const st = {
+  ratio:'16:9', type:null, imgUrl:null, vidUrl:null, vidBlob:null, muted:false,
+  vault:[], ctrl:null, cd:{}, errMsg:{}, rot:{}, perf:{}, lastUsed:{}, pingMap:{}, gradioPrefix:{},
+  hfRouterBlocked:false, lastAction:null, camStream:null, camRec:null, camChunks:[], llm7Models:null, airforceModels:null,
+  keys: loadSavedKeys()
+};
 const $ = id => document.getElementById(id);
-const isZeroGpu = s => s.host.endsWith('.hf.space') && !s.id.includes('cpu');
+const isUnlimited = s => s.host==='aihorde.net' || s.host==='oai.aihorde.net' || s.id.includes('cpu') || s.host==='oai.endpoints.kepler.ai.cloud.ovh.net' || s.cat==='audio';
+const KEY_FIELDS = [['hf','kHF'],['airforce','kAir'],['llm7','kLlm7'],['pollinations','kPol'],['cfToken','kCfTok'],['cfAccount','kCfAcc'],['nvidia','kNv'],['gemini','kGem'],['groq','kGroq'],['horde','kHorde']];
+const KEY_LABELS = {hf:'Hugging Face',airforce:'Api.Airforce',llm7:'LLM7.io',pollinations:'Pollinations',cfToken:'Cloudflare',nvidia:'NVIDIA NIM',gemini:'Google Gemini',groq:'Groq',horde:'AI Horde'};
+
+function getKey(p){ return (st.keys[p] || '').trim(); }
+function detectProvider(k){
+  if(k.startsWith('hf_')) return 'hf';
+  if(k.startsWith('sk-air-')) return 'airforce';
+  if(k.startsWith('pk_') || k.startsWith('sk_')) return 'pollinations';
+  if(k.startsWith('nvapi-')) return 'nvidia';
+  if(k.startsWith('AIza')) return 'gemini';
+  if(k.startsWith('gsk_')) return 'groq';
+  if(k === '0000000000' || /^[a-zA-Z0-9_-]{22}$/.test(k)) return 'horde';
+  return 'llm7';
+}
+
+function refreshKeyInputs(){
+  KEY_FIELDS.forEach(([k,id])=>{
+    const el = $(id), val = st.keys[k] || '';
+    el.value = val;
+    el.classList.toggle('hasVal', !!val.trim());
+  });
+  const pol = getKey('pollinations');
+  const active = Object.entries(KEY_LABELS).filter(([k])=>getKey(k)).map(([,lbl])=>lbl);
+  const elStat = $('keyStat');
+  if(pol && pol.startsWith('pk_')){
+    elStat.className = 'keyStat warn';
+    elStat.textContent = '⚠️ מפתח pk_ של Pollinations חסום מאז 11/2026 ומחזיר 401 — יש להזין מפתח sk_ מ-enter.pollinations.ai.';
+  } else {
+    elStat.className = 'keyStat';
+    const contentTip = (location.protocol==='content:' || location.protocol==='file:') ? ' · לשמירה קבועה באנדרואיד לחץ "↓ קוד"' : '';
+    elStat.textContent = active.length
+      ? ('✓ נשמר ומופעל: ' + active.join(' · ') + contentTip)
+      : '💡 פועל חינמית על Spaces / AI Horde · הדבק מפתח להאצה' + contentTip;
+  }
+}
+
+function persistKeys(){
+  const clean = {};
+  Object.entries(st.keys).forEach(([k,v])=>{ if(v && String(v).trim()) clean[k] = String(v).trim(); });
+  st.keys = clean;
+  st.hfRouterBlocked = false;
+  const json = JSON.stringify(clean);
+  try { $('embeddedKeys').textContent = json; } catch {}
+  try { localStorage.setItem('studio_yaniv_keys_v2', json); } catch {}
+  try { window.name = 'SY_KEYS:' + json; } catch {}
+  try { history.replaceState(null, '', '#keys=' + btoa(unescape(encodeURIComponent(json)))); } catch {}
+  st.cd = {}; st.errMsg = {};
+  refreshKeyInputs();
+  updateUi();
+  if($('srvModal').classList.contains('on')) renderSrvList();
+}
+
+function applyQuickKey(rawVal){
+  const v = (rawVal || '').trim();
+  if(!v) return null;
+  const prov = detectProvider(v);
+  st.keys[prov] = v;
+  persistKeys();
+  return { prov, label: KEY_LABELS[prov] || prov };
+}
+
+$('quickKeyInput').addEventListener('input', () => {
+  const v = $('quickKeyInput').value.trim();
+  if(v.length >= 10) applyQuickKey(v);
+});
+$('quickKeyInput').addEventListener('keydown', e => {
+  if(e.key === 'Enter'){ e.preventDefault(); $('btnApplyKey').click(); }
+});
+$('btnApplyKey').onclick = () => {
+  const res = applyQuickKey($('quickKeyInput').value);
+  if(!res) return;
+  $('btnApplyKey').textContent = '✓ נשמר (' + res.label + ')';
+  setTimeout(()=>$('btnApplyKey').textContent='שמור', 2200);
+};
+$('btnTestKey').onclick = async () => {
+  const v = $('quickKeyInput').value.trim();
+  if(v) applyQuickKey(v);
+  $('btnTestKey').textContent = 'בודק...';
+  const msgs = [];
+  if(getKey('hf')){
+    try{
+      const r = await fetch('https://huggingface.co/api/whoami-v2',{headers:{'Authorization':'Bearer '+getKey('hf')}});
+      if(r.ok){
+        const j = await r.json();
+        const rInf = await fetch('https://router.huggingface.co/hf-inference/models/black-forest-labs/FLUX.1-schnell',{method:'POST',headers:{'Authorization':'Bearer '+getKey('hf'),'Content-Type':'application/json'},body:JSON.stringify({inputs:'test'})});
+        if(rInf.status===401 || rInf.status===403) msgs.push('✓ HF תקין ל-Spaces (ללא הרשאת Router Inference)');
+        else msgs.push('✓ HF תקין מלא ('+(j.name||'user')+')');
+      } else msgs.push('❌ HF HTTP '+r.status);
+    }catch{ msgs.push('⚠️ HF שגיאת רשת'); }
+  }
+  if(getKey('pollinations')){
+    const pk = getKey('pollinations');
+    if(pk.startsWith('pk_')) msgs.push('❌ Pollinations pk_ חסום (נדרש sk_)');
+    else {
+      try{
+        const r = await fetch('https://gen.pollinations.ai/v1/models',{headers:{'Authorization':'Bearer '+pk}});
+        msgs.push(r.ok ? '✓ Pollinations sk_ תקין' : ('❌ Pollinations HTTP '+r.status));
+      }catch{ msgs.push('⚠️ Pollinations שגיאת רשת'); }
+    }
+  }
+  if(getKey('llm7')){
+    try{
+      const r = await fetch('https://api.llm7.io/v1/models',{headers:{'Authorization':'Bearer '+getKey('llm7')}});
+      msgs.push(r.ok ? '✓ LLM7 תקין' : ('❌ LLM7 HTTP '+r.status));
+    }catch{ msgs.push('⚠️ LLM7 שגיאת רשת'); }
+  }
+  if(getKey('gemini')){
+    try{
+      const r = await fetch('https://generativelanguage.googleapis.com/v1beta/models?key='+encodeURIComponent(getKey('gemini')));
+      msgs.push(r.ok ? '✓ Gemini תקין' : ('❌ Gemini HTTP '+r.status));
+    }catch{ msgs.push('⚠️ Gemini שגיאת רשת'); }
+  }
+  if(!msgs.length) msgs.push('הדבק מפתח קודם כדי לבדוק אותו');
+  $('keyStat').className = msgs.some(m=>m.startsWith('❌')) ? 'keyStat warn' : 'keyStat';
+  $('keyStat').textContent = msgs.join(' · ');
+  $('btnTestKey').textContent = 'בדוק מפתח';
+};
+
+document.querySelectorAll('.keyGrid input').forEach(inp => {
+  inp.addEventListener('input', () => {
+    st.keys[inp.dataset.k] = inp.value.trim();
+    persistKeys();
+  });
+});
+refreshKeyInputs();
 
 function setErr(m){ if(!m){ $('errBox').classList.add('hide'); return; } $('errTxt').textContent=m; $('errBox').classList.remove('hide'); }
 function updateUi(){
@@ -162,154 +532,357 @@ function updateUi(){
   $('btnMute').innerHTML = st.muted ? '&#128263; ללא שמע' : '&#128266; השתק שמע';
   $('btnClear').disabled = !st.type;
   $('btnDlNow').disabled = !st.type;
+  $('btnExtend').disabled = !st.type;
+  $('btnAgain').disabled = !st.lastAction;
 }
 updateUi();
 
 document.querySelectorAll('#ratioSeg button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('#ratioSeg button').forEach(x=>x.classList.remove('on'));
-  b.classList.add('on'); st.ratio = b.dataset.r; updateUi();
+  b.classList.add('on'); st.ratio = b.dataset.r; $('stageBox').style.aspectRatio=''; updateUi();
 });
 $('btnMute').onclick = () => { st.muted = !st.muted; updateUi(); };
-$('btnClear').onclick = () => { st.type=null; st.imgUrl=null; st.vidUrl=null; st.vidBlob=null; $('vidView').src=''; $('imgView').src=''; setErr(''); updateUi(); };
-$('btnStopAll').onclick = () => { if(st.ctrl) st.ctrl.abort(); stopRender(); $('btnClear').click(); };
+$('btnClear').onclick = () => { st.type=null; st.imgUrl=null; st.vidUrl=null; st.vidBlob=null; $('vidView').src=''; $('imgView').src=''; $('stageBox').style.aspectRatio=''; setErr(''); updateUi(); };
+$('btnStopAll').onclick = () => { if(st.ctrl) st.ctrl.abort(); stopRender(); };
 $('btnCopyHtml').onclick = async () => {
+  persistKeys();
   try { await navigator.clipboard.writeText('<!doctype html>\n' + document.documentElement.outerHTML); $('btnCopyHtml').textContent='הועתק!'; setTimeout(()=>$('btnCopyHtml').textContent='העתק',1800); } catch {}
 };
-$('btnSrvs').onclick = () => {
-  $('srvList').innerHTML = SERVERS.map(s=>'<div class="srvRow"><div style="min-width:0"><b>'+s.name+'</b><div style="font-size:10px;color:#94a3b8">~'+s.spd+'s · מתחדש כל '+s.ref+' דק׳</div></div><span style="color:#38bdf8;font-weight:700">'+s.cat.toUpperCase()+'</span></div>').join('');
-  $('srvModal').classList.add('on');
+$('btnDlHtml').onclick = () => {
+  persistKeys();
+  const blob = new Blob(['<!doctype html>\n' + document.documentElement.outerHTML], {type:'text/html;charset=utf-8'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'studio-yaniv.html'; a.click();
 };
-$('btnVault').onclick = () => {
-  $('vaultList').innerHTML = st.vault.length ? st.vault.map((v,i)=>'<div class="srvRow"><span>'+(v.type==='video'?'סרטון':'תמונה')+' #'+(i+1)+'</span><button class="btn-white" onclick="dlVault('+i+')">הורד</button></div>').join('') : '<div style="text-align:center;color:#94a3b8;padding:16px">אין פריטים</div>';
-  $('vaultModal').classList.add('on');
+
+function renderSrvList(){
+  const now = Date.now(), activeIds = new Set(Object.values(st.lastUsed));
+  $('srvList').innerHTML = SERVERS.map(s => {
+    const coolLeft = st.cd[s.id] && st.cd[s.id] > now ? Math.ceil((st.cd[s.id] - now)/60000) : 0;
+    const isLast = activeIds.has(s.id) && !coolLeft, ping = st.pingMap[s.id], lastErr = st.errMsg[s.id];
+    const rowCls = coolLeft ? 'srvRow cool' : (isLast ? 'srvRow pin' : 'srvRow ok');
+    const stCls = coolLeft ? 'srvSt cool' : 'srvSt ok';
+    const stTxt = coolLeft ? `⏳ ${lastErr ? lastErr.slice(0,22) : 'ממתין'} (${coolLeft} דק׳)` : isLast ? '🟢 פעל בהצלחה' : ping===false ? '⚠️ עמוס' : isUnlimited(s) ? '♾️ ללא הגבלה' : '🟢 זמין ברוטציה';
+    return `<div class="${rowCls}"><div style="min-width:0"><b>${s.name}</b><div style="font-size:10px;color:#94a3b8">${s.cat.toUpperCase()} · רענון כל ${s.ref} דק׳</div></div><span class="${stCls}">${stTxt}</span></div>`;
+  }).join('');
+}
+$('btnSrvs').onclick = () => { refreshKeyInputs(); renderSrvList(); $('srvModal').classList.add('on'); };
+$('btnResetSrvs').onclick = () => { st.cd={}; st.errMsg={}; st.pingMap={}; st.hfRouterBlocked=false; renderSrvList(); updateUi(); };
+$('btnTestSrvs').onclick = async () => {
+  $('btnTestSrvs').disabled = true;
+  const sample = SERVERS.filter(s => s.host.endsWith('.hf.space') || s.cat==='llm' || s.id==='t2i-horde-deliberate');
+  await Promise.all(sample.map(async s => {
+    try{
+      const c = new AbortController(); setTimeout(()=>c.abort(), 5500);
+      if(s.host.endsWith('.hf.space')){
+        const info = await fetchGradioInfo(s.host, c.signal);
+        st.pingMap[s.id] = !!info;
+        delete st.cd[s.id]; delete st.errMsg[s.id];
+      } else {
+        const u = s.id==='t2i-horde-deliberate'?'https://aihorde.net/api/v2/status/models?type=image':`https://${s.host}/v1/models`;
+        const r = await fetch(u, {signal:c.signal});
+        st.pingMap[s.id] = r.ok;
+        if(!r.ok) throw new Error('HTTP '+r.status);
+        delete st.cd[s.id]; delete st.errMsg[s.id];
+      }
+    }catch(e){
+      st.pingMap[s.id] = false;
+      st.cd[s.id] = Date.now() + s.ref*60000;
+      st.errMsg[s.id] = String(e?.message||'שגיאה').slice(0,22);
+    }
+  }));
+  $('btnTestSrvs').disabled = false;
+  renderSrvList(); updateUi();
 };
+
+function renderVaultList(){
+  const box = $('vaultList');
+  if(!st.vault.length){ box.innerHTML = '<div style="text-align:center;color:#94a3b8;padding:20px">תיקיית השמורים ריקה</div>'; return; }
+  box.innerHTML = '';
+  st.vault.forEach((v, i) => {
+    const card = document.createElement('div'); card.className = 'vCard';
+    const mediaBox = document.createElement('div'); mediaBox.className = 'vBox';
+    if(v.type === 'video'){ const vid = document.createElement('video'); vid.src = v.url; vid.controls = true; vid.playsInline = true; vid.muted = st.muted; mediaBox.appendChild(vid); }
+    else { const img = document.createElement('img'); img.src = v.url; mediaBox.appendChild(img); }
+    const btns = document.createElement('div'); btns.className = 'vBtns';
+    const bSave = document.createElement('button'); bSave.className = 'vSave'; bSave.textContent = '💾 שמור'; bSave.onclick = () => window.dlVault(i);
+    const bDel = document.createElement('button'); bDel.className = 'vDel'; bDel.textContent = '🗑 מחק'; bDel.onclick = () => window.delVault(i);
+    btns.append(bSave, bDel); card.append(mediaBox, btns); box.appendChild(card);
+  });
+}
+window.delVault = (idx) => { st.vault.splice(idx, 1); updateUi(); renderVaultList(); };
+$('btnVault').onclick = () => { renderVaultList(); $('vaultModal').classList.add('on'); };
+
 $('btnIdea').onclick = () => {
   const ideas = ['תינוק צוחק בחיוך רחב בסלון','אסטרונאוט במאדים עם מוזיקה חללית','כלב מרכיב משקפי שמש על חוף הים','גשם ניאון בעיר עתידנית בלילה'];
   $('promptBox').value = ideas[Math.floor(Math.random()*ideas.length)];
 };
 
+const closeMenus = () => { $('vidMenu').classList.remove('on'); $('imgMenu').classList.remove('on'); };
+$('btnUpVidMenu').onclick = e => { e.stopPropagation(); const o=$('vidMenu').classList.contains('on'); closeMenus(); if(!o)$('vidMenu').classList.add('on'); };
+$('btnUpImgMenu').onclick = e => { e.stopPropagation(); const o=$('imgMenu').classList.contains('on'); closeMenus(); if(!o)$('imgMenu').classList.add('on'); };
+document.addEventListener('click', closeMenus);
+$('optVidGal').onclick = () => $('inVid').click();
+$('optImgGal').onclick = () => $('inImg').click();
+$('optVidCam').onclick = () => openCamera('video');
+$('optImgCam').onclick = () => openCamera('image');
+
+async function openCamera(kind){
+  closeMenus();
+  if(!navigator.mediaDevices?.getUserMedia){ (kind==='image'?$('inImgCam'):$('inVidCam')).click(); return; }
+  try{
+    st.camStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}, audio:kind==='video'});
+    $('camView').srcObject = st.camStream;
+    $('camTitle').textContent = kind==='image' ? '📷 צילום תמונה' : '🎥 צילום סרטון';
+    $('btnSnap').style.display = kind==='image' ? 'inline-flex' : 'none';
+    $('btnRecStart').style.display = kind==='video' ? 'inline-flex' : 'none';
+    $('btnRecStop').style.display = 'none';
+    $('camModal').classList.add('on');
+  }catch{ (kind==='image'?$('inImgCam'):$('inVidCam')).click(); }
+}
+function closeCam(){ st.camStream?.getTracks().forEach(t=>t.stop()); st.camStream=null; $('camModal').classList.remove('on'); }
+$('btnCloseCam').onclick = closeCam;
+$('btnSnap').onclick = () => {
+  const v=$('camView'), c=document.createElement('canvas');
+  c.width=v.videoWidth||1280; c.height=v.videoHeight||720;
+  c.getContext('2d').drawImage(v,0,0,c.width,c.height);
+  c.toBlob(b=>{ if(b) showImg(b); closeCam(); }, 'image/jpeg', .94);
+};
+$('btnRecStart').onclick = () => {
+  st.camChunks=[]; const m=MediaRecorder.isTypeSupported('video/webm')?'video/webm':'video/mp4';
+  st.camRec = new MediaRecorder(st.camStream, {mimeType:m});
+  st.camRec.ondataavailable = e => { if(e.data.size) st.camChunks.push(e.data); };
+  st.camRec.onstop = () => { showVid(new Blob(st.camChunks, {type:m})); closeCam(); };
+  st.camRec.start(); $('btnRecStart').style.display='none'; $('btnRecStop').style.display='inline-flex';
+};
+$('btnRecStop').onclick = () => st.camRec?.stop();
+
+async function loadUploadedImg(f){
+  if(!f) return; let b = f;
+  if((/\.(heic|heif)$/i.test(f.name) || f.type==='image/heic') && window.heic2any){
+    try{ const r = await window.heic2any({blob:f,toType:'image/jpeg',quality:.94}); b = Array.isArray(r)?r[0]:r; }catch{}
+  }
+  showImg(b);
+}
+$('inImg').onchange = e => { loadUploadedImg(e.target.files?.[0]); e.target.value=''; };
+$('inImgCam').onchange = e => { loadUploadedImg(e.target.files?.[0]); e.target.value=''; };
+$('inVid').onchange = e => { const f=e.target.files?.[0]; if(f) showVid(f); e.target.value=''; };
+$('inVidCam').onchange = e => { const f=e.target.files?.[0]; if(f) showVid(f); e.target.value=''; };
+
 let progTmr = null, curPct = 5;
-function startRender(expSec=10){
+function startRender(expSec=14){
   curPct = 5; setRenderPct(5);
-  $('emptyPlay').classList.add('hide');
-  $('renderOverlay').classList.add('on');
-  const t0 = performance.now();
-  clearInterval(progTmr);
+  $('emptyPlay').classList.add('hide'); $('renderOverlay').classList.add('on');
+  const t0 = performance.now(); clearInterval(progTmr);
   progTmr = setInterval(()=>{
     const el = (performance.now()-t0)/1000;
-    curPct = Math.max(curPct, Math.min(94, 6 + 86*(1-Math.exp(-el/Math.max(3,expSec*0.65)))));
+    curPct = Math.max(curPct, Math.min(93, 6 + 85*(1-Math.exp(-el/Math.max(4,expSec*0.7)))));
     setRenderPct(curPct);
   }, 150);
 }
-function setRenderPct(p){
-  const v = Math.round(Math.max(1,Math.min(100,p)));
-  $('pctTxt').textContent = v+'%'; $('pBarFill').style.width = v+'%';
-  $('ringArc').style.strokeDashoffset = 188.5 * (1 - v/100);
-}
+function setRenderPct(p){ const v=Math.round(Math.max(1,Math.min(100,p))); $('pctTxt').textContent=v+'%'; $('pBarFill').style.width=v+'%'; $('ringArc').style.strokeDashoffset=188.5*(1-v/100); }
 function stopRender(){ clearInterval(progTmr); $('renderOverlay').classList.remove('on'); }
+
+function hasReadyKey(s){
+  if(s.host==='router.huggingface.co') return !!getKey('hf') && !st.hfRouterBlocked;
+  if(s.host==='api.llm7.io' && s.cat!=='llm') return !!getKey('llm7');
+  if(s.host==='api.airforce') return !!getKey('airforce');
+  if(s.host==='api.cloudflare.com') return !!(getKey('cfToken') && getKey('cfAccount'));
+  if(s.host==='ai.api.nvidia.com') return !!getKey('nvidia');
+  if(s.host==='generativelanguage.googleapis.com') return !!getKey('gemini');
+  if(s.id==='vid-pollinations' || s.id==='aud-pollinations') return getKey('pollinations').startsWith('sk_');
+  if(s.host==='gen.pollinations.ai'){
+    const pk = getKey('pollinations');
+    return pk.startsWith('sk_');
+  }
+  return true;
+}
 
 function rotated(cat){
   const now = Date.now();
-  let arr = SERVERS.filter(s => s.cat===cat && (!st.cd[s.id] || st.cd[s.id]<=now));
-  if(!arr.length) arr = SERVERS.filter(s => s.cat===cat);
-  const proven = arr.filter(s => (st.perf[s.id]?.ok||0)>0 && !(st.perf[s.id]?.fail||0));
-  const fresh = arr.filter(s => !st.perf[s.id] || !(st.perf[s.id]?.fail||0) && !(st.perf[s.id]?.ok||0));
-  const deg = arr.filter(s => (st.perf[s.id]?.fail||0)>0);
-  const idx = st.rot[cat]||0; st.rot[cat] = idx+1;
+  let arr = SERVERS.filter(s => s.cat===cat && hasReadyKey(s) && (!st.cd[s.id] || st.cd[s.id]<=now));
+  if(!arr.length) arr = SERVERS.filter(s => s.cat===cat && hasReadyKey(s));
+  const idx = st.rot[cat] || 0;
+  st.rot[cat] = idx + 1;
+  const proven = arr.filter(s => (st.perf[s.id]?.ok||0) > 0 && !(st.perf[s.id]?.fail||0));
+  const fresh = arr.filter(s => !st.perf[s.id] || (!(st.perf[s.id]?.fail||0) && !(st.perf[s.id]?.ok||0)));
+  const deg = arr.filter(s => (st.perf[s.id]?.fail||0) > 0);
   const rotA = a => a.length<=1 ? a : [...a.slice(idx%a.length), ...a.slice(0,idx%a.length)];
-  return [...rotA(proven), ...rotA(fresh), ...rotA(deg)];
+  const list = [...rotA(proven), ...rotA(fresh), ...rotA(deg)];
+  const prevId = st.lastUsed[cat];
+  if(prevId && list.length > 1 && list[0]?.id === prevId) list.push(list.shift());
+  return list;
 }
 
-async function translateHe(txt, sig){
-  if(!/[\u0590-\u05FF]/.test(txt)) return txt;
-  try{
-    const r = await fetch('https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/chat/completions',{
-      method:'POST',headers:{'Content-Type':'application/json'},signal:sig,
-      body:JSON.stringify({model:'Qwen3.5-9B',messages:[{role:'user',content:'Translate to concise English visual prompt only: '+txt}],max_tokens:180})
-    });
-    if(r.ok){ const j = await r.json(); const out = j?.choices?.[0]?.message?.content?.trim(); if(out) return out; }
-  }catch{}
-  try{
-    const mr = await fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(txt)+'&langpair=he|en',{signal:sig});
-    const mj = await mr.json(); const c = mj?.responseData?.translatedText;
-    if(c && !/[\u0590-\u05FF]/.test(c)) return c;
-  }catch{}
-  return txt;
-}
-
-async function uploadBlob(host, blob, name, sig){
-  const fd = new FormData(); fd.append('files', blob, name);
-  const r = await fetch('https://'+host+'/gradio_api/upload',{method:'POST',body:fd,signal:sig});
-  const arr = await r.json(); return {path:arr[0], meta:{_type:'gradio.FileData'}};
-}
-
-async function callGradio(host, ep, data, sig, timeoutMs=45000){
-  const c = new AbortController(); const t = setTimeout(()=>c.abort(), timeoutMs);
-  sig?.addEventListener('abort', ()=>c.abort());
-  try{
-    const pr = await fetch('https://'+host+'/gradio_api/call/'+ep,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data}),signal:c.signal});
-    const {event_id} = await pr.json();
-    const sr = await fetch('https://'+host+'/gradio_api/call/'+ep+'/'+event_id,{signal:c.signal});
-    const txt = await sr.text();
-    const lines = txt.split('\n');
-    for(let i=0;i<lines.length;i++){
-      if(lines[i].startsWith('event: error')){
-        const d = (lines[i+1]||'').replace(/^data:\s*/,'').trim();
-        const isQ = /quota|limit|exceeded|zerogpu/i.test(d) || (host.endsWith('.hf.space') && (d==='null'||d==='{"error":null}'||d==='{"error": null}'));
-        throw new Error(isQ ? 'ZeroGPU quota exceeded' : ('Space error: '+d.slice(0,60)));
+async function callFreeLLM(prompt, sig){
+  const lk = getKey('llm7'), gk = getKey('gemini'), gq = getKey('groq');
+  const fns = [
+    ()=>fetch('https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json'},signal:sig,body:JSON.stringify({model:'Qwen3.5-9B',messages:[{role:'user',content:prompt}],max_tokens:220})}),
+    ()=>fetch('https://api.llm7.io/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json',...(lk?{'Authorization':`Bearer ${lk}`}:{})},signal:sig,body:JSON.stringify({model:'fast',messages:[{role:'user',content:prompt}],max_tokens:220})}),
+    ()=>fetch('https://api.kilo.ai/api/gateway/chat/completions',{method:'POST',headers:{'Content-Type':'application/json'},signal:sig,body:JSON.stringify({model:'kilo-auto/free',messages:[{role:'user',content:prompt}],max_tokens:220})}),
+    ...(gq ? [()=>fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${gq}`},signal:sig,body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[{role:'user',content:prompt}],max_tokens:220})})] : []),
+    ...(gk ? [()=>fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(gk)}`,{method:'POST',headers:{'Content-Type':'application/json'},signal:sig,body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})})] : []),
+    ()=>fetch('https://oai.aihorde.net/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${getKey('horde')||'0000000000'}`},signal:sig,body:JSON.stringify({messages:[{role:'user',content:prompt}],max_tokens:200})})
+  ];
+  for(const fn of fns){
+    try{
+      const r = await fn();
+      if(r.ok){
+        const j = await r.json();
+        const out = (j?.choices?.[0]?.message?.content || j?.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
+        if(out) return out;
       }
-      if(lines[i].startsWith('event: complete')){
-        const d = lines[i+1]?.replace(/^data:\s*/,'');
-        if(d) return JSON.parse(d);
-      }
-    }
-    throw new Error('No complete event');
-  }finally{ clearTimeout(t); }
-}
-
-function findUrl(res){
-  for(const it of res||[]){
-    if(!it) continue;
-    if(typeof it==='string' && (it.startsWith('http')||it.startsWith('data:'))) return it;
-    if(it.url) return it.url;
-    if(it.video?.url) return it.video.url;
-    if(it.image?.url) return it.image.url;
-    if(it.audio?.url) return it.audio.url;
-    if(Array.isArray(it) && it[0]?.url) return it[0].url;
+    }catch{}
   }
   return null;
 }
 
-async function blobToHordeWebp(blob){
-  const img = new Image();
+async function buildExactPrompt(txt, mode, sig){
+  const clean = txt.trim(), isEdit = mode==='edit', isI2V = mode==='i2v', isT2V = mode==='t2v';
+  let en = clean;
+  if(/[\u0590-\u05FF]/.test(clean)){
+    const rule = isEdit
+      ? 'Convert this Hebrew photo edit into an exact literal English editing instruction. Explicitly preserve all original people, faces, poses, outfits, and untouched background identical: '
+      : isI2V
+      ? 'Convert this Hebrew image-to-video request into an exact literal English video motion prompt. Keep the exact same people, faces, clothing, and background from the reference photo while performing the requested action: '
+      : isT2V
+      ? 'Translate this Hebrew video request literally into vivid English describing clear dynamic subject motion and exact scene details: '
+      : mode==='sfx'
+      ? 'Translate this Hebrew sound effect / audio scene description into concise English sound description: '
+      : 'Translate this Hebrew image request literally into clear accurate English keeping 100% of every requested detail: ';
+    const llmOut = await callFreeLLM(rule + clean + ' (Output ONLY English, no quotes)', sig);
+    if(llmOut) en = llmOut;
+    else {
+      try{
+        const mr = await fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(clean)+'&langpair=he|en',{signal:sig});
+        const mj = await mr.json(); const c = mj?.responseData?.translatedText;
+        if(c && !/[\u0590-\u05FF]/.test(c)) en = c;
+      }catch{}
+    }
+  }
+  if(isEdit && !/preserve|identical|unchanged/i.test(en)) en += '. Strictly preserve all original faces, people, proportions, and unmodified background identical.';
+  if(isI2V && !/same people|preserve|reference/i.test(en)) en += '. Keep the exact same people, faces, clothing, and background from the reference image while animating natural lively motion.';
+  return en;
+}
+
+async function fetchGradioInfo(host, sig){
+  const cached = st.gradioPrefix[host];
+  const prefixes = cached !== undefined ? [cached] : ['/gradio_api', ''];
+  let lastErr = 'Info 404';
+  for(const pref of prefixes){
+    const r = await fetch('https://'+host+pref+'/info', {signal:sig});
+    if(r.status === 404){ lastErr = 'HTTP 404'; continue; }
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const ct = r.headers.get('content-type') || '';
+    if(ct.includes('text/html')) throw new Error('Space sleeping');
+    const j = await r.json();
+    st.gradioPrefix[host] = pref;
+    return { info: j, pref };
+  }
+  throw new Error(lastErr);
+}
+
+async function uploadBlob(host, pref, blob, name, sig){
+  const hf = getKey('hf'), fd = new FormData(); fd.append('files', blob, name);
+  const url = 'https://'+host+pref+'/upload';
+  let r;
+  try { r = await fetch(url, {method:'POST', body:fd, signal:sig, headers:hf?{'Authorization':'Bearer '+hf}:{}}); }
+  catch { r = await fetch(url, {method:'POST', body:fd, signal:sig}); }
+  if(!r.ok) throw new Error('Upload HTTP '+r.status);
+  const arr = await r.json();
+  if(!arr?.[0]) throw new Error('Upload empty');
+  return {path:arr[0], orig_name:name, meta:{_type:'gradio.FileData'}};
+}
+
+async function callGradio(host, pref, ep, data, sig, timeoutMs=45000){
+  const hf = getKey('hf'), c = new AbortController(), t = setTimeout(()=>c.abort(), timeoutMs);
+  const onAb = () => c.abort();
+  sig?.addEventListener('abort', onAb, {once:true});
+  const base = 'https://'+host+pref+'/call/'+ep;
+  const authHdr = hf ? {'Authorization':'Bearer '+hf} : {};
+  try{
+    let pr;
+    try { pr = await fetch(base,{method:'POST',headers:{'Content-Type':'application/json',...authHdr},body:JSON.stringify({data}),signal:c.signal}); }
+    catch { pr = await fetch(base,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data}),signal:c.signal}); }
+    if(!pr.ok) throw new Error('Call HTTP '+pr.status);
+    const pj = await pr.json();
+    const event_id = pj?.event_id;
+    if(!event_id) throw new Error('No event_id');
+    let sr;
+    try { sr = await fetch(base+'/'+event_id, {signal:c.signal, headers:authHdr}); }
+    catch { sr = await fetch(base+'/'+event_id, {signal:c.signal}); }
+    if(!sr.ok) throw new Error('Stream HTTP '+sr.status);
+    const txt = await sr.text(), lines = txt.split('\n');
+    for(let i=0;i<lines.length;i++){
+      if(lines[i].startsWith('event: error')){
+        const d = (lines[i+1]||'').replace(/^data:\s*/,'').trim();
+        const isQ = /quota|limit|exceeded|zerogpu|sign in|login/i.test(d);
+        throw new Error(isQ ? ('ZeroGPU: '+d.slice(0,45)) : ('Space: '+(d==='null'?'Runtime error':d.slice(0,55))));
+      }
+      if(lines[i].startsWith('event: complete')){ const d=lines[i+1]?.replace(/^data:\s*/,''); if(d) return JSON.parse(d); }
+    }
+    throw new Error('No complete event');
+  }finally{ clearTimeout(t); sig?.removeEventListener('abort', onAb); }
+}
+
+function extractUrlFromVal(it, host, pref){
+  if(!it) return null;
+  if(typeof it==='string' && (it.startsWith('http')||it.startsWith('data:'))) return it;
+  if(it.url) return it.url;
+  if(it.path && host) return 'https://'+host+pref+'/file='+encodeURIComponent(it.path);
+  if(it.video) return extractUrlFromVal(it.video, host, pref);
+  if(it.image) return extractUrlFromVal(it.image, host, pref);
+  if(it.audio) return extractUrlFromVal(it.audio, host, pref);
+  if(it.value) return extractUrlFromVal(it.value, host, pref);
+  if(Array.isArray(it)){
+    for(const sub of it){ const u = extractUrlFromVal(sub, host, pref); if(u) return u; }
+  }
+  return null;
+}
+function findUrl(res, host, pref){
+  for(const it of res||[]){ const u = extractUrlFromVal(it, host, pref); if(u) return u; }
+  return null;
+}
+
+async function verifyVideoMotion(blob){
   const u = URL.createObjectURL(blob);
-  img.src = u;
-  await new Promise(r => img.onload = r);
-  const w0 = img.naturalWidth||512, h0 = img.naturalHeight||512;
-  const sc = Math.min(1, 512/Math.max(w0,h0));
+  try{
+    const v = document.createElement('video'); v.muted=true; v.src=u;
+    await new Promise((res,rej)=>{ const t=setTimeout(()=>rej(),4000); v.onloadedmetadata=()=>{clearTimeout(t);res();}; });
+    if(!Number.isFinite(v.duration)||v.duration<0.8) return false;
+    const c=document.createElement('canvas'); c.width=48; c.height=48; const ctx=c.getContext('2d');
+    v.currentTime=Math.min(0.2,v.duration*0.1); await new Promise(r=>v.onseeked=r); ctx.drawImage(v,0,0,48,48);
+    const d1=ctx.getImageData(0,0,48,48).data;
+    v.currentTime=Math.max(0.4,v.duration*0.78); await new Promise(r=>v.onseeked=r); ctx.drawImage(v,0,0,48,48);
+    const d2=ctx.getImageData(0,0,48,48).data;
+    let diff=0; for(let i=0;i<d1.length;i+=4) diff+=Math.abs(d1[i]-d2[i])+Math.abs(d1[i+1]-d2[i+1])+Math.abs(d1[i+2]-d2[i+2]);
+    return (diff/(48*48*3)) > 1.1;
+  }catch{ return true; }
+  finally{ URL.revokeObjectURL(u); }
+}
+
+async function blobToBase64(blob){
+  return await new Promise(res => { const r=new FileReader(); r.onload=()=>res(r.result.split(',')[1]); r.readAsDataURL(blob); });
+}
+
+async function blobToHordeWebp(blob){
+  const img = new Image(), u = URL.createObjectURL(blob);
+  img.src = u; await new Promise(r => img.onload = r);
+  const w0 = img.naturalWidth||512, h0 = img.naturalHeight||512, sc = Math.min(1, 512/Math.max(w0,h0));
   const w = Math.max(256, Math.round((w0*sc)/64)*64), h = Math.max(256, Math.round((h0*sc)/64)*64);
-  const c = document.createElement('canvas'); c.width=w; c.height=h;
-  c.getContext('2d').drawImage(img,0,0,w,h);
+  const c = document.createElement('canvas'); c.width=w; c.height=h; c.getContext('2d').drawImage(img,0,0,w,h);
   URL.revokeObjectURL(u);
   return { w, h, b64: c.toDataURL('image/webp',0.88).split(',')[1] };
 }
 
 async function callHorde(specId, prompt, w, h, imgBlob, sig){
+  const hk = getKey('horde') || '0000000000';
   const body = {
-    prompt,
-    models: HORDE_MODELS[specId] || ['Deliberate', "ICBINP - I Can't Believe It's Not Photography", 'AlbedoBase XL 3.1', 'stable_diffusion'],
+    prompt, models: HORDE_MODELS[specId] || ['Deliberate', "ICBINP - I Can't Believe It's Not Photography", 'AbsoluteReality', 'stable_diffusion'],
     params: { width: Math.min(640,Math.max(256,Math.round(w/64)*64)), height: Math.min(640,Math.max(256,Math.round(h/64)*64)), steps: 22, cfg_scale: 7.2, clip_skip: 1, sampler_name: 'k_euler_a', n: 1, denoising_strength: 0.56 },
     nsfw: false, censor_nsfw: true, r2: true
   };
-  if(imgBlob){
-    const hw = await blobToHordeWebp(imgBlob);
-    body.params.width = hw.w; body.params.height = hw.h;
-    body.source_image = hw.b64; body.source_processing = 'img2img';
-  }
-  const sr = await fetch('https://aihorde.net/api/v2/generate/async',{
-    method:'POST', headers:{'Content-Type':'application/json',apikey:'0000000000','Client-Agent':'StudioYaniv:2.1:standalone'},
-    body: JSON.stringify(body), signal:sig
-  });
+  if(imgBlob){ const hw = await blobToHordeWebp(imgBlob); body.params.width=hw.w; body.params.height=hw.h; body.source_image=hw.b64; body.source_processing='img2img'; }
+  const sr = await fetch('https://aihorde.net/api/v2/generate/async',{method:'POST',headers:{'Content-Type':'application/json',apikey:hk,'Client-Agent':'StudioYaniv:2.6:standalone'},body:JSON.stringify(body),signal:sig});
   if(!sr.ok) throw new Error('Horde '+sr.status);
   const {id} = await sr.json();
   for(let i=0;i<36;i++){
@@ -327,166 +900,354 @@ async function callHorde(specId, prompt, w, h, imgBlob, sig){
   throw new Error('Horde timeout');
 }
 
-async function dynCall(spec, prompt, imgBlob, sig){
-  const dims = st.ratio==='9:16'?[576,1024]:st.ratio==='1:1'?[1024,1024]:[1024,576];
-  if(spec.id==='t2i-pollinations-z' || spec.id==='t2i-pollinations-sana'){
-    const mod = spec.id==='t2i-pollinations-sana' ? 'sana' : 'zimage';
-    const seed = Math.floor(Math.random()*999999);
-    const urls = mod==='sana'
-      ? ['https://image.pollinations.ai/prompt/'+encodeURIComponent(prompt)+'?model=sana&width='+dims[0]+'&height='+dims[1]+'&seed='+seed+'&nologo=true',
-         'https://image.pollinations.ai/prompt/'+encodeURIComponent(prompt)+'?model=flux&width='+dims[0]+'&height='+dims[1]+'&seed='+seed+'&nologo=true']
-      : ['https://gen.pollinations.ai/image/'+encodeURIComponent(prompt)+'?model=zimage&width='+dims[0]+'&height='+dims[1]+'&seed='+seed+'&nologo=true',
-         'https://image.pollinations.ai/prompt/'+encodeURIComponent(prompt)+'?model=sana&width='+dims[0]+'&height='+dims[1]+'&seed='+seed+'&nologo=true'];
-    for(const pu of urls){
-      try{
-        const pr = await fetch(pu,{signal:sig});
-        if(pr.ok){ const b = await pr.blob(); if(b.size>1500) return b; }
-      }catch{}
+async function callHfRouter(cat, prompt, imgBlob, sig){
+  const hf = getKey('hf'); if(!hf) throw new Error('No HF token');
+  if(cat==='image'){
+    const endpoints = [
+      'https://router.huggingface.co/hf-inference/models/black-forest-labs/FLUX.1-schnell',
+      'https://router.huggingface.co/hf-inference/models/stabilityai/stable-diffusion-xl-base-1.0',
+      'https://router.huggingface.co/fal-ai/models/black-forest-labs/FLUX.1-schnell'
+    ];
+    let lastErr = 'HF Router 404';
+    for(const ep of endpoints){
+      const r = await fetch(ep,{method:'POST',headers:{'Authorization':'Bearer '+hf,'Accept':'image/png','Content-Type':'application/json'},signal:sig,body:JSON.stringify({inputs:prompt})});
+      if(r.ok && !(r.headers.get('content-type')||'').includes('json')) return await r.blob();
+      lastErr = 'HF Router '+r.status;
+      if(r.status===401 || r.status===403){ st.hfRouterBlocked = true; throw new Error('HF token lacks Router Inference ('+r.status+')'); }
     }
-    throw new Error('Pollinations unavailable');
+    throw new Error(lastErr);
   }
-  if(spec.id.startsWith('t2i-horde') || spec.id.startsWith('ed-horde')){
-    return await callHorde(spec.id, prompt, dims[0], dims[1], imgBlob, sig);
+  if(cat==='video'){
+    const endpoints = [
+      'https://router.huggingface.co/fal-ai/models/Wan-AI/Wan2.2-TI2V-5B',
+      'https://router.huggingface.co/fal-ai/models/Lightricks/LTX-Video'
+    ];
+    let lastErr = 'HF Video 404';
+    const body = imgBlob ? {inputs:await blobToBase64(imgBlob), parameters:{prompt}} : {inputs:prompt};
+    for(const ep of endpoints){
+      const r = await fetch(ep,{method:'POST',headers:{'Authorization':'Bearer '+hf,'Content-Type':'application/json'},signal:sig,body:JSON.stringify(body)});
+      if(r.ok && (r.headers.get('content-type')||'').includes('video')) return await r.blob();
+      lastErr = 'HF Video '+r.status;
+      if(r.status===401 || r.status===403){ st.hfRouterBlocked = true; throw new Error('HF token lacks Router Inference ('+r.status+')'); }
+    }
+    throw new Error(lastErr);
   }
-  const info = await (await fetch('https://'+spec.host+'/gradio_api/info',{signal:sig})).json();
+  throw new Error('Unsupported');
+}
+
+async function callGeminiImage(prompt, imgBlob, sig){
+  const gk = getKey('gemini'); if(!gk) throw new Error('No Gemini key');
+  const parts = [{text: prompt}];
+  if(imgBlob) parts.push({inlineData:{mimeType:imgBlob.type||'image/jpeg', data:await blobToBase64(imgBlob)}});
+  const models = ['gemini-2.5-flash-image', 'gemini-2.0-flash-exp-image-generation'];
+  for(const m of models){
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${encodeURIComponent(gk)}`,{
+      method:'POST', headers:{'Content-Type':'application/json'}, signal:sig,
+      body:JSON.stringify({contents:[{parts}], generationConfig:{responseModalities:['IMAGE','TEXT']}})
+    });
+    if(!r.ok) continue;
+    const j = await r.json();
+    const outParts = j?.candidates?.[0]?.content?.parts || [];
+    const imgP = outParts.find(p => p.inlineData?.data);
+    if(imgP) return await (await fetch(`data:${imgP.inlineData.mimeType||'image/png'};base64,${imgP.inlineData.data}`)).blob();
+  }
+  throw new Error('Gemini image unavailable');
+}
+
+async function callLlm7Media(cat, prompt, imgBlob, sig){
+  const lk = getKey('llm7'); if(!lk) throw new Error('No LLM7 token');
+  const authHdr = {'Authorization':'Bearer '+lk};
+  if(!st.llm7Models){ const mr = await fetch('https://api.llm7.io/v1/models',{signal:sig}); if(mr.ok) st.llm7Models = (await mr.json())?.data || []; }
+  const ms = st.llm7Models || [];
+  if(cat==='image' || cat==='edit'){
+    const m = ms.find(x=>x.model_type==='image' && !x.usage_based_only) || ms.find(x=>x.model_type==='image') || {id:'z-image-turbo'};
+    if(imgBlob){
+      const fd = new FormData(); fd.append('model', m.id); fd.append('prompt', prompt); fd.append('image', imgBlob, 'edit.jpg');
+      const r = await fetch('https://api.llm7.io/v1/images/edits',{method:'POST',headers:authHdr,signal:sig,body:fd});
+      if(!r.ok) throw new Error('LLM7 edit '+r.status);
+      const d = await r.json(), u = d?.data?.[0]?.url || (d?.data?.[0]?.b64_json?'data:image/png;base64,'+d.data[0].b64_json:null);
+      if(!u) throw new Error('No LLM7 img');
+      return await (await fetch(u,{signal:sig})).blob();
+    }
+    const r = await fetch('https://api.llm7.io/v1/images/generations',{method:'POST',headers:{'Content-Type':'application/json',...authHdr},signal:sig,body:JSON.stringify({model:m.id,prompt})});
+    if(!r.ok) throw new Error('LLM7 img '+r.status);
+    const d = await r.json(), u = d?.data?.[0]?.url || (d?.data?.[0]?.b64_json?'data:image/png;base64,'+d.data[0].b64_json:null);
+    if(!u) throw new Error('No LLM7 img');
+    return await (await fetch(u,{signal:sig})).blob();
+  }
+  const vm = ms.find(x=>x.model_type==='video' && !x.usage_based_only) || ms.find(x=>x.model_type==='video');
+  if(!vm) throw new Error('No LLM7 vid');
+  const dur = vm.capabilities?.supported_seconds?.[0] || 5;
+  const resSz = vm.capabilities?.supported_sizes?.[0] || '720p';
+  let sub;
+  if(imgBlob){
+    const fd = new FormData();
+    fd.append('model', vm.id); fd.append('request_type', 'image-to-video'); fd.append('prompt', prompt);
+    fd.append('duration', String(dur)); fd.append('resolution', resSz); fd.append('input_reference', imgBlob, 'ref.jpg');
+    sub = await fetch('https://api.llm7.io/v1/videos',{method:'POST',headers:authHdr,signal:sig,body:fd});
+  } else {
+    sub = await fetch('https://api.llm7.io/v1/videos',{method:'POST',headers:{'Content-Type':'application/json',...authHdr},signal:sig,body:JSON.stringify({model:vm.id,request_type:'text-to-video',prompt,duration:dur,resolution:resSz})});
+  }
+  if(!sub.ok) throw new Error('LLM7 vid '+sub.status);
+  const {id} = await sub.json();
+  for(let i=0;i<36;i++){
+    await new Promise(r=>setTimeout(r,2500));
+    const chk = await (await fetch('https://api.llm7.io/v1/videos/'+encodeURIComponent(id),{headers:authHdr,signal:sig})).json();
+    if(chk?.status==='completed'){
+      const outUrl = chk.outputs?.[0]?.url || chk.outputs?.[0];
+      if(typeof outUrl === 'string' && outUrl.startsWith('http')) return await (await fetch(outUrl,{signal:sig})).blob();
+      return await (await fetch('https://api.llm7.io/v1/videos/'+encodeURIComponent(id)+'/content',{headers:authHdr,signal:sig})).blob();
+    }
+    if(chk?.status==='failed') throw new Error('LLM7 vid fail');
+  }
+  throw new Error('Timeout');
+}
+
+async function callAirforceMedia(cat, prompt, imgBlob, sig){
+  const ak = getKey('airforce'); if(!ak) throw new Error('No Airforce key');
+  if(cat==='image' || cat==='edit'){
+    const body = imgBlob
+      ? {model:'image-1-edit',prompt,input_images:[{b64_json:await blobToBase64(imgBlob)}]}
+      : {model:'image-1',prompt,aspect_ratio:st.ratio};
+    const r = await fetch('https://api.airforce/v1/images/generations',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+ak},signal:sig,body:JSON.stringify(body)});
+    if(!r.ok) throw new Error('Airforce '+r.status);
+    const d = await r.json(), u = d?.data?.[0]?.url || (d?.data?.[0]?.b64_json?'data:image/png;base64,'+d.data[0].b64_json:null);
+    if(!u) throw new Error('No Airforce img');
+    return await (await fetch(u,{signal:sig})).blob();
+  }
+  if(!st.airforceModels){
+    const mr = await fetch('https://api.airforce/v1/models',{headers:{'Authorization':'Bearer '+ak},signal:sig});
+    if(mr.ok) st.airforceModels = (await mr.json())?.data || [];
+  }
+  const vm = (st.airforceModels||[]).find(m=>m.media_type==='video');
+  if(!vm) throw new Error('No Airforce vid');
+  const body = {model:vm.id, prompt, mode:imgBlob?'image':'text', duration_seconds:6, aspect_ratio:st.ratio};
+  if(imgBlob) body.input_images = [{b64_json:await blobToBase64(imgBlob)}];
+  const sub = await fetch('https://api.airforce/v1/video/generations',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+ak},signal:sig,body:JSON.stringify(body)});
+  if(!sub.ok) throw new Error('Airforce vid '+sub.status);
+  const dj = await sub.json(), tid = dj?.id || dj?.task_id;
+  if(dj?.data?.[0]?.url) return await (await fetch(dj.data[0].url,{signal:sig})).blob();
+  for(let i=0;i<30;i++){
+    await new Promise(r=>setTimeout(r,2500));
+    const sr = await fetch('https://api.airforce/v1/video/generations/'+encodeURIComponent(tid),{headers:{'Authorization':'Bearer '+ak},signal:sig});
+    if(!sr.ok) continue;
+    const j = await sr.json(), vu = j?.url || j?.video_url || j?.data?.[0]?.url;
+    if(vu) return await (await fetch(vu,{signal:sig})).blob();
+    if(/fail|error/i.test(j?.status||'')) throw new Error('Airforce fail');
+  }
+  throw new Error('Timeout');
+}
+
+async function dynCall(spec, prompt, imgBlob, sig, audBlob=null, vidBlob=null){
+  let dims = st.ratio==='9:16'?[576,1024]:st.ratio==='1:1'?[1024,1024]:[1024,576];
+  if(imgBlob){
+    try{
+      const im = new Image(), u = URL.createObjectURL(imgBlob); im.src = u;
+      await new Promise(r=>im.onload=r);
+      const sc = Math.min(1, 1024/Math.max(im.naturalWidth||1024, im.naturalHeight||576));
+      dims = [Math.max(256,Math.round(((im.naturalWidth||1024)*sc)/16)*16), Math.max(256,Math.round(((im.naturalHeight||576)*sc)/16)*16)];
+      URL.revokeObjectURL(u);
+    }catch{}
+  }
+  if(spec.host==='router.huggingface.co') return await callHfRouter(spec.cat, prompt, imgBlob, sig);
+  if(spec.host==='api.llm7.io') return await callLlm7Media(spec.cat, prompt, imgBlob, sig);
+  if(spec.host==='api.airforce') return await callAirforceMedia(spec.cat, prompt, imgBlob, sig);
+  if(spec.host==='generativelanguage.googleapis.com') return await callGeminiImage(prompt, imgBlob, sig);
+  if(spec.id==='t2i-cf'){
+    const acc = st.keys.cfAccount?.trim(), tok = getKey('cfToken'); if(!acc||!tok) throw new Error('No CF key');
+    const r = await fetch(`https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(acc)}/ai/run/@cf/black-forest-labs/flux-1-schnell`,{method:'POST',headers:{'Authorization':'Bearer '+tok,'Content-Type':'application/json'},signal:sig,body:JSON.stringify({prompt,num_steps:4})});
+    if(!r.ok) throw new Error('CF '+r.status);
+    const b64 = (await r.json())?.result?.image; if(!b64) throw new Error('No CF img');
+    return await (await fetch('data:image/png;base64,'+b64)).blob();
+  }
+  if(spec.id==='t2i-nvidia'){
+    const nk = getKey('nvidia'); if(!nk) throw new Error('No NV key');
+    const r = await fetch('https://ai.api.nvidia.com/v1/genai/black-forest-labs/flux.1-schnell',{method:'POST',headers:{'Authorization':'Bearer '+nk,'Accept':'application/json','Content-Type':'application/json'},signal:sig,body:JSON.stringify({prompt,width:dims[0],height:dims[1],steps:4,seed:0})});
+    if(!r.ok) throw new Error('NV '+r.status);
+    const d = await r.json(), b64 = d?.artifacts?.[0]?.base64 || d?.image; if(!b64) throw new Error('No NV img');
+    return await (await fetch('data:image/jpeg;base64,'+b64)).blob();
+  }
+  if(spec.host==='gen.pollinations.ai'){
+    const pk = getKey('pollinations');
+    if(!pk || pk.startsWith('pk_')) throw new Error('Need sk_ key');
+    if(spec.id==='vid-pollinations'){
+      const r = await fetch(`https://gen.pollinations.ai/video/${encodeURIComponent(prompt)}?model=alibaba/wan-2.2-fast&duration=5`,{signal:sig, headers:{'Authorization':'Bearer '+pk,'Prefer':'respond-async'}});
+      if(!r.ok) throw new Error('Pol '+r.status);
+      if((r.headers.get('content-type')||'').includes('json')){
+        const j = await r.json();
+        if(j?.id){
+          for(let i=0;i<36;i++){
+            await new Promise(rs=>setTimeout(rs,2500));
+            const jr = await fetch('https://gen.pollinations.ai/v1/jobs/'+encodeURIComponent(j.id),{headers:{'Authorization':'Bearer '+pk},signal:sig});
+            const jj = await jr.json();
+            if(jj?.status==='completed' && jj?.output_url) return await (await fetch(jj.output_url,{signal:sig})).blob();
+            if(jj?.status==='failed') throw new Error('Pol job fail');
+          }
+          throw new Error('Pol timeout');
+        }
+      }
+      return await r.blob();
+    }
+    if(spec.id==='aud-pollinations'){
+      const r = await fetch(`https://gen.pollinations.ai/audio/${encodeURIComponent(prompt)}?voice=nova`,{signal:sig, headers:{'Authorization':'Bearer '+pk}});
+      if(!r.ok) throw new Error('Pol aud '+r.status);
+      return await r.blob();
+    }
+    const seed = Math.floor(Math.random()*999999);
+    const mName = spec.id==='t2i-pollinations-zimage' ? 'tongyi-mai%2Fz-image-turbo' : 'black-forest-labs/flux.1-schnell';
+    const pr = await fetch(`https://gen.pollinations.ai/image/${encodeURIComponent(prompt)}?model=${mName}&width=${dims[0]}&height=${dims[1]}&seed=${seed}&nologo=true`,{signal:sig, headers:{'Authorization':'Bearer '+pk}});
+    if(!pr.ok) throw new Error('Pol '+pr.status);
+    return await pr.blob();
+  }
+  if(spec.id.startsWith('t2i-horde') || spec.id.startsWith('ed-horde')) return await callHorde(spec.id, prompt, dims[0], dims[1], imgBlob, sig);
+
+  const { info, pref } = await fetchGradioInfo(spec.host, sig);
   const eps = info.named_endpoints||{};
   const keys = Object.keys(eps).filter(k=>!/clear|reset|example|update|toggle|load|lora|smart_config|policy|refresh|status|lambda/i.test(k));
   const ek = (!imgBlob && eps['/text_to_video'] ? '/text_to_video' : null) || (imgBlob && eps['/image_to_video'] ? '/image_to_video' : null) || (spec.ep && eps['/'+spec.ep] ? '/'+spec.ep : null) || keys.find(k=>/edit|infer|generate|run|tts|audio/i.test(k)) || keys[0];
-  const up = imgBlob ? await uploadBlob(spec.host, imgBlob, 'src.jpg', sig) : null;
-  let im=false, pr=false;
+  if(!ek || !eps[ek]) throw new Error('No endpoint');
+  const up = imgBlob ? await uploadBlob(spec.host, pref, imgBlob, 'src.jpg', sig) : null;
+  const upA = audBlob ? await uploadBlob(spec.host, pref, audBlob, 'speech.wav', sig) : null;
+  const upV = vidBlob ? await uploadBlob(spec.host, pref, vidBlob, 'vid.webm', sig) : null;
+  let im=false, au=false, vd=false, pr=false;
   const data = (eps[ek].parameters||[]).map(p=>{
     const n = ((p.parameter_name||'')+' '+(p.label||'')).toLowerCase();
-    const py = (p.python_type?.type||'').toLowerCase();
-    if(!im && up && (py.includes('file') || /image|img|input_image/.test(n))){
+    const py = (p.python_type?.type||'').toLowerCase(), enums = p.type?.enum;
+    const hasDef = Boolean(p.parameter_has_default);
+    const isFileParam = py.includes('file') || py.includes('dict') || /image|img|video|audio|wav|mp3|mask|lora/.test(n);
+    if(!vd && upV && /video/.test(n) && (py.includes('file')||py.includes('dict')||/video/.test(n))){ vd=true; return upV; }
+    if(!au && upA && (py.includes('file') && /audio|wav|mp3|speech|voice|sound/.test(n) || /driven_audio|audio/.test(n))){ au=true; return upA; }
+    if(!im && up && (py.includes('file') || /image|img|input_image|source_image|first_frame|start_image|portrait|face/.test(n)) && !/size|width|height|scale|count|num|seed|format|ratio|end_|last_/.test(n)){
       im=true; return py.includes('dict(image') ? [{image:up,caption:null}] : py.startsWith('list') ? [up] : up;
     }
-    if(!pr && /prompt|instruction|text/.test(n) && !/negative/.test(n)){ pr=true; return prompt; }
+    if(isFileParam) return hasDef ? p.parameter_default : null;
+    if(!pr && /prompt|instruction|text|lyrics|caption|description/.test(n) && !/negative/.test(n)){ pr=true; return prompt; }
+    if(/voice|speaker/.test(n) && Array.isArray(enums) && /[\u0590-\u05FF]/.test(prompt)){
+      const heOpt = enums.find(v=>/he-il|hebrew|hila|avri/i.test(String(v))); if(heOpt) return heOpt;
+    }
+    if(/camera_lora/.test(n) && Array.isArray(enums) && enums.includes('Static')) return 'Static';
+    if(/ratio|aspect/.test(n) && Array.isArray(enums)){ const rm=enums.find(v=>String(v).includes(st.ratio)); if(rm) return rm; }
+    if(/negative/.test(n)) return hasDef ? p.parameter_default : '';
+    if(/randomize/.test(n) && p.type?.type==='boolean') return true;
+    if(/seed/.test(n)) return hasDef ? p.parameter_default : 42;
+    if(/num_inference_steps|inference_steps|steps/.test(n)) return hasDef ? Math.min(Number(p.parameter_default)||6, 8) : 6;
+    if(hasDef) return p.parameter_default;
     if(/width/.test(n)) return dims[0];
     if(/height/.test(n)) return dims[1];
-    if(/step/.test(n)) return Math.min(Number(p.parameter_default)||8, 8);
-    if(/camera_lora/.test(n) && p.type?.enum?.includes('Static')) return 'Static';
-    return p.parameter_has_default ? p.parameter_default : (p.type?.type==='boolean'?true:1);
+    if(/num_frames|frames/.test(n)) return 65;
+    if(/fps|frame_rate/.test(n)) return 16;
+    if(/duration|second/.test(n)) return 5;
+    if(/guidance|cfg/.test(n)) return 4.5;
+    if(Array.isArray(enums) && enums.length) return enums[0];
+    if(p.type?.type==='boolean') return true;
+    if(p.type?.type==='string') return '';
+    return 1;
   });
-  const res = await callGradio(spec.host, ek.replace(/^\//,''), data, sig, spec.cat==='video'?60000:22000);
-  const u = findUrl(res); if(!u) throw new Error('No media URL');
-  return await (await fetch(u,{signal:sig})).blob();
+  if(audBlob && !au) throw new Error('No audio param');
+  const res = await callGradio(spec.host, pref, ek.replace(/^\//,''), data, sig, (spec.cat==='video'||spec.cat==='lipsync')?120000:35000);
+  const u = findUrl(res, spec.host, pref); if(!u) throw new Error('No media URL');
+  const hf = getKey('hf');
+  let blobR;
+  try { blobR = await fetch(u,{signal:sig, headers:(u.includes('.hf.space')&&hf)?{'Authorization':'Bearer '+hf}:{}}); }
+  catch { blobR = await fetch(u,{signal:sig}); }
+  const blob = await blobR.blob();
+  if((spec.cat==='video'||spec.cat==='lipsync') && !(await verifyVideoMotion(blob))) throw new Error('Frozen video frame');
+  return blob;
 }
 
-async function raceServers(cat, fn, batch=3, sig){
-  let rem = rotated(cat), zHits = 0;
+async function raceServers(cat, fn, batch=2, sig){
+  let rem = rotated(cat);
+  const reasons = [];
   while(rem.length>0){
     if(sig.aborted) throw new Error('Aborted');
-    if(zHits>=3){ rem = rem.filter(s=>!isZeroGpu(s)); if(!rem.length) break; }
-    const b = rem.slice(0,batch); rem = rem.slice(batch);
+    const b = rem.slice(0, batch); rem = rem.slice(batch);
     const cs = b.map(()=>new AbortController());
-    sig.addEventListener('abort',()=>cs.forEach(c=>c.abort()));
-    let qErr = 0;
+    const onAb = () => cs.forEach(c=>c.abort());
+    sig.addEventListener('abort', onAb, {once:true});
     try{
-      return await Promise.any(b.map(async (s,j)=>{
-        try{ const res = await fn(s, cs[j].signal); cs.forEach((x,k)=>{if(k!==j)x.abort();}); st.perf[s.id]={ok:(st.perf[s.id]?.ok||0)+1,fail:0}; st.cd[s.id]=Date.now()+12000; return {res, s}; }
-        catch(e){ st.perf[s.id]={ok:st.perf[s.id]?.ok||0,fail:(st.perf[s.id]?.fail||0)+1}; if(/quota|exceeded|limit|429/i.test(String(e?.message||'')) && isZeroGpu(s)) qErr++; st.cd[s.id] = Date.now() + (s.ref||2)*60000; throw e; }
+      const won = await Promise.any(b.map(async (s,j)=>{
+        try{
+          const res = await fn(s, cs[j].signal);
+          cs.forEach((x,k)=>{if(k!==j)x.abort();});
+          st.perf[s.id]={ok:(st.perf[s.id]?.ok||0)+1,fail:0};
+          st.lastUsed[cat] = s.id;
+          delete st.errMsg[s.id];
+          return {res, s};
+        }
+        catch(e){
+          const msg = String(e?.message || 'Error');
+          st.perf[s.id]={ok:st.perf[s.id]?.ok||0,fail:(st.perf[s.id]?.fail||0)+1};
+          st.cd[s.id] = Date.now() + (s.ref||4)*60000;
+          st.errMsg[s.id] = msg;
+          reasons.push(`${s.name.split(' (')[0]}: ${msg}`);
+          throw e;
+        }
       }));
+      sig.removeEventListener('abort', onAb);
+      return won;
     }catch{
+      sig.removeEventListener('abort', onAb);
       if(sig.aborted) throw new Error('Aborted');
-      zHits += qErr;
     }
   }
-  throw new Error('ZeroGPU IP quota exhausted');
+  const sampleErr = reasons.slice(0,4).join(' | ');
+  throw new Error('כל השרתים בקטגוריה נכשלו כרגע. פתח "שרתים" לבדיקת מפתח/סטטוס. (' + sampleErr + ')');
 }
 
-async function renderMotionVideoFromBlob(imgBlob, rawPrompt, sig){
-  const img = new Image();
-  const u = URL.createObjectURL(imgBlob); img.src = u;
-  await new Promise(r => img.onload = r);
-  const asp = (img.naturalWidth||1024)/(img.naturalHeight||576);
-  const cW = (asp>=1?1024:Math.round(768*asp)) & ~1, cH = Math.round(cW/asp) & ~1;
-  const c = document.createElement('canvas'); c.width=cW; c.height=cH;
-  const ctx = c.getContext('2d');
-  const rec = new MediaRecorder(c.captureStream(24), {mimeType:'video/webm', videoBitsPerSecond:3200000});
-  const ch=[]; rec.ondataavailable=e=>{if(e.data.size)ch.push(e.data)};
-  const done = new Promise(res=>rec.onstop=()=>{URL.revokeObjectURL(u); res(new Blob(ch,{type:'video/webm'}));});
-  const t = rawPrompt.toLowerCase();
-  const snow=/שלג|חורף|snow/i.test(t), rain=/גשם|rain/i.test(t), fire=/אש|fire|spark/i.test(t);
-  const pts = Array.from({length:snow||rain||fire?36:0},(_,k)=>({x:(k*71)%cW,y:(k*131)%cH,v:1.5+(k%4)}));
-  rec.start();
-  let f=0, tot=96;
-  await new Promise(res=>{
-    const tick=()=>{
-      if(sig?.aborted || f>=tot){ rec.stop(); res(); return; }
-      const p=f/tot, z=1+0.055*(0.5-0.5*Math.cos(p*Math.PI)), dw=cW*z, dh=cH*z;
-      ctx.clearRect(0,0,cW,cH);
-      ctx.drawImage(img,(cW-dw)/2+Math.sin(p*6.28)*cW*0.01,(cH-dh)/2+Math.cos(p*6.28)*cH*0.008,dw,dh);
-      for(const pt of pts){
-        if(rain){ pt.y=(pt.y+pt.v*7)%cH; ctx.strokeStyle='rgba(186,230,253,.5)'; ctx.beginPath(); ctx.moveTo(pt.x,pt.y); ctx.lineTo(pt.x-3,pt.y+12); ctx.stroke(); }
-        else if(fire){ pt.y=(pt.y-pt.v*2+cH)%cH; ctx.fillStyle='rgba(251,146,60,.65)'; ctx.beginPath(); ctx.arc(pt.x,pt.y,2,0,6.28); ctx.fill(); }
-        else { pt.y=(pt.y+pt.v*1.4)%cH; ctx.fillStyle='rgba(255,255,255,.75)'; ctx.beginPath(); ctx.arc(pt.x,pt.y,2.2,0,6.28); ctx.fill(); }
-      }
-      f++; setTimeout(tick,41);
-    };
-    tick();
-  });
-  return await done;
-}
-
-function encodeWav(samples, sr){
-  const buf=new ArrayBuffer(44+samples.length*2), v=new DataView(buf);
-  const ws=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
-  ws(0,'RIFF'); v.setUint32(4,36+samples.length*2,true); ws(8,'WAVE'); ws(12,'fmt ');
-  v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,1,true);
-  v.setUint32(24,sr,true); v.setUint32(28,sr*2,true); v.setUint16(32,2,true); v.setUint16(34,16,true);
-  ws(36,'data'); v.setUint32(40,samples.length*2,true);
-  for(let i=0;i<samples.length;i++){const x=Math.max(-1,Math.min(1,samples[i])); v.setInt16(44+i*2,x<0?x*0x8000:x*0x7fff,true);}
-  return new Blob([buf],{type:'audio/wav'});
-}
-
-async function composeSpeechLine(raw, sig){
+async function extractSpokenHebrew(raw, sig){
   const qm = raw.match(/["'״׳]([^"'״׳]{2,140})["'״׳]/);
   if(qm) return qm[1].trim();
-  const am = raw.match(/(?:אומר|אומרת|אומרים|תגיד|שיגיד|לומר|להגיד|says?|saying)\s+(?:ש)?(.{2,120})/i);
-  if(am?.[1]) return am[1].trim();
+  const am = raw.match(/(?:אומר|אומרת|אומרים|תגיד|שיגיד|יגיד|תאמר|לומר|להגיד|says?|saying)\s+(?:ש)?(.{2,120})/i);
+  if(am?.[1]) return am[1].replace(/\s*(בלי מוזיקה|ללא מוזיקה).*$/i,'').trim();
   const isHe = /[\u0590-\u05FF]/.test(raw);
+  const generated = await callFreeLLM((isHe?'כתוב אך ורק משפט דיבור קצר וטבעי בעברית (בלי מרכאות וללא הסברים) שהדמות אומרת לפי ההנחיה: ':'Write ONLY 1 short natural spoken sentence matching: ')+raw, sig);
+  if(generated) return generated.replace(/^["'״׳]+|["'״׳]+$/g,'').trim();
+  return raw.replace(/(תעשה ש|תגרום ל|שידבר|תדבר|דיבור|דיבוב|בקול|בוידאו|וידאו|סרטון|בלי מוזיקה|ללא מוזיקה)/gi,'').trim() || (isHe ? 'שלום לכולם!' : 'Hello!');
+}
+
+async function generateRequestedAudioOnly(raw, sig){
+  const wantsNoSound = st.muted || /(ללא שמע|בלי סאונד|בלי קול|muted|silent)/i.test(raw);
+  if(wantsNoSound) return { speechBlob:null, musicBlob:null, wantsSpeech:false, wantsMusic:false, wantsSfx:false };
+  const wantsNoMusic = /(בלי מוזיקה|ללא מוזיקה|without music|no music)/i.test(raw);
+  const wantsMusic = !wantsNoMusic && /(מוזיקה|מוסיקה|מנגינה|שיר|פסקול|music|song|melody|beat|soundtrack)/i.test(raw);
+  const wantsSpeech = /(מדבר|מדברת|מדברים|לדבר|דיבר|שידבר|תדבר|אומר|אומרת|אומרים|תגיד|שיגיד|יגיד|דיבור|דיבוב|דובב|לספר|בדיחה|נאום|קריינות|talk|speak|speech|say|dialogue|lip)/i.test(raw) || /["'״׳][^"'״׳]{2,140}["'״׳]/.test(raw);
+  const wantsSfx = !wantsSpeech && !wantsMusic && /(צוחק|צוחקת|צוחקים|צחוק|בכי|בוכה|נובח|נביחה|גשם|רעם|רוח|גלים|ים|אש|מנוע|רכב|מטוס|דלת|צליל|קולות|סאונד|laugh|cry|bark|rain|thunder|wind|ocean|fire|engine|sfx|sound)/i.test(raw);
+
+  let speechBlob = null, musicBlob = null;
+  if(wantsSpeech){
+    const line = await extractSpokenHebrew(raw, sig);
+    const ttsPool = rotated('audio');
+    const ordered = /[\u0590-\u05FF]/.test(line)
+      ? [...ttsPool.filter(x=>x.id==='aud-phonikud'||x.id.startsWith('aud-edge')), ...ttsPool.filter(x=>x.id!=='aud-phonikud'&&!x.id.startsWith('aud-edge'))]
+      : ttsPool;
+    for(const s of ordered){ try{ speechBlob = await dynCall(s, line, null, sig); if(speechBlob) break; }catch{} }
+    if(!speechBlob) throw new Error('שרתי הדיבור עמוסים כרגע, נסה שוב בעוד רגע.');
+  }
+  if(wantsMusic){
+    const enMus = await buildExactPrompt(raw, 'music', sig);
+    try{ musicBlob = (await raceServers('music',(s,sg)=>dynCall(s,enMus,null,sg),2,sig)).res; }catch{}
+  }
+  return { speechBlob, musicBlob, wantsSpeech, wantsMusic, wantsSfx };
+}
+
+async function attachMatchedSfx(vidBlob, rawPrompt, sig){
+  if(st.muted) return vidBlob;
+  const enSfx = await buildExactPrompt(rawPrompt, 'sfx', sig);
   try{
-    const r = await fetch('https://oai.endpoints.kepler.ai.cloud.ovh.net/v1/chat/completions',{
-      method:'POST',headers:{'Content-Type':'application/json'},signal:sig,
-      body:JSON.stringify({model:'Qwen3.5-9B',messages:[{role:'user',content:(isHe?'כתוב משפט דיבור קצר וטבעי בעברית (בלי מרכאות) שמתאים להנחיה: ':'Write 1 short spoken line matching: ')+raw}],max_tokens:120})
-    });
-    if(r.ok){ const j = await r.json(); const out = j?.choices?.[0]?.message?.content?.replace(/^["'״׳]+|["'״׳]+$/g,'').trim(); if(out) return out; }
+    const mma = SERVERS.find(s=>s.id==='sfx-mmaudio');
+    if(mma && (!st.cd[mma.id] || st.cd[mma.id]<=Date.now())){
+      const withAud = await dynCall(mma, enSfx, null, sig, null, vidBlob);
+      if(withAud) return withAud;
+    }
   }catch{}
-  return isHe ? 'שלום לכולם! איזה יום נהדר.' : 'Hello everyone! Great to see you today.';
+  try{
+    const sfxAud = (await raceServers('sfx',(s,sg)=>s.id!=='sfx-mmaudio'?dynCall(s,enSfx,null,sg):Promise.reject(),2,sig)).res;
+    if(sfxAud) return await muxOrStripVideo(URL.createObjectURL(vidBlob), sfxAud, false, false, false);
+  }catch{}
+  return vidBlob;
 }
 
-async function synthAudioForPrompt(raw, sig){
-  const hasLaugh = /(צחוק|צוחק|צוחקת|צוחקים|חחח|laugh)/i.test(raw);
-  const hasSpeech = /(מדבר|מדברת|מדברים|לדבר|דיבר|שידבר|תדבר|אומר|אומרת|תגיד|שיגיד|דיבור|דיבוב|דובב|לספר|בדיחה|נאום|קריינות|talk|speak|speech|say|dialogue)/i.test(raw);
-  const spoken = hasSpeech ? await composeSpeechLine(raw, sig) : raw;
-  if(hasSpeech || hasLaugh){
-    const ttsList = rotated('audio').filter(x=>!x.id.includes('music') && !x.id.includes('acestep'));
-    const ordered = /[\u0590-\u05FF]/.test(spoken) ? [...ttsList.filter(x=>x.id==='aud-edge-tts'), ...ttsList.filter(x=>x.id!=='aud-edge-tts')] : ttsList;
-    for(const s of ordered){
-      try{ return await dynCall(s, (hasLaugh && !hasSpeech)?'[S1] (laughs) '+spoken:spoken, null, sig); }catch{}
-    }
-    if(hasSpeech && !hasLaugh) throw new Error('שרתי הדיבור עמוסים כרגע, נסה שוב');
-  }
-  const sr=24000, dur=4.0, ctx=new OfflineAudioContext(1,sr*dur,sr), m=ctx.createGain();
-  m.gain.value=.55; m.connect(ctx.destination);
-  if(hasLaugh && !hasSpeech){
-    for(let i=0;i<7;i++){
-      const t=.1+i*.38, o=ctx.createOscillator(), f=ctx.createBiquadFilter(), g=ctx.createGain();
-      o.type='sawtooth'; o.frequency.setValueAtTime(260-i*10,t); f.type='bandpass'; f.frequency.value=820; f.Q.value=3.2;
-      g.gain.setValueAtTime(.001,t); g.gain.exponentialRampToValueAtTime(.85,t+.05); g.gain.exponentialRampToValueAtTime(.001,t+.28);
-      o.connect(f); f.connect(g); g.connect(m); o.start(t); o.stop(t+.3);
-    }
-  } else {
-    [220,277.18,329.63].forEach((fr,i)=>{
-      const o=ctx.createOscillator(), g=ctx.createGain(); o.type='sine'; o.frequency.value=fr;
-      g.gain.setValueAtTime(.001,i*.3); g.gain.linearRampToValueAtTime(.18,i*.3+.5); g.gain.exponentialRampToValueAtTime(.02,dur);
-      o.connect(g); g.connect(m); o.start(i*.3); o.stop(dur);
-    });
-  }
-  return encodeWav((await ctx.startRendering()).getChannelData(0), sr);
-}
-
-async function muxOrStripVideo(vUrl, aBlob, keepOrig=false, strip=false, loopAud=true){
+async function muxOrStripVideo(vUrl, aBlob, keepOrig=false, strip=false, loopAud=false, maxSec=0){
   const v=document.createElement('video'); v.crossOrigin='anonymous'; v.muted=!keepOrig||strip; v.src=vUrl;
   await new Promise(r=>v.onloadedmetadata=r);
   const c=document.createElement('canvas'); c.width=(v.videoWidth||1024)&~1; c.height=(v.videoHeight||576)&~1;
@@ -495,7 +1256,7 @@ async function muxOrStripVideo(vUrl, aBlob, keepOrig=false, strip=false, loopAud
   if(!strip && aBlob){
     actx=new AudioContext(); await actx.resume().catch(()=>{});
     const ab=await actx.decodeAudioData(await aBlob.arrayBuffer());
-    srcNode=actx.createBufferSource(); srcNode.buffer=ab; srcNode.loop=loopAud && ab.duration<(v.duration||5);
+    srcNode=actx.createBufferSource(); srcNode.buffer=ab; srcNode.loop=loopAud && ab.duration<(v.duration||6);
     const dest=actx.createMediaStreamDestination(); srcNode.connect(dest);
     if(keepOrig){ try{ const es=actx.createMediaElementSource(v); es.connect(dest); }catch{} }
     tracks.push(...dest.stream.getAudioTracks());
@@ -504,7 +1265,46 @@ async function muxOrStripVideo(vUrl, aBlob, keepOrig=false, strip=false, loopAud
   const ch=[]; rec.ondataavailable=e=>{if(e.data.size)ch.push(e.data)};
   const done=new Promise(res=>rec.onstop=()=>{try{srcNode?.stop()}catch{} actx?.close().catch(()=>{}); res(new Blob(ch,{type:'video/webm'}));});
   rec.start(); srcNode?.start(0); await v.play();
-  (function d(){ if(v.ended||v.paused){rec.stop();return;} ctx.drawImage(v,0,0,c.width,c.height); requestAnimationFrame(d); })();
+  (function d(){ if(v.ended||v.paused||(maxSec>0&&v.currentTime>=maxSec)){v.pause();rec.stop();return;} ctx.drawImage(v,0,0,c.width,c.height); requestAnimationFrame(d); })();
+  return await done;
+}
+
+async function concatTwoVideos(urlA, urlB, keepAudio=true, maxSec=0){
+  const vA=document.createElement('video'); vA.crossOrigin='anonymous'; vA.muted=!keepAudio; vA.src=urlA;
+  const vB=document.createElement('video'); vB.crossOrigin='anonymous'; vB.muted=!keepAudio; vB.src=urlB;
+  await Promise.all([new Promise(r=>vA.onloadedmetadata=r), new Promise(r=>vB.onloadedmetadata=r)]);
+  const cw=(vA.videoWidth||1024)&~1, ch=(vA.videoHeight||576)&~1;
+  const c=document.createElement('canvas'); c.width=cw; c.height=ch; const ctx=c.getContext('2d');
+  let tracks=[...c.captureStream(24).getVideoTracks()], actx=null;
+  if(keepAudio){
+    try{
+      actx=new AudioContext(); await actx.resume().catch(()=>{});
+      const dest=actx.createMediaStreamDestination();
+      try{ actx.createMediaElementSource(vA).connect(dest); }catch{}
+      try{ actx.createMediaElementSource(vB).connect(dest); }catch{}
+      tracks.push(...dest.stream.getAudioTracks());
+    }catch{}
+  }
+  const rec=new MediaRecorder(new MediaStream(tracks),{mimeType:'video/webm'}), chs=[];
+  rec.ondataavailable=e=>{if(e.data.size)chs.push(e.data)};
+  const done=new Promise(res=>rec.onstop=()=>{actx?.close().catch(()=>{}); res(new Blob(chs,{type:'video/webm'}));});
+  rec.start();
+  const tStart = performance.now();
+  for(const v of [vA, vB]){
+    if(maxSec>0 && ((performance.now()-tStart)/1000)>=maxSec) break;
+    await v.play();
+    await new Promise(res=>{
+      function step(){
+        const elapsed=(performance.now()-tStart)/1000;
+        if(v.ended||v.paused||(maxSec>0&&elapsed>=maxSec)){v.pause();res();return;}
+        const sc=Math.min(cw/(v.videoWidth||cw),ch/(v.videoHeight||ch)), dw=(v.videoWidth||cw)*sc, dh=(v.videoHeight||ch)*sc;
+        ctx.fillStyle='#000'; ctx.fillRect(0,0,cw,ch); ctx.drawImage(v,(cw-dw)/2,(ch-dh)/2,dw,dh);
+        requestAnimationFrame(step);
+      }
+      step();
+    });
+  }
+  rec.stop();
   return await done;
 }
 
@@ -517,86 +1317,182 @@ async function captureVidFrame(url, atEnd=false){
   c.getContext('2d').drawImage(v,0,0);
   return await new Promise(r=>c.toBlob(r,'image/jpeg',.92));
 }
+async function getVidDuration(blob){
+  const u=URL.createObjectURL(blob), v=document.createElement('video'); v.preload='metadata'; v.src=u;
+  const d = await new Promise(r=>{const t=setTimeout(()=>r(5),2000); v.onloadedmetadata=()=>{clearTimeout(t);r(v.duration||5);}; v.onerror=()=>{clearTimeout(t);r(5);};});
+  URL.revokeObjectURL(u); return d;
+}
 
-function showImg(b){ st.type='image'; st.imgUrl=URL.createObjectURL(b); $('imgView').src=st.imgUrl; st.vault.unshift({type:'image',url:st.imgUrl,blob:b}); updateUi(); }
-function showVid(b){ st.type='video'; st.vidBlob=b; st.vidUrl=URL.createObjectURL(b); $('vidView').src=st.vidUrl; $('vidView').play().catch(()=>{}); st.vault.unshift({type:'video',url:st.vidUrl,blob:b}); updateUi(); }
+async function ensure6to10Sec(firstBlob, enPrompt, raw, sig, capMax10=true){
+  let curBlob = firstBlob;
+  let dur = await getVidDuration(curBlob);
+  if(dur < 5.8){
+    setRenderPct(84);
+    const lf = await captureVidFrame(URL.createObjectURL(curBlob), true);
+    try{
+      const contBlob = (await raceServers('video',(s,sg)=>dynCall(s,`${enPrompt}. Seamless direct continuation from final frame keeping exact same people, faces, clothing, and background.`,lf,sg),2,sig)).res;
+      curBlob = await concatTwoVideos(URL.createObjectURL(curBlob), URL.createObjectURL(contBlob), !st.muted, capMax10 ? 10 : 0);
+      dur = await getVidDuration(curBlob);
+    }catch{}
+  }
+  if(capMax10 && dur > 10.2){
+    curBlob = await muxOrStripVideo(URL.createObjectURL(curBlob), null, !st.muted, st.muted, false, 10.0);
+  }
+  return curBlob;
+}
 
-// 1) עריכת תמונה
+function showImg(b){
+  st.type='image'; st.imgUrl=URL.createObjectURL(b); $('imgView').src=st.imgUrl;
+  $('imgView').onload=()=>{ if($('imgView').naturalWidth) $('stageBox').style.aspectRatio=$('imgView').naturalWidth+'/'+$('imgView').naturalHeight; };
+  st.vault.unshift({type:'image',url:st.imgUrl,blob:b}); updateUi();
+}
+function showVid(b){
+  st.type='video'; st.vidBlob=b; st.vidUrl=URL.createObjectURL(b); $('vidView').src=st.vidUrl;
+  $('vidView').onloadedmetadata=()=>{ if($('vidView').videoWidth) $('stageBox').style.aspectRatio=$('vidView').videoWidth+'/'+$('vidView').videoHeight; };
+  $('vidView').play().catch(()=>{}); st.vault.unshift({type:'video',url:st.vidUrl,blob:b}); updateUi();
+}
+
+// 1) עריכת / יצירת תמונה
 $('btnImgEdit').onclick = async () => {
   const raw = $('promptBox').value.trim(); if(!raw) return setErr('יש לכתוב תיאור עריכה או יצירת תמונה.');
-  setErr(''); st.ctrl = new AbortController(); startRender(8);
+  st.lastAction = 'imgEdit'; setErr(''); st.ctrl = new AbortController(); startRender(10);
   try{
-    const en = await translateHe(raw, st.ctrl.signal);
-    const srcBlob = st.type==='image' ? await (await fetch(st.imgUrl)).blob() : st.type==='video' ? await captureVidFrame(st.vidUrl, false) : null;
+    const wantsNew = /(תמונה חדשה|צור תמונה מאפס|בלי התמונה|new image)/i.test(raw);
+    const srcBlob = (!wantsNew && st.type==='image') ? await (await fetch(st.imgUrl)).blob()
+                  : (!wantsNew && st.type==='video') ? await captureVidFrame(st.vidUrl, false) : null;
     if(srcBlob){
-      const {res} = await raceServers('edit',(s,sig)=>dynCall(s,en,srcBlob,sig),3,st.ctrl.signal);
+      const en = await buildExactPrompt(raw, 'edit', st.ctrl.signal);
+      const {res} = await raceServers('edit',(s,sig)=>dynCall(s,en,srcBlob,sig),2,st.ctrl.signal);
       setRenderPct(100); showImg(res);
     } else {
-      const {res} = await raceServers('image',(s,sig)=>dynCall(s,en,null,sig),3,st.ctrl.signal);
+      const en = await buildExactPrompt(raw, 't2i', st.ctrl.signal);
+      const {res} = await raceServers('image',(s,sig)=>dynCall(s,en,null,sig),2,st.ctrl.signal);
       setRenderPct(100); showImg(res);
     }
   }catch(e){ if(!st.ctrl.signal.aborted) setErr(e.message||'שגיאה'); }
   finally{ stopRender(); updateUi(); }
 };
 
-// 2) יצירת וידאו (מתמונה+טקסט / טקסט בלבד / תמונה בלבד)
+// 2) יצירת וידאו (6 עד 10 שניות + שמע צמוד)
 $('btnVid').onclick = async () => {
   const raw = $('promptBox').value.trim();
-  const refBlob = st.type==='image' ? await (await fetch(st.imgUrl)).blob() : null;
+  const wantsNewVid = /(סרטון חדש|בלי התמונה|new video)/i.test(raw);
+  const refBlob = (!wantsNewVid && st.type==='image') ? await (await fetch(st.imgUrl)).blob() : null;
   if(!raw && !refBlob) return setErr('יש לכתוב תיאור לסרטון או להעלות תמונה (או שניהם יחד).');
-  setErr(''); st.ctrl = new AbortController(); startRender(16);
+  st.lastAction = 'vid'; setErr(''); st.ctrl = new AbortController(); startRender(36);
   try{
-    const en = await translateHe(raw||'smooth cinematic motion', st.ctrl.signal);
-    const audProm = raw ? synthAudioForPrompt(raw, st.ctrl.signal) : Promise.resolve(null);
+    const { speechBlob, wantsSpeech, wantsMusic, musicBlob, wantsSfx } = raw ? await generateRequestedAudioOnly(raw, st.ctrl.signal) : {};
+    const en = await buildExactPrompt(raw||'lively natural motion', refBlob?'i2v':'t2v', st.ctrl.signal);
+
     let vb;
-    try{ vb = (await raceServers('video',(s,sig)=>dynCall(s,en,refBlob,sig),2,st.ctrl.signal)).res; }
-    catch{
-      if(st.ctrl.signal.aborted) throw new Error('Aborted');
-      const kf = refBlob || (await raceServers('image',(s,sig)=>dynCall(s,en,null,sig),3,st.ctrl.signal)).res;
-      try{ vb = (await raceServers('video',(s,sig)=>dynCall(s,en,kf,sig),2,st.ctrl.signal)).res; }
-      catch{
-        if(st.ctrl.signal.aborted) throw new Error('Aborted');
-        vb = await renderMotionVideoFromBlob(kf, raw||en, st.ctrl.signal);
+    if(refBlob && speechBlob){
+      try{ vb = (await raceServers('lipsync',(s,sig)=>dynCall(s,en,refBlob,sig,speechBlob),2,st.ctrl.signal)).res; }
+      catch(e){ if(st.ctrl.signal.aborted) throw e; }
+    }
+    if(!vb){
+      try{ vb = (await raceServers('video',(s,sig)=>dynCall(s,en,refBlob,sig),2,st.ctrl.signal)).res; }
+      catch(e){
+        if(st.ctrl.signal.aborted || refBlob) throw e;
+        const kf = (await raceServers('image',(s,sig)=>dynCall(s,en,null,sig),2,st.ctrl.signal)).res;
+        vb = (await raceServers('video',(s,sig)=>dynCall(s,en,kf,sig),2,st.ctrl.signal)).res;
       }
     }
-    const ab = await audProm;
-    const out = ab ? await muxOrStripVideo(URL.createObjectURL(vb), ab, false, false) : vb;
-    setRenderPct(100); showVid(out);
+
+    vb = await ensure6to10Sec(vb, en, raw, st.ctrl.signal, true);
+    const aud = speechBlob || (wantsMusic ? musicBlob : null);
+    if(aud && !(refBlob && speechBlob)) vb = await muxOrStripVideo(URL.createObjectURL(vb), aud, false, false, !wantsSpeech);
+    else if(wantsSfx && raw) vb = await attachMatchedSfx(vb, raw, st.ctrl.signal);
+    setRenderPct(100); showVid(vb);
   }catch(e){ if(!st.ctrl.signal.aborted) setErr(e.message||'שגיאה'); }
   finally{ stopRender(); updateUi(); }
 };
 
-// 3) עריכת וידאו
+// 3) עריכת וידאו (6 עד 10 שניות + שמע צמוד)
 $('btnVidEdit').onclick = async () => {
-  const raw = $('promptBox').value.trim(); if(!raw) return setErr('יש לתאר בטקסט מה להוסיף או לערוך בסרטון.');
-  if(st.type!=='video') return setErr('יש להעלות או ליצור סרטון תחילה כדי לערוך אותו.');
-  setErr(''); st.ctrl = new AbortController(); startRender(18);
+  const raw = $('promptBox').value.trim(); if(!raw) return setErr('יש לתאר בטקסט מה לערוך בסרטון.');
+  if(!st.type) return setErr('יש להעלות סרטון או תמונה תחילה.');
+  st.lastAction = 'vidEdit'; setErr(''); st.ctrl = new AbortController(); startRender(36);
   try{
-    const stripped = raw.replace(/["'״׳][^"'״׳]*["'״׳]/g,' ').replace(/(?:מדבר|לדבר|מספר|תדבר|שידבר|אומר|תגיד|שיגיד)\s+(?:על|ש|את)\s+.+$/i,' ');
-    const isSp = /(מדבר|מדברת|מדברים|לדבר|דיבר|שידבר|תדבר|אומר|אומרת|תגיד|שיגיד|דיבור|דיבוב|דובב|לספר|בדיחה|talk|speak|speech|say)/i.test(raw);
-    const audioOnly = (isSp || /(צחוק|צוחק|מוזיקה|שמע|סאונד|קול|laugh|voice|music)/i.test(raw)) && !/(משקפיים|כובע|שלג|רקע|אלמנט|צבע|חולצה|החלף|תוריד|add a |put a )/i.test(stripped);
-    if(audioOnly){
-      const ab = await synthAudioForPrompt(raw, st.ctrl.signal);
-      const out = await muxOrStripVideo(st.vidUrl, ab, !st.muted, false, !isSp);
-      setRenderPct(100); showVid(out); return;
+    const { speechBlob, musicBlob, wantsSpeech, wantsMusic, wantsSfx } = await generateRequestedAudioOnly(raw, st.ctrl.signal);
+    const stripped = raw.replace(/["'״׳][^"'״׳]*["'״׳]/g,' ').replace(/(?:אומר|אומרת|תגיד|שיגיד|מדבר|לדבר)\s+(?:ש|את|על)\s+.+$/i,' ');
+    const hasVisualEdit = /(משקפיים|כובע|שלג|רקע|חולצה|החלף|תוריד|שנה|צבע|יער|ים|עיר|אש|גשם|שמיים|sunglasses|hat|snow|background|shirt|replace|change|remove)/i.test(stripped);
+    const frameBlob = st.type==='video' ? await captureVidFrame(st.vidUrl, false) : await (await fetch(st.imgUrl)).blob();
+
+    if((wantsSpeech || wantsMusic || wantsSfx) && !hasVisualEdit){
+      if(wantsSpeech && speechBlob){
+        try{
+          const enSp = await buildExactPrompt(raw, 'i2v', st.ctrl.signal);
+          let lipV = (await raceServers('lipsync',(s,sig)=>dynCall(s,enSp,frameBlob,sig,speechBlob),2,st.ctrl.signal)).res;
+          lipV = await ensure6to10Sec(lipV, enSp, raw, st.ctrl.signal, true);
+          setRenderPct(100); showVid(lipV); return;
+        }catch(e){ if(st.ctrl.signal.aborted) throw e; }
+      }
+      if(st.type==='video'){
+        let out = st.vidBlob;
+        if(speechBlob || musicBlob) out = await muxOrStripVideo(st.vidUrl, speechBlob||musicBlob, !st.muted, false, wantsMusic && !wantsSpeech);
+        else if(wantsSfx) out = await attachMatchedSfx(st.vidBlob, raw, st.ctrl.signal);
+        setRenderPct(100); showVid(out); return;
+      }
     }
-    const en = await translateHe(raw, st.ctrl.signal);
-    const frBlob = await captureVidFrame(st.vidUrl, false);
-    let editedImg = frBlob;
-    try{ editedImg = (await raceServers('edit',(s,sig)=>dynCall(s,en,frBlob,sig),3,st.ctrl.signal)).res; }
-    catch(e){ if(st.ctrl.signal.aborted) throw e; }
-    let vidBlob;
-    try{ vidBlob = (await raceServers('video',(s,sig)=>dynCall(s,en,editedImg,sig),2,st.ctrl.signal)).res; }
-    catch(e){ if(st.ctrl.signal.aborted) throw e; vidBlob = await renderMotionVideoFromBlob(editedImg, raw, st.ctrl.signal); }
-    const ab = await synthAudioForPrompt(raw, st.ctrl.signal);
-    const finalV = await muxOrStripVideo(URL.createObjectURL(vidBlob), ab, false, false, !isSp);
-    setRenderPct(100); showVid(finalV);
+
+    const enEdit = await buildExactPrompt(raw, 'edit', st.ctrl.signal);
+    const editedImg = (await raceServers('edit',(s,sig)=>dynCall(s,enEdit,frameBlob,sig),2,st.ctrl.signal)).res;
+    const enVid = await buildExactPrompt(raw, 'i2v', st.ctrl.signal);
+    let vidBlob = null;
+    if(wantsSpeech && speechBlob){
+      try{ vidBlob = (await raceServers('lipsync',(s,sig)=>dynCall(s,enEdit,editedImg,sig,speechBlob),2,st.ctrl.signal)).res; }
+      catch(e){ if(st.ctrl.signal.aborted) throw e; }
+    }
+    if(!vidBlob) vidBlob = (await raceServers('video',(s,sig)=>dynCall(s,enVid,editedImg,sig),2,st.ctrl.signal)).res;
+    vidBlob = await ensure6to10Sec(vidBlob, enVid, raw, st.ctrl.signal, true);
+    const aud = speechBlob || (wantsMusic ? musicBlob : null);
+    if(aud && !(wantsSpeech && speechBlob)) vidBlob = await muxOrStripVideo(URL.createObjectURL(vidBlob), aud, false, false, !wantsSpeech);
+    else if(wantsSfx) vidBlob = await attachMatchedSfx(vidBlob, raw, st.ctrl.signal);
+    setRenderPct(100); showVid(vidBlob);
   }catch(e){ if(!st.ctrl.signal.aborted) setErr(e.message||'שגיאה'); }
   finally{ stopRender(); updateUi(); }
 };
 
-$('inImg').onchange = e => { const f=e.target.files?.[0]; if(f) showImg(f); e.target.value=''; };
-$('inVid').onchange = e => { const f=e.target.files?.[0]; if(f) showVid(f); e.target.value=''; };
+// 4) הארכת סרטון ללא הגבלה (+6s בכל לחיצה)
+$('btnExtend').onclick = async () => {
+  if(!st.type) return setErr('יש להעלות או ליצור סרטון/תמונה תחילה.');
+  st.lastAction = 'extend'; setErr(''); st.ctrl = new AbortController(); startRender(36);
+  try{
+    const raw = $('promptBox').value.trim() || 'המשך טבעי וחלק עם אותם פנים ורקע';
+    const lastFrame = st.type==='video' ? await captureVidFrame(st.vidUrl, true) : await (await fetch(st.imgUrl)).blob();
+    const { speechBlob, musicBlob, wantsSpeech, wantsMusic, wantsSfx } = await generateRequestedAudioOnly(raw, st.ctrl.signal);
+    const en = await buildExactPrompt(raw, 'i2v', st.ctrl.signal);
+
+    let extBlob = null;
+    if(speechBlob){
+      try{ extBlob = (await raceServers('lipsync',(s,sig)=>dynCall(s,en,lastFrame,sig,speechBlob),2,st.ctrl.signal)).res; }
+      catch(e){ if(st.ctrl.signal.aborted) throw e; }
+    }
+    if(!extBlob){
+      extBlob = (await raceServers('video',(s,sig)=>dynCall(s,en,lastFrame,sig),2,st.ctrl.signal)).res;
+      extBlob = await ensure6to10Sec(extBlob, en, raw, st.ctrl.signal, false);
+      const aud = speechBlob || (wantsMusic ? musicBlob : null);
+      if(aud) extBlob = await muxOrStripVideo(URL.createObjectURL(extBlob), aud, false, false, !wantsSpeech);
+      else if(wantsSfx) extBlob = await attachMatchedSfx(extBlob, raw, st.ctrl.signal);
+    }
+
+    if(st.type==='video'){
+      const merged = await concatTwoVideos(st.vidUrl, URL.createObjectURL(extBlob), !st.muted, 0);
+      setRenderPct(100); showVid(merged);
+    } else {
+      setRenderPct(100); showVid(extBlob);
+    }
+  }catch(e){ if(!st.ctrl.signal.aborted) setErr(e.message||'שגיאה'); }
+  finally{ stopRender(); updateUi(); }
+};
+
+// 5) צור שוב
+$('btnAgain').onclick = () => {
+  if(st.lastAction==='vid') $('btnVid').click();
+  else if(st.lastAction==='vidEdit') $('btnVidEdit').click();
+  else if(st.lastAction==='imgEdit') $('btnImgEdit').click();
+  else if(st.lastAction==='extend') $('btnExtend').click();
+};
 
 window.dlVault = async (idx) => {
   const item = st.vault[idx]; if(!item) return;
